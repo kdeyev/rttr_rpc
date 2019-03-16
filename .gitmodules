@@ -1,0 +1,9 @@
+[submodule "rttr"]
+	path = rttr
+	url = https://github.com/kdeyev/rttr.git
+[submodule "rpcWebChannel"]
+	path = rpcWebChannel
+	url = https://github.com/kdeyev/rpcWebChannel.git
+[submodule "jsonrpcpp"]
+	path = jsonrpcpp
+	url = https://github.com/kdeyev/jsonrpcpp.git

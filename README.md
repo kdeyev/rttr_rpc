@@ -13,3 +13,4 @@
 3. mkdir build && cd mkdir
 2. cmake -G "Visual Studio 15 2017 Win64" ..
 5. cmake --build . --target install
+

@@ -6,10 +6,12 @@ project(rttRpc VERSION 1.0)
 set(JSONRPCPP_INCLUDE_DIR ../../jsonrpcpp/install/include)
 set(JSONRPCPP_LIB_DIR ../../jsonrpcpp/install/lib)
 
-set(NLOHMANN_JSON_DIR ../../rttr/3rd_party/nlohmann/json/include)
+set(NLOHMANN_JSON_DIR ../../nlohmann_json/include)
 set(JSON_SERIALIZATION_NLOHMANN_DIR ../../rttr/src/examples/json_serialization_nlohmann)
 
 find_package(RTTR CONFIG REQUIRED Core)
+#find_package(nlohmann_json 3.2.0 REQUIRED)
+#find_package(jsonrpcpp REQUIRED)
 
 set(HEADER_FILES ${JSON_SERIALIZATION_NLOHMANN_DIR}/to_json.h
                  ${JSON_SERIALIZATION_NLOHMANN_DIR}/from_json.h

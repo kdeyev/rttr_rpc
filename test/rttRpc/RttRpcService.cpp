@@ -577,7 +577,6 @@ jsonrpcpp::MessagePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr&
         }
     }
 
-	//rttr::variant result = m.invoke(_serviceObj, arguments[0]);
     rttr::variant result = m.invoke_variadic (_serviceObj, arguments);
 
     //// iterate over candidates

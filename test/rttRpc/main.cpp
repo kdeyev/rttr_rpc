@@ -5,14 +5,38 @@ using namespace rttr;
 
 #include "RttRpcServiceRepository.h"
 
+struct point2d {
+    point2d () {
+    }
+    point2d (int x_, int y_) : x (x_), y (y_) {
+    }
+
+    int x = 0;
+    int y = 0;
+};
+
 struct MyStruct {
     MyStruct (){};
-	void func(double val) { std::cout << val << std::endl; };
-    int  data;
+    void func (double val) {
+        std::cout << val << std::endl;
+    };
+
+    void func2 (point2d val) {
+        std::cout << val.x << std::endl;
+    };
+    int data;
 };
 
 RTTR_REGISTRATION {
-    registration::class_<MyStruct> ("MyStruct").constructor<> ().property ("data", &MyStruct::data).method ("func", &MyStruct::func);
+    registration::class_<MyStruct> ("MyStruct")
+        .constructor<> ()
+        .property ("data", &MyStruct::data)
+        .method ("func", &MyStruct::func)
+        .method ("func2", &MyStruct::func2);
+
+    ;
+
+    rttr::registration::class_<point2d> ("point2d").constructor () (rttr::policy::ctor::as_object).property ("x", &point2d::x).property ("y", &point2d::y);
 }
 
 //void dispatch(instance serviceObj) {
@@ -27,11 +51,11 @@ int main (int argc, char** argv) {
     repo.addService ("test", obj);
 
     //dispatch(obj);
+    jsonrpcpp::Parser parser;
 
-    nlohmann::json j = nlohmann::json::parse (R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0], "id": 1})");
-
-    jsonrpcpp::Parser     parser;
-    jsonrpcpp::MessagePtr m = parser.parse_json (j);
+    jsonrpcpp::MessagePtr m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0], "id": 1})"));
+    repo.processMessage (m);
+    m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func2", "params": [{"x":42,"y":41}], "id": 1})"));
     repo.processMessage (m);
 
     return 0;

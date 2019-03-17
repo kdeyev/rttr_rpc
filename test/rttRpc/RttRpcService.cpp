@@ -1,6 +1,7 @@
 #include "RttRpcService.h"
 
 #include "from_json.h"
+#include "to_json.h"
 
 //
 //class RttRpcServiceRequestPrivate : public QSharedData {
@@ -549,13 +550,13 @@ const nlohmann::json& RttRpcService::serviceInfo () const {
 //    return request.createResponse (RttRpcService::convertReturnValue (returnValue));
 //}
 
-jsonrpcpp::MessagePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr& request) const {
+jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr& request) const {
     const std::string& method = request->_serviceMethod;
 
     const auto& params = request->params;
 
     rttr::method m = _serviceObjType.get_method (method);
-	//method 	get_method(string_view name, const std::vector< type > &type_list) const noexcept
+    //method 	get_method(string_view name, const std::vector< type > &type_list) const noexcept
 
     if (!m.is_valid ()) {
         return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound);
@@ -572,12 +573,38 @@ jsonrpcpp::MessagePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr&
         rttr::array_range<rttr::parameter_info> params_infos = m.get_parameter_infos ();
 
         for (auto&& p_info : params_infos) {
-			rttr::variant param = io::from_json(params.param_array[p_info.get_index()], p_info.get_type());
+            rttr::variant param = io::from_json (params.param_array[p_info.get_index ()], p_info.get_type ());
             arguments.push_back (rttr::argument (param));
         }
     }
 
-    rttr::variant result = m.invoke_variadic (_serviceObj, arguments);
+    rttr::variant result;
+    if (_isServiceObjThreadSafe) {
+        result = m.invoke_variadic (_serviceObj, arguments);
+    } else {
+        //std::lock_guard lock (&_serviceMutex);
+        result = m.invoke_variadic (_serviceObj, arguments);
+    }
+
+    if (!result.is_valid ()) {
+        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InternalError, "swrong return value");
+    }
+
+    nlohmann::json return_value = io::to_json_obj (result);
+
+    //if (m._hasOut) {
+    //    QJsonArray ret;
+    //    if (info._returnType != QMetaType::Void)
+    //        ret.append (RttRpcService::convertReturnValue (returnValue));
+    //    for (int i = 0; i < info._parameters.size (); ++i)
+    //        if (info._parameters.at (i)._out)
+    //            ret.append (RttRpcService::convertReturnValue (arguments[i]));
+    //    if (ret.size () > 1)
+    //        return request.createResponse (ret);
+    //    return request.createResponse (ret.first ());
+    //}
+
+    return request->createResponse (return_value);
 
     //// iterate over candidates
     //for (const QPair<int, int>& methodInfo : indexes) {

@@ -62,7 +62,7 @@ public:
      * @param message JSON-RPC message
      * @return jsonrpcpp::MessagePtr JSON-RPC response message
      */
-	jsonrpcpp::MessagePtr dispatch (const jsonrpcpp::NotificationPtr& request) const;
+	jsonrpcpp::PesponsePtr dispatch (const jsonrpcpp::NotificationPtr& request) const;
 
 private:
 	std::string _serviceName;

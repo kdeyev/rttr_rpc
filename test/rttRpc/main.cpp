@@ -21,8 +21,9 @@ struct MyStruct {
         std::cout << val << std::endl;
     };
 
-    void func2 (point2d val) {
+    double func2 (point2d val) {
         std::cout << val.x << std::endl;
+		return val.y;
     };
     int data;
 };
@@ -54,9 +55,12 @@ int main (int argc, char** argv) {
     jsonrpcpp::Parser parser;
 
     jsonrpcpp::MessagePtr m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0], "id": 1})"));
-    repo.processMessage (m);
-    m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func2", "params": [{"x":42,"y":41}], "id": 1})"));
-    repo.processMessage (m);
+	jsonrpcpp::MessagePtr rerponse = repo.processMessage (m);
+	std::cout << rerponse->to_json().dump(4) << std::endl;
+
+    m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func2", "params": [{"x":42,"y":41}], "id": 2})"));
+	rerponse = repo.processMessage (m);
+	std::cout << rerponse->to_json().dump(4) << std::endl;
 
     return 0;
 }

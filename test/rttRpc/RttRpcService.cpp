@@ -134,12 +134,24 @@
 //}
 
 RttRpcService::RttRpcService (const std::string& name, const rttr::instance& serviceObj)
-    : _serviceName (name), _serviceObj (serviceObj), _serviceObjType (serviceObj.get_type ()) {
+    : _serviceName (name), _serviceObj (serviceObj), _serviceObjType (_serviceObj.get_type ()) {
     // TODO: take it from rttr metainfo
 
     //_serviceVersion;
     //_serviceDescription;
     //_isServiceObjThreadSafe = false;
+
+
+	scanMethods();
+}
+
+void RttRpcService::scanMethods() {
+	_methods.clear();
+	for (auto& method : _serviceObjType.get_methods()) {
+		std::string mathod_name(method.get_name().data(), method.get_name().length());
+		RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod>(method);
+		_methods[mathod_name].push_back(method_obj);
+	}
 }
 
 RttRpcService::~RttRpcService () {
@@ -550,94 +562,29 @@ const nlohmann::json& RttRpcService::serviceInfo () const {
 //    return request.createResponse (RttRpcService::convertReturnValue (returnValue));
 //}
 
+
 jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr& request) const {
-    const std::string& method = request->_serviceMethod;
+    const std::string& method_name = request->_serviceMethod;
 
-    const auto& params = request->params;
+	auto iter2 = _methods.find(method_name);
+	
+	if (iter2 == _methods.end()) {
+		return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
+	}
 
-    rttr::method m = _serviceObjType.get_method (method);
-    //method 	get_method(string_view name, const std::vector< type > &type_list) const noexcept
-
-    if (!m.is_valid ()) {
-        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound);
-    }
-
-    std::vector<rttr::argument> arguments;
-    if (params.is_map ()) {
-        for (auto iter : params.param_map) {
-            // search
-            return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InvalidRequest, "named arguments are not supported currently");
-        }
-    } else {
-        arguments.reserve (params.param_array.size ());
-        rttr::array_range<rttr::parameter_info> params_infos = m.get_parameter_infos ();
-
-        for (auto&& p_info : params_infos) {
-            rttr::variant param = io::from_json (params.param_array[p_info.get_index ()], p_info.get_type ());
-            arguments.push_back (rttr::argument (param));
-        }
-    }
-
-    rttr::variant result;
-    if (_isServiceObjThreadSafe) {
-        result = m.invoke_variadic (_serviceObj, arguments);
-    } else {
-        //std::lock_guard lock (&_serviceMutex);
-        result = m.invoke_variadic (_serviceObj, arguments);
-    }
-
-    if (!result.is_valid ()) {
-        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InternalError, "swrong return value");
-    }
-
-    nlohmann::json return_value = io::to_json_obj (result);
-
-    //if (m._hasOut) {
-    //    QJsonArray ret;
-    //    if (info._returnType != QMetaType::Void)
-    //        ret.append (RttRpcService::convertReturnValue (returnValue));
-    //    for (int i = 0; i < info._parameters.size (); ++i)
-    //        if (info._parameters.at (i)._out)
-    //            ret.append (RttRpcService::convertReturnValue (arguments[i]));
-    //    if (ret.size () > 1)
-    //        return request.createResponse (ret);
-    //    return request.createResponse (ret.first ());
-    //}
-
-    return request->createResponse (return_value);
-
-    //// iterate over candidates
-    //for (const QPair<int, int>& methodInfo : indexes) {
-    //    // method call
-    //    if (methodInfo.first == 0) {
-    //        int methodIndex = methodInfo.second;
-
-    //        const RttRpcService::MethodInfo& info = d->_methodInfoHash[methodIndex];
-    //        bool methodMatch = usingNamedParameters ? jsParameterCompare (params.toObject (), info) : jsParameterCompare (params.toArray (), info);
-
-    //        if (methodMatch) {
-    //            return d->invokeMethod (methodIndex, request);
-    //        }
-    //    }
-
-    //    // getter
-    //    if (methodInfo.first == 1) {
-    //        if (usingNamedParameters) {
-    //            return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InvalidRequest, "getters are supporting only array-styled requests");
-    //        }
-    //        int propertyIndex = methodInfo.second;
-
-    //        return d->callGetter (propertyIndex, request);
-    //    }
-    //    // setter
-    //    if (methodInfo.first == 2) {
-    //        if (usingNamedParameters) {
-    //            return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InvalidRequest, "setters are supporting only array-styled requests");
-    //        }
-    //        int propertyIndex = methodInfo.second;
-    //        return d->callSetter (propertyIndex, request);
-    //    }
-    //}
-
-    return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::InvalidParams, "invalid parameters");
+	nlohmann::json response_json;
+	const std::list <RttRpcServiceMethodPtr>& methods_list = iter2->second;
+	if (methods_list.size() == 1) {
+		if (methods_list.front()->invoke(_serviceObj, request->_origParams, response_json)) {
+			return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::InternalError, "method call failed");
+		}
+		return request->createResponse(response_json);
+	} else {
+		for (auto& method : methods_list) {
+			if (method->invoke(_serviceObj, request->_origParams, response_json)) {
+				return request->createResponse(response_json);
+			}
+		}
+		return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
+	}
 }

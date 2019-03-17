@@ -6,17 +6,20 @@
 #include <rttr/type.h>
 #include <rttr/instance.h>
 
+#include <nlohmann/json.hpp>
+
 #include <jsonrp.hpp>
 namespace jsonrpcpp {
-	typedef std::shared_ptr<Entity> MessagePtr;
-	typedef std::shared_ptr<Request> RequestPtr;
-	typedef std::shared_ptr<Notification> NotificationPtr;
-	typedef std::shared_ptr<Parameter> ParameterPtr;
-	typedef std::shared_ptr<Response> PesponsePtr;
-	typedef std::shared_ptr<Error> ErrorPtr;
-	typedef std::shared_ptr<Batch> EatchPtr;
-};
+    typedef std::shared_ptr<Entity>       MessagePtr;
+    typedef std::shared_ptr<Request>      RequestPtr;
+    typedef std::shared_ptr<Notification> NotificationPtr;
+    typedef std::shared_ptr<Parameter>    ParameterPtr;
+    typedef std::shared_ptr<Response>     PesponsePtr;
+    typedef std::shared_ptr<Error>        ErrorPtr;
+    typedef std::shared_ptr<Batch>        EatchPtr;
+}; // namespace jsonrpcpp
 
+#include "RttRpcServiceMethod.h"
 
 /**
  * @brief Service wrapper over QOblect is responsible for QObjects methods ivocation according to JSON-RPC requests messages.
@@ -39,7 +42,7 @@ public:
      * 
      * @return QSharedPointer<QObject> 
      */
-	rttr::instance& serviceObj ();
+    rttr::instance& serviceObj ();
 
     /**
      * @brief Returns service name
@@ -54,7 +57,7 @@ public:
      * 
      * @return const nlohmann::json& 
      */
-	const nlohmann::json& serviceInfo () const;
+    const nlohmann::json& serviceInfo () const;
 
     /**
      * @brief Process a JSON-RPC message. In general it means the invocation of a requested function.
@@ -62,19 +65,24 @@ public:
      * @param message JSON-RPC message
      * @return jsonrpcpp::MessagePtr JSON-RPC response message
      */
-	jsonrpcpp::PesponsePtr dispatch (const jsonrpcpp::NotificationPtr& request) const;
+    jsonrpcpp::PesponsePtr dispatch (const jsonrpcpp::NotificationPtr& request) const;
 
 private:
-	std::string _serviceName;
-	std::string _serviceVersion;
-	std::string _serviceDescription;
-	bool        _isServiceObjThreadSafe = false;
+    void scanMethods ();
 
-	rttr::instance _serviceObj;
-	rttr::type  _serviceObjType;
+    std::string _serviceName;
+    std::string _serviceVersion;
+    std::string _serviceDescription;
+    bool        _isServiceObjThreadSafe = false;
 
-	nlohmann::json _serviceInfo;
-//    mutable QMutex _serviceMutex;
+    rttr::instance _serviceObj;
+    rttr::type     _serviceObjType;
+
+    nlohmann::json _serviceInfo;
+
+    std::unordered_map<std::string, std::list<RttRpcServiceMethodPtr>> _methods;
+
+    //    mutable QMutex _serviceMutex;
 };
 
-using RttRpcServicePtr = std::shared_ptr <RttRpcService>;
+using RttRpcServicePtr = std::shared_ptr<RttRpcService>;

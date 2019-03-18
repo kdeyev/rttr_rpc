@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+#include <iostream>
+
 //
 //class RttRpcServiceRequestPrivate : public QSharedData {
 //public:
@@ -16,7 +18,7 @@
 //class RttRpcService {
 //public:
 //    RttRpcService (const std::string& name, const std::string& version, const std::string& description, QSharedPointer<QObject> obj, bool threadSafe)
-//        : _serviceName (name), _serviceVersion (version), _serviceDescription (description), _serviceObj (obj), _isServiceObjThreadSafe (threadSafe) {
+//        : _name (name), _serviceVersion (version), _serviceDescription (description), _serviceObj (obj), _isServiceObjThreadSafe (threadSafe) {
 //        cacheInvokableInfo ();
 //    }
 //
@@ -70,7 +72,7 @@
 //    nlohmann::json _serviceInfo;
 //
 //    QSharedPointer<QObject> _serviceObj;
-//    std::string              _serviceName;
+//    std::string              _name;
 //    QString                 _serviceVersion;
 //    QString                 _serviceDescription;
 //
@@ -136,7 +138,7 @@
 //}
 
 RttRpcService::RttRpcService (const std::string& name, const rttr::instance& serviceObj)
-    : _serviceName (name), _serviceObj (serviceObj), _serviceObjType (_serviceObj.get_type ()) {
+    : _name (name), _serviceObj (serviceObj), _serviceObjType (_serviceObj.get_type ()) {
     // TODO: take it from rttr metainfo
 
     //_serviceVersion;
@@ -165,40 +167,12 @@ rttr::instance& RttRpcService::serviceObj () {
 }
 
 const std::string& RttRpcService::serviceName () const {
-    return _serviceName;
+    return _name;
 }
 
 const nlohmann::json& RttRpcService::serviceInfo () const {
     return _serviceInfo;
 }
-//
-//QString convertToString (QJsonValue::Type t) {
-//    switch (t) {
-//    case QJsonValue::Null:
-//        return "null";
-//    case QJsonValue::Bool:
-//        return "boolean";
-//    case QJsonValue::Double:
-//        return "number";
-//    case QJsonValue::String:
-//        return "string";
-//    case QJsonValue::Array:
-//        return "array";
-//    case QJsonValue::Object:
-//        return "object";
-//    case QJsonValue::Undefined:
-//    default:
-//        return "undefined";
-//    }
-//}
-//
-//nlohmann::json createParameterDescription (const QString& desc, int type) {
-//    nlohmann::json param;
-//    param["description"] = desc;
-//    param["type"]        = convertToString (QJsonValue::Type (type));
-//    //desc["default"] = type;
-//    return param;
-//}
 
 nlohmann::json RttRpcService::createServiceInfo () const {
     nlohmann::json data;
@@ -215,8 +189,12 @@ nlohmann::json RttRpcService::createServiceInfo () const {
 
     for (auto iter = _methods.begin (); iter != _methods.end (); ++iter) {
         const std::string&                       method_name = iter->first;
-        const std::list<RttRpcServiceMethodPtr>& method_lest = iter->second;
-        for (auto& method : method_lest) {
+        const std::list<RttRpcServiceMethodPtr>& method_list = iter->second;
+        for (auto& method : method_list) {
+			if (methods_json.count(method_name)) {
+				std::cout << "Service: " + _name + " - the method name used twice: " << method_name << std::endl;
+				continue;
+			}
             methods_json[method_name] = method->createJsonSchema ();
         }
     }
@@ -552,7 +530,7 @@ jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr
     auto iter2 = _methods.find (method_name);
 
     if (iter2 == _methods.end ()) {
-        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
+        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, "Service: " + _name + " - cannot find requested method");
     }
 
     nlohmann::json    response_json;
@@ -560,21 +538,28 @@ jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr
     const std::list<RttRpcServiceMethodPtr>& methods_list = iter2->second;
     if (methods_list.size () == 1) {
 		jsonrpcpp::Error err;
+		// invoke
         if (methods_list.front ()->invoke (_serviceObj, request->_origParams, response_json, err)) {
-            return request->createErrorResponse (err);
+			// it the invokation finished successfully - return a responce
+			return request->createResponse(response_json);
         }
-        return request->createResponse (response_json);
+		// return a error
+		return request->createErrorResponse(err);
     } else {
 		std::stringstream errors;
         for (auto& method : methods_list) {
 			jsonrpcpp::Error err;
             if (method->invoke (_serviceObj, request->_origParams, response_json, err)) {
+				// it the invokation finished successfully - return a responce
                 return request->createResponse (response_json);
 			}
 			else {
-				errors << "method cannot be invoked: " << err.message << std::endl;
+				// accumulate errors
+				errors << "Service: " + _name + " - method cannot be invoked: " << err.message << std::endl;
 			}
         }
+
+		// all invocations were failed - return an accumulative error
         return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, errors.str());
     }
 }

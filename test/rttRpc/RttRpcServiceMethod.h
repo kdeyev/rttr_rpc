@@ -14,6 +14,11 @@ class RttRpcServiceParam {
 public:
     RttRpcServiceParam (const rttr::parameter_info& info);
 
+	static nlohmann::json create_parameter_description(const std::string& desc, const rttr::type& type);
+	static std::string get_json_type_name(const rttr::type& type);
+
+	nlohmann::json create_parameter_description() const;
+
     rttr::parameter_info _info;
     std::string          _name;
     rttr::type           _type;
@@ -33,7 +38,10 @@ public:
 
     nlohmann::json createJsonSchema () const;
 
+	bool _has_valid_names = false;
 private:
+	bool check_valid_names() const;
+
     std::string                   _name;
     rttr::method                  _method;
     std::list<RttRpcServiceParam> _params;

@@ -71,7 +71,7 @@ private:
     void scanMethods ();
 	nlohmann::json createServiceInfo() const;
 
-    std::string _serviceName;
+    std::string _name;
     std::string _serviceVersion;
     std::string _serviceDescription;
     bool        _isServiceObjThreadSafe = false;

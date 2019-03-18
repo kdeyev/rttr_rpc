@@ -77,7 +77,7 @@ jsonrpcpp::MessagePtr RttRpcServiceRepository::processMessage (const jsonrpcpp::
             jsonrpcpp::MessagePtr error = notification->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "service "+ serviceName +" not found");
             return error;
         } else {
-            RttRpcServicePtr      service  = _services.at (serviceName);
+            const RttRpcServicePtr& service  = _services.at (serviceName);
             jsonrpcpp::MessagePtr response = service->dispatch (notification);
             return response;
         }

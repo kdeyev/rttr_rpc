@@ -5,7 +5,7 @@
 #include "from_json.h"
 #include "to_json.h"
 
-std::string to_string(rttr::string_view& in) {
+std::string to_string(const rttr::string_view& in) {
     return std::string(in.data(), in.size());
 }
 
@@ -13,42 +13,52 @@ RttRpcServiceParam::RttRpcServiceParam(const rttr::parameter_info& info)
     : _info(info), _name(to_string(info.get_name())), _type(info.get_type()), _index(info.get_index()), _has_default_value(info.has_default_value()) {
 }
 
-
 std::string RttRpcServiceParam::get_json_type_name(const rttr::type& type) {
-	//std::string type_nane = to_string(type.get_name());
+    //std::string type_nane = to_string(type.get_name());
 
-	if (type == rttr::type::get(nullptr)) {
-		return "null";
-	}
-	else if (type == rttr::type::get<bool>()) {
-		return "boolean";
-	}
-	else if (type == rttr::type::get<std::string>()) {
-		return "string";
-	}
-	else if (type.is_arithmetic()) {
-		return "number";
-	}
-	else if (type.is_array()) {
-		return "array";
-	}
-	else if (type.is_associative_container() || type.is_class()) {
-		return "object";
-	}
+    if(type == rttr::type::get(nullptr)) {
+        return "null";
+    } else if(type == rttr::type::get<bool>()) {
+        return "boolean";
+    } else if(type == rttr::type::get<std::string>()) {
+        return "string";
+    } else if(type.is_arithmetic()) {
+        return "number";
+    } else if(type.is_array()) {
+        return "array";
+    } else if(type.is_associative_container() || type.is_class()) {
+        return "object";
+    }
 
-	return "undefined";
+    return "undefined";
 }
 
 nlohmann::json RttRpcServiceParam::create_parameter_description(const std::string& desc, const rttr::type& type) {
     nlohmann::json param;
-    param["description"] = desc;
-    param["type"]        = get_json_type_name(type);
-    //desc["default"] = type;
+    if(type.is_enumeration()) {
+        param["description"] = desc;
+        param["type"]        = "string"; // hard coded type
+        param["values"]      = nlohmann::json::array();
+
+        for(const rttr::string_view& name : type.get_enumeration().get_names()) {
+            param["values"].push_back(to_string(name));
+        }
+
+        //desc["default"] = type;
+    } else {
+        param["description"] = desc;
+        param["type"]        = get_json_type_name(type);
+        //desc["default"] = _info.h;
+    }
     return param;
 }
 
 nlohmann::json RttRpcServiceParam::create_parameter_description() const {
-    return create_parameter_description(_name, _type);
+    nlohmann::json param = create_parameter_description(_name, _type);
+    if(_info.has_default_value()) {
+        param["default"] = io::to_json_obj(_info.get_default_value());
+    }
+    return param;
 }
 
 RttRpcServiceMethod::RttRpcServiceMethod(const rttr::method& method) : _method(method), _name(to_string(method.get_name())) {
@@ -192,7 +202,7 @@ bool RttRpcServiceMethod::invoke(const rttr::instance& serviceObj, const nlohman
 
 nlohmann::json RttRpcServiceMethod::createJsonSchema() const {
     if(!_has_valid_names) {
-		std::cout << "there is no parameter names for the method" << std::endl;
+        std::cout << "there is no parameter names for the method" << std::endl;
         return "there is no parameter names for the method";
     }
     nlohmann::json method_desc;

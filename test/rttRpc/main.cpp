@@ -5,6 +5,8 @@ using namespace rttr;
 
 #include "RttRpcServiceRepository.h"
 
+enum class E_Alignment { AlignLeft = 0x0001, AlignRight = 0x0002, AlignHCenter = 0x0004, AlignJustify = 0x0008 };
+
 struct point2d {
     point2d() {
     }
@@ -25,6 +27,32 @@ struct MyStruct {
         std::cout << val1.x << std::endl;
         return val2.y;
     };
+
+    std::string func3(E_Alignment al) {
+        std::string res;
+        switch(al) {
+        case E_Alignment::AlignLeft:
+            res = "AlignLeft";
+            break;
+        case E_Alignment::AlignRight:
+            res = "AlignRight";
+            break;
+        case E_Alignment::AlignHCenter:
+            res = "AlignHCenter";
+            break;
+        case E_Alignment::AlignJustify:
+            res = "AlignJustify";
+            break;
+        default:
+            break;
+        }
+        std::cout << res << std::endl;
+        return res;
+    };
+
+    void func4(double val1) {
+        std::cout << val1 << std::endl;
+    };
     int data;
 };
 
@@ -41,9 +69,20 @@ RTTR_REGISTRATION {
         .method("func", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
             parameter_names("val1", "val2"))
-	;
+
+        .method("func3", &MyStruct::func3)(
+            // parameters are required for json schemas
+            parameter_names("al"))
+
+        .method("func4", &MyStruct::func4)(
+			// default values cannot go together with names
+			default_arguments(42.0));
 
     rttr::registration::class_<point2d>("point2d").constructor()(rttr::policy::ctor::as_object).property("x", &point2d::x).property("y", &point2d::y);
+
+    rttr::registration::enumeration<E_Alignment>("E_Alignment")(value("AlignLeft", E_Alignment::AlignLeft), value("AlignRight", E_Alignment::AlignRight),
+                                                                value("AlignHCenter", E_Alignment::AlignHCenter),
+                                                                value("AlignJustify", E_Alignment::AlignJustify));
 }
 
 int main(int argc, char** argv) {
@@ -65,9 +104,21 @@ int main(int argc, char** argv) {
     rerponse = repo.processMessage(m);
     std::cout << rerponse->to_json().dump(4) << std::endl;
 
-	m = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
-	rerponse = repo.processMessage(m);
-	std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
+    rerponse = repo.processMessage(m);
+    std::cout << rerponse->to_json().dump(4) << std::endl;
+
+    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func3", "params": {"al" : "AlignJustify"}, "id": 2})"));
+    rerponse = repo.processMessage(m);
+    std::cout << rerponse->to_json().dump(4) << std::endl;
+
+    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": {"val1" : 24}, "id": 2})"));
+    rerponse = repo.processMessage(m);
+    std::cout << rerponse->to_json().dump(4) << std::endl;
+
+    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [], "id": 2})"));
+    rerponse = repo.processMessage(m);
+    std::cout << rerponse->to_json().dump(4) << std::endl;
 
     return 0;
 }

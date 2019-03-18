@@ -26,6 +26,8 @@ bool RttRpcServiceRepository::addService (const RttRpcServicePtr& service) {
     }
 
     _services[serviceName] = service;
+
+	_servicesInfo = createServicesInfo();
     return true;
 }
 
@@ -36,6 +38,8 @@ bool RttRpcServiceRepository::removeService (const std::string& serviceName) {
     }
 
     _services.erase (serviceName);
+
+	_servicesInfo = createServicesInfo();
     return true;
 }
 
@@ -95,8 +99,8 @@ jsonrpcpp::MessagePtr RttRpcServiceRepository::processMessage (const jsonrpcpp::
     return jsonrpcpp::MessagePtr ();
 }
 
-nlohmann::json RttRpcServiceRepository::servicesInfo () const {
-    nlohmann::json objectInfos = nlohmann::json::array ();
+nlohmann::json RttRpcServiceRepository::createServicesInfo() const {
+    nlohmann::json objectInfos = nlohmann::json::object ();
     for (auto iter : _services) {
         const nlohmann::json& info = iter.second->serviceInfo ();
         objectInfos[iter.first]    = info;

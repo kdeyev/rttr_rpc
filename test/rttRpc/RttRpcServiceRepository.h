@@ -75,10 +75,15 @@ public:
      */
 	jsonrpcpp::MessagePtr processMessage (const jsonrpcpp::MessagePtr& message) const;
 
+
+	const nlohmann::json& servicesInfo() const {
+		return _servicesInfo;
+	}
 private:
 	bool addService(const RttRpcServicePtr& service);
 
-	nlohmann::json servicesInfo() const;
+	nlohmann::json createServicesInfo() const;
+	nlohmann::json _servicesInfo;
 
 	std::unordered_map <std::string, RttRpcServicePtr> _services;
 };

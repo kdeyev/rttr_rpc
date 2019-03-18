@@ -23,7 +23,7 @@ struct MyStruct {
 
     double func (point2d val1, point2d val2) {
         std::cout << val1.x << std::endl;
-		return val2.y;
+        return val2.y;
     };
     int data;
 };
@@ -32,8 +32,8 @@ RTTR_REGISTRATION {
     registration::class_<MyStruct> ("MyStruct")
         .constructor<> ()
         .property ("data", &MyStruct::data)
-        .method ("func", select_overload<void(double, double)>(&MyStruct::func))
-        .method ("func", select_overload<double(point2d, point2d)>(&MyStruct::func));
+        .method ("func", select_overload<void(double, double)> (&MyStruct::func))
+        .method ("func", select_overload<double(point2d, point2d)> (&MyStruct::func));
 
     ;
 
@@ -46,16 +46,18 @@ int main (int argc, char** argv) {
     RttRpcServiceRepository repo;
     repo.addService ("test", obj);
 
+    std::cout << repo.servicesInfo ().dump (4) << std::endl;
+
     //dispatch(obj);
     jsonrpcpp::Parser parser;
 
-    jsonrpcpp::MessagePtr m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0, 41], "id": 1})"));
-	jsonrpcpp::MessagePtr rerponse = repo.processMessage (m);
-	std::cout << rerponse->to_json().dump(4) << std::endl;
+    jsonrpcpp::MessagePtr m        = parser.parse_json (nlohmann::json::parse (R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0, 41], "id": 1})"));
+    jsonrpcpp::MessagePtr rerponse = repo.processMessage (m);
+    std::cout << rerponse->to_json ().dump (4) << std::endl;
 
-    m = parser.parse_json (nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
-	rerponse = repo.processMessage (m);
-	std::cout << rerponse->to_json().dump(4) << std::endl;
+    m = parser.parse_json (nlohmann::json::parse (R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
+    rerponse = repo.processMessage (m);
+    std::cout << rerponse->to_json ().dump (4) << std::endl;
 
     return 0;
 }

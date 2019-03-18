@@ -3,6 +3,8 @@
 #include "from_json.h"
 #include "to_json.h"
 
+#include <sstream>
+
 //
 //class RttRpcServiceRequestPrivate : public QSharedData {
 //public:
@@ -141,17 +143,18 @@ RttRpcService::RttRpcService (const std::string& name, const rttr::instance& ser
     //_serviceDescription;
     //_isServiceObjThreadSafe = false;
 
+    scanMethods ();
 
-	scanMethods();
+    _serviceInfo = createServiceInfo ();
 }
 
-void RttRpcService::scanMethods() {
-	_methods.clear();
-	for (auto& method : _serviceObjType.get_methods()) {
-		std::string mathod_name(method.get_name().data(), method.get_name().length());
-		RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod>(method);
-		_methods[mathod_name].push_back(method_obj);
-	}
+void RttRpcService::scanMethods () {
+    _methods.clear ();
+    for (auto& method : _serviceObjType.get_methods ()) {
+        std::string            mathod_name (method.get_name ().data (), method.get_name ().length ());
+        RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod> (method);
+        _methods[mathod_name].push_back (method_obj);
+    }
 }
 
 RttRpcService::~RttRpcService () {
@@ -196,90 +199,71 @@ const nlohmann::json& RttRpcService::serviceInfo () const {
 //    //desc["default"] = type;
 //    return param;
 //}
-//
-//nlohmann::json RttRpcService::createServiceInfo () const {
-//    nlohmann::json data;
-//    data["jsonrpc"] = "2.0";
-//
-//    nlohmann::json info;
-//    info["title"]   = _serviceDescription;
-//    info["version"] = _serviceVersion;
-//
-//    data["info"] = info;
-//
-//    nlohmann::json   qtMethods;
-//    QSet<QString> identifiers;
-//
-//    for (auto iter = _methodInfoHash.begin (); iter != _methodInfoHash.end (); ++iter) {
-//        const MethodInfo& info = iter.value ();
-//        QString           name = info._name;
-//
-//        //if (identifiers.contains (name)) {
-//        //    continue;
-//        //}
-//        identifiers << name;
-//
-//        nlohmann::json method_desc;
-//        method_desc["summary"]     = name;
-//        method_desc["description"] = name;
-//
-//        nlohmann::json properties;
-//
-//        for (const auto& param : info._parameters) {
-//            properties[param._name] = createParameterDescription (param._name, param._jsType);
-//        }
-//        nlohmann::json params;
-//        params["type"]       = "object";
-//        params["properties"] = properties;
-//
-//        method_desc["params"] = params;
-//        method_desc["result"] = createParameterDescription ("return value", convertVariantTypeToJSType (info._returnType));
-//        qtMethods[name]       = method_desc;
-//    }
-//
-//    for (auto iter = _propertyInfoHash.begin (); iter != _propertyInfoHash.end (); ++iter) {
-//        const PropInfo& info = iter.value ();
-//        {
-//            QString name = info._getterName;
-//            identifiers << name;
-//
-//            nlohmann::json method_desc;
-//            method_desc["summary"]     = name;
-//            method_desc["description"] = name;
-//
-//            nlohmann::json properties;
-//            nlohmann::json params;
-//            params["type"]       = "object";
-//            params["properties"] = properties;
-//
-//            method_desc["params"] = params;
-//            method_desc["result"] = createParameterDescription ("return value", convertVariantTypeToJSType (info._type));
-//            qtMethods[name]       = method_desc;
-//        }
-//        {
-//            QString name = info._setterName;
-//            identifiers << name;
-//
-//            nlohmann::json method_desc;
-//            method_desc["summary"]     = name;
-//            method_desc["description"] = name;
-//
-//            nlohmann::json properties;
-//            properties[info._name] = createParameterDescription (info._name, convertVariantTypeToJSType (info._type));
-//
-//            nlohmann::json params;
-//            params["type"]       = "object";
-//            params["properties"] = properties;
-//
-//            method_desc["params"] = params;
-//            method_desc["result"] = createParameterDescription ("return value", QJsonValue::Undefined);
-//            qtMethods[name]       = method_desc;
-//        }
-//    }
-//
-//    data["methods"] = qtMethods;
-//    return data;
-//}
+
+nlohmann::json RttRpcService::createServiceInfo () const {
+    nlohmann::json data;
+    data["jsonrpc"] = "2.0";
+
+    nlohmann::json info;
+    info["title"]   = _serviceDescription;
+    info["version"] = _serviceVersion;
+
+    data["info"] = info;
+
+    nlohmann::json methods_json;
+    //QSet<QString> identifiers;
+
+    for (auto iter = _methods.begin (); iter != _methods.end (); ++iter) {
+        const std::string&                       method_name = iter->first;
+        const std::list<RttRpcServiceMethodPtr>& method_lest = iter->second;
+        for (auto& method : method_lest) {
+            methods_json[method_name] = method->createJsonSchema ();
+        }
+    }
+
+    //for (auto iter = _propertyInfoHash.begin (); iter != _propertyInfoHash.end (); ++iter) {
+    //    const PropInfo& info = iter.value ();
+    //    {
+    //        QString name = info._getterName;
+    //        identifiers << name;
+
+    //        nlohmann::json method_desc;
+    //        method_desc["summary"]     = name;
+    //        method_desc["description"] = name;
+
+    //        nlohmann::json properties;
+    //        nlohmann::json params;
+    //        params["type"]       = "object";
+    //        params["properties"] = properties;
+
+    //        method_desc["params"] = params;
+    //        method_desc["result"] = createParameterDescription ("return value", convertVariantTypeToJSType (info._type));
+    //        qtMethods[name]       = method_desc;
+    //    }
+    //    {
+    //        QString name = info._setterName;
+    //        identifiers << name;
+
+    //        nlohmann::json method_desc;
+    //        method_desc["summary"]     = name;
+    //        method_desc["description"] = name;
+
+    //        nlohmann::json properties;
+    //        properties[info._name] = createParameterDescription (info._name, convertVariantTypeToJSType (info._type));
+
+    //        nlohmann::json params;
+    //        params["type"]       = "object";
+    //        params["properties"] = properties;
+
+    //        method_desc["params"] = params;
+    //        method_desc["result"] = createParameterDescription ("return value", QJsonValue::Undefined);
+    //        qtMethods[name]       = method_desc;
+    //    }
+    //}
+
+    data["methods"] = methods_json;
+    return data;
+}
 //
 //int RttRpcService::convertVariantTypeToJSType (int type) {
 //    switch (type) {
@@ -562,29 +546,35 @@ const nlohmann::json& RttRpcService::serviceInfo () const {
 //    return request.createResponse (RttRpcService::convertReturnValue (returnValue));
 //}
 
-
 jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr& request) const {
     const std::string& method_name = request->_serviceMethod;
 
-	auto iter2 = _methods.find(method_name);
-	
-	if (iter2 == _methods.end()) {
-		return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
-	}
+    auto iter2 = _methods.find (method_name);
 
-	nlohmann::json response_json;
-	const std::list <RttRpcServiceMethodPtr>& methods_list = iter2->second;
-	if (methods_list.size() == 1) {
-		if (methods_list.front()->invoke(_serviceObj, request->_origParams, response_json)) {
-			return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::InternalError, "method call failed");
-		}
-		return request->createResponse(response_json);
-	} else {
-		for (auto& method : methods_list) {
-			if (method->invoke(_serviceObj, request->_origParams, response_json)) {
-				return request->createResponse(response_json);
+    if (iter2 == _methods.end ()) {
+        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
+    }
+
+    nlohmann::json    response_json;
+
+    const std::list<RttRpcServiceMethodPtr>& methods_list = iter2->second;
+    if (methods_list.size () == 1) {
+		jsonrpcpp::Error err;
+        if (methods_list.front ()->invoke (_serviceObj, request->_origParams, response_json, err)) {
+            return request->createErrorResponse (err);
+        }
+        return request->createResponse (response_json);
+    } else {
+		std::stringstream errors;
+        for (auto& method : methods_list) {
+			jsonrpcpp::Error err;
+            if (method->invoke (_serviceObj, request->_origParams, response_json, err)) {
+                return request->createResponse (response_json);
 			}
-		}
-		return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "cannot find requested method");
-	}
+			else {
+				errors << "method cannot be invoked: " << err.message << std::endl;
+			}
+        }
+        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, errors.str());
+    }
 }

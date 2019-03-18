@@ -69,6 +69,7 @@ public:
 
 private:
     void scanMethods ();
+	nlohmann::json createServiceInfo() const;
 
     std::string _serviceName;
     std::string _serviceVersion;

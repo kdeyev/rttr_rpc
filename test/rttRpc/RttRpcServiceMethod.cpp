@@ -66,8 +66,24 @@ RttRpcServiceMethod::RttRpcServiceMethod(const rttr::method& method) : _method(m
         _params.push_back(RttRpcServiceParam(param_info));
     }
 
+	scanMetadata();
     _has_valid_names = check_valid_names();
 }
+
+
+void RttRpcServiceMethod::scanMetadata() {
+	_description = _name;
+	auto m = _method.get_metadata(MetaData_Type::DESCRIPTION);
+	if (m.is_valid()) {
+		if (m.is_type<std::string>()) {
+			_description = m.get_value<std::string>();
+		}
+		else {
+			std::cout << "Method: " + _name + " - wrong type of DESCRIPTION meta data tag" << std::endl;
+		}
+	}
+}
+
 
 bool RttRpcServiceMethod::check_valid_names() const {
     for(auto& param : _params) {
@@ -207,7 +223,7 @@ nlohmann::json RttRpcServiceMethod::createJsonSchema() const {
     }
     nlohmann::json method_desc;
     method_desc["summary"]     = to_string(_method.get_signature());
-    method_desc["description"] = _name;
+    method_desc["description"] = _description;
 
     nlohmann::json properties;
 

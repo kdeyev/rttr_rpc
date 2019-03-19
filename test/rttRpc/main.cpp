@@ -59,25 +59,38 @@ struct MyStruct {
 
 RTTR_REGISTRATION {
     registration::class_<MyStruct>("MyStruct")
-        .constructor<>()
+       (
+			// class meta data 
+			metadata(MetaData_Type::THREAD_SAVE_OBJ, true),
+			metadata(MetaData_Type::DESCRIPTION, "My cool service obj"),
+			metadata(MetaData_Type::VERSION, "0.1a")
+		)
         .property("data", &MyStruct::data)
         .method("func", select_overload<void(double, double)>(&MyStruct::func))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"))
+            parameter_names("val1", "val2"),
+			metadata(MetaData_Type::DESCRIPTION, "My cool method func")
+			)
         .method("func2", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"))
+            parameter_names("val1", "val2"),
+			metadata(MetaData_Type::DESCRIPTION, "My cool method func2")
+			)
         .method("func", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"))
+            parameter_names("val1", "val2"),
+			metadata(MetaData_Type::DESCRIPTION, "My cool method func2")
+			)
         .method("func3", &MyStruct::func3)(
             // parameters are required for json schemas
-            parameter_names("al"))
+            parameter_names("al"),
+			metadata(MetaData_Type::DESCRIPTION, "My cool method func3"))
         .method("func4", &MyStruct::func4)(
 			// default values cannot go together with names
 			default_arguments(double(42.0)),
 			// parameters are required for json schemas
-			parameter_names("val1"))
+			parameter_names("val1"),
+			metadata(MetaData_Type::DESCRIPTION, "My cool method func4"))
 
         .property("data", &MyStruct::data);
 

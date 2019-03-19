@@ -34,22 +34,22 @@ public:
      * @param serviceObjIsThreadSafe Is the service object thread safe
      * @param obj Service object
      */
-    RttRpcService (const std::string& name, const rttr::instance& serviceObj);
-    ~RttRpcService ();
+    RttRpcService(const std::string& name, const rttr::instance& serviceObj);
+    ~RttRpcService();
 
     /**
      * @brief Returns service object
      * 
      * @return QSharedPointer<QObject> 
      */
-    rttr::instance& serviceObj ();
+    rttr::instance& serviceObj();
 
     /**
      * @brief Returns service name
      * 
      * @return const std::string& 
      */
-    const std::string& serviceName () const;
+    const std::string& serviceName() const;
 
     /**
      * @brief Returns JSON Document contains JSON Schema Service Descriptor 
@@ -57,7 +57,7 @@ public:
      * 
      * @return const nlohmann::json& 
      */
-    const nlohmann::json& serviceInfo () const;
+    const nlohmann::json& serviceInfo() const;
 
     /**
      * @brief Process a JSON-RPC message. In general it means the invocation of a requested function.
@@ -65,16 +65,17 @@ public:
      * @param message JSON-RPC message
      * @return jsonrpcpp::MessagePtr JSON-RPC response message
      */
-    jsonrpcpp::PesponsePtr dispatch (const jsonrpcpp::NotificationPtr& request) const;
+    jsonrpcpp::PesponsePtr dispatch(const jsonrpcpp::NotificationPtr& request) const;
 
 private:
-    void scanMethods ();
-	nlohmann::json createServiceInfo() const;
+    void           scanMetadata();
+    void           scanMethods();
+    nlohmann::json createServiceInfo() const;
 
     std::string _name;
-    std::string _serviceVersion;
-    std::string _serviceDescription;
-    bool        _isServiceObjThreadSafe = false;
+    std::string _version;
+    std::string _description;
+    bool        _is_thread_safe = false;
 
     rttr::instance _serviceObj;
     rttr::type     _serviceObjType;

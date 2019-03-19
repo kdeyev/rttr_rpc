@@ -10,6 +10,9 @@
 
 #include <jsonrp.hpp>
 
+
+enum class MetaData_Type { THREAD_SAVE_OBJ, DESCRIPTION, VERSION };
+
 class RttRpcServiceParam {
 public:
     RttRpcServiceParam (const rttr::parameter_info& info);
@@ -40,9 +43,11 @@ public:
 
 	bool _has_valid_names = false;
 private:
+	void scanMetadata();
 	bool check_valid_names() const;
 
     std::string                   _name;
+	std::string                   _description;
     rttr::method                  _method;
     std::list<RttRpcServiceParam> _params;
 };

@@ -18,7 +18,7 @@
 //class RttRpcService {
 //public:
 //    RttRpcService (const std::string& name, const std::string& version, const std::string& description, QSharedPointer<QObject> obj, bool threadSafe)
-//        : _name (name), _serviceVersion (version), _serviceDescription (description), _serviceObj (obj), _isServiceObjThreadSafe (threadSafe) {
+//        : _name (name), _version (version), _description (description), _serviceObj (obj), _is_thread_safe (threadSafe) {
 //        cacheInvokableInfo ();
 //    }
 //
@@ -73,10 +73,10 @@
 //
 //    QSharedPointer<QObject> _serviceObj;
 //    std::string              _name;
-//    QString                 _serviceVersion;
-//    QString                 _serviceDescription;
+//    QString                 _version;
+//    QString                 _description;
 //
-//    bool           _isServiceObjThreadSafe = false;
+//    bool           _is_thread_safe = false;
 //    mutable QMutex _serviceMutex;
 //};
 //
@@ -137,65 +137,95 @@
 //    }
 //}
 
-RttRpcService::RttRpcService (const std::string& name, const rttr::instance& serviceObj)
-    : _name (name), _serviceObj (serviceObj), _serviceObjType (_serviceObj.get_type ()) {
-    // TODO: take it from rttr metainfo
+RttRpcService::RttRpcService(const std::string& name, const rttr::instance& serviceObj)
+    : _name(name), _serviceObj(serviceObj), _serviceObjType(_serviceObj.get_type()) {
+ 
+	scanMetadata();
+    scanMethods();
 
-    //_serviceVersion;
-    //_serviceDescription;
-    //_isServiceObjThreadSafe = false;
-
-    scanMethods ();
-
-    _serviceInfo = createServiceInfo ();
+    _serviceInfo = createServiceInfo();
 }
 
-void RttRpcService::scanMethods () {
-    _methods.clear ();
-    for (auto& method : _serviceObjType.get_methods ()) {
-        std::string            mathod_name (method.get_name ().data (), method.get_name ().length ());
-        RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod> (method);
-        _methods[mathod_name].push_back (method_obj);
+void RttRpcService::scanMetadata() {
+	_is_thread_safe = false;
+	auto m = _serviceObjType.get_metadata(MetaData_Type::THREAD_SAVE_OBJ);
+	if (m.is_valid()) {
+		if (m.is_type<bool>()) {
+			_is_thread_safe = m.get_value<bool>();
+		}
+		else {
+			std::cout << "Service: " + _name + " - wrong type of THREAD_SAVE_OBJ meta data tag" << std::endl;
+		}
+	}
+
+	m = _serviceObjType.get_metadata(MetaData_Type::VERSION);
+	if (m.is_valid()) {
+		if (m.is_type<std::string>()) {
+			_version = m.get_value<std::string>();
+		}
+		else {
+			std::cout << "Service: " + _name + " - wrong type of VERSION meta data tag" << std::endl;
+		}
+	}
+
+	_description = _name;
+	m = _serviceObjType.get_metadata(MetaData_Type::DESCRIPTION);
+	if (m.is_valid()) {
+		if (m.is_type<std::string>()) {
+			_description = m.get_value<std::string>();
+		}
+		else {
+			std::cout << "Service: " + _name + " - wrong type of DESCRIPTION meta data tag" << std::endl;
+		}
+	}
+}
+
+void RttRpcService::scanMethods() {
+    _methods.clear();
+    for(auto& method : _serviceObjType.get_methods()) {
+        std::string            mathod_name(method.get_name().data(), method.get_name().length());
+        RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod>(method);
+        _methods[mathod_name].push_back(method_obj);
     }
 }
 
-RttRpcService::~RttRpcService () {
+RttRpcService::~RttRpcService() {
 }
 
-rttr::instance& RttRpcService::serviceObj () {
+rttr::instance& RttRpcService::serviceObj() {
     return _serviceObj;
 }
 
-const std::string& RttRpcService::serviceName () const {
+const std::string& RttRpcService::serviceName() const {
     return _name;
 }
 
-const nlohmann::json& RttRpcService::serviceInfo () const {
+const nlohmann::json& RttRpcService::serviceInfo() const {
     return _serviceInfo;
 }
 
-nlohmann::json RttRpcService::createServiceInfo () const {
+nlohmann::json RttRpcService::createServiceInfo() const {
     nlohmann::json data;
     data["jsonrpc"] = "2.0";
 
     nlohmann::json info;
-    info["title"]   = _serviceDescription;
-    info["version"] = _serviceVersion;
+    info["title"]   = _description;
+    info["version"] = _version;
 
     data["info"] = info;
 
     nlohmann::json methods_json;
     //QSet<QString> identifiers;
 
-    for (auto iter = _methods.begin (); iter != _methods.end (); ++iter) {
+    for(auto iter = _methods.begin(); iter != _methods.end(); ++iter) {
         const std::string&                       method_name = iter->first;
         const std::list<RttRpcServiceMethodPtr>& method_list = iter->second;
-        for (auto& method : method_list) {
-			if (methods_json.count(method_name)) {
-				std::cout << "Service: " + _name + " - the method name used twice: " << method_name << std::endl;
-				continue;
-			}
-            methods_json[method_name] = method->createJsonSchema ();
+        for(auto& method : method_list) {
+            if(methods_json.count(method_name)) {
+                std::cout << "Service: " + _name + " - the method name used twice: " << method_name << std::endl;
+                continue;
+            }
+            methods_json[method_name] = method->createJsonSchema();
         }
     }
 
@@ -447,7 +477,7 @@ nlohmann::json RttRpcService::createServiceInfo () const {
 //    }
 //
 //    bool success = false;
-//    if (_isServiceObjThreadSafe) {
+//    if (_is_thread_safe) {
 //        success = _serviceObj->qt_metacall (QMetaObject::InvokeMetaMethod, methodIndex, parameters.data ()) < 0;
 //    } else {
 //        QMutexLocker lock (&_serviceMutex);
@@ -488,7 +518,7 @@ nlohmann::json RttRpcService::createServiceInfo () const {
 //    const RttRpcService::PropInfo& prop = _propertyInfoHash[propertyIndex];
 //
 //    QVariant returnValue;
-//    if (_isServiceObjThreadSafe) {
+//    if (_is_thread_safe) {
 //        returnValue = prop._prop.read (_serviceObj.data ());
 //    } else {
 //        QMutexLocker lock (&_serviceMutex);
@@ -512,7 +542,7 @@ nlohmann::json RttRpcService::createServiceInfo () const {
 //
 //    QVariant argument = convertArgument (arr[0], prop._type);
 //
-//    if (_isServiceObjThreadSafe) {
+//    if (_is_thread_safe) {
 //        prop._prop.write (_serviceObj.data (), argument);
 //    } else {
 //        QMutexLocker lock (&_serviceMutex);
@@ -524,42 +554,41 @@ nlohmann::json RttRpcService::createServiceInfo () const {
 //    return request.createResponse (RttRpcService::convertReturnValue (returnValue));
 //}
 
-jsonrpcpp::PesponsePtr RttRpcService::dispatch (const jsonrpcpp::NotificationPtr& request) const {
+jsonrpcpp::PesponsePtr RttRpcService::dispatch(const jsonrpcpp::NotificationPtr& request) const {
     const std::string& method_name = request->_serviceMethod;
 
-    auto iter2 = _methods.find (method_name);
+    auto iter2 = _methods.find(method_name);
 
-    if (iter2 == _methods.end ()) {
-        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, "Service: " + _name + " - cannot find requested method");
+    if(iter2 == _methods.end()) {
+        return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "Service: " + _name + " - cannot find requested method");
     }
 
-    nlohmann::json    response_json;
+    nlohmann::json response_json;
 
     const std::list<RttRpcServiceMethodPtr>& methods_list = iter2->second;
-    if (methods_list.size () == 1) {
-		jsonrpcpp::Error err;
-		// invoke
-        if (methods_list.front ()->invoke (_serviceObj, request->_origParams, response_json, err)) {
-			// it the invokation finished successfully - return a responce
-			return request->createResponse(response_json);
+    if(methods_list.size() == 1) {
+        jsonrpcpp::Error err;
+        // invoke
+        if(methods_list.front()->invoke(_serviceObj, request->_origParams, response_json, err)) {
+            // it the invokation finished successfully - return a responce
+            return request->createResponse(response_json);
         }
-		// return a error
-		return request->createErrorResponse(err);
+        // return a error
+        return request->createErrorResponse(err);
     } else {
-		std::stringstream errors;
-        for (auto& method : methods_list) {
-			jsonrpcpp::Error err;
-            if (method->invoke (_serviceObj, request->_origParams, response_json, err)) {
-				// it the invokation finished successfully - return a responce
-                return request->createResponse (response_json);
-			}
-			else {
-				// accumulate errors
-				errors << "Service: " + _name + " - method cannot be invoked: " << err.message << std::endl;
-			}
+        std::stringstream errors;
+        for(auto& method : methods_list) {
+            jsonrpcpp::Error err;
+            if(method->invoke(_serviceObj, request->_origParams, response_json, err)) {
+                // it the invokation finished successfully - return a responce
+                return request->createResponse(response_json);
+            } else {
+                // accumulate errors
+                errors << "Service: " + _name + " - method cannot be invoked: " << err.message << std::endl;
+            }
         }
 
-		// all invocations were failed - return an accumulative error
-        return request->createErrorResponse (jsonrpcpp::Error::ErrorCode::MethodNotFound, errors.str());
+        // all invocations were failed - return an accumulative error
+        return request->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, errors.str());
     }
 }

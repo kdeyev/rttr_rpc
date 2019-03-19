@@ -61,13 +61,13 @@ rttr::instance RttRpcServiceRepository::getServiceObject (const std::string& ser
 
 jsonrpcpp::MessagePtr RttRpcServiceRepository::processMessage (const jsonrpcpp::MessagePtr& message) const {
     switch (message->type ()) {
-        //case jsonrpcpp::Message::entity_t::Discrovery: {
-        //       RttRpcMessage response = message.createResponse (d->servicesInfo ());
-        //       return response;
-        //   }
     case jsonrpcpp::Message::entity_t::request:
     case jsonrpcpp::Message::entity_t::notification: {
         jsonrpcpp::NotificationPtr notification = std::dynamic_pointer_cast<jsonrpcpp::Notification> (message);
+		if (notification->method == "__init__") {
+			// special method name for service discovery
+			return notification->createResponse(servicesInfo());
+		}
 		const std::string& serviceName = notification->_serviceName;
 		if (serviceName.empty()) {
 			jsonrpcpp::MessagePtr error = notification->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "empty service name");

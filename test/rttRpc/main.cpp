@@ -51,8 +51,9 @@ struct MyStruct {
         return res;
     };
 
-    void func4(double val1) {
+	double func4(double val1) {
         std::cout << val1 << std::endl;
+		return val1 + 1;
     };
     int data;
 };

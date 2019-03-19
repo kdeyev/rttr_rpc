@@ -64,13 +64,6 @@ nlohmann::json RttRpcServiceParam::create_parameter_description() const {
 RttRpcServiceMethod::RttRpcServiceMethod(const rttr::method& method) : _method(method), _name(to_string(method.get_name())) {
     for(auto param_info : _method.get_parameter_infos()) {
         _params.push_back(RttRpcServiceParam(param_info));
-
-		if (param_info.has_default_value()) {
-			std::cout << "i'm default" << std::endl;
-		}
-		if (_params.back()._has_default_value) {
-			std::cout << "i'm default" << std::endl;
-		}
     }
 
     _has_valid_names = check_valid_names();

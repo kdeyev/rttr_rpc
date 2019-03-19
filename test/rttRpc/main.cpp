@@ -3,6 +3,7 @@
 #include <rttr/registration>
 using namespace rttr;
 
+#include "RttRpcBeastServer.h"
 #include "RttRpcServiceRepository.h"
 
 enum class E_Alignment { AlignLeft = 0x0001, AlignRight = 0x0002, AlignHCenter = 0x0004, AlignJustify = 0x0008 };
@@ -90,10 +91,12 @@ RTTR_REGISTRATION {
 int main(int argc, char** argv) {
     MyStruct obj;
 
-    RttRpcServiceRepository repo;
-    repo.addService("test", obj);
+	RttRpcBeastServer server(1);
+	RttRpcServiceRepository& repo = server._serviceRepository;
 
-    std::cout << repo.servicesInfo().dump(4) << std::endl;
+	repo.addService("test", obj);
+
+	std::cout << repo.servicesInfo().dump(4) << std::endl;
 
     //dispatch(obj);
     jsonrpcpp::Parser parser;
@@ -121,6 +124,8 @@ int main(int argc, char** argv) {
     m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [], "id": 2})"));
     rerponse = repo.processMessage(m);
     std::cout << rerponse->to_json().dump(4) << std::endl;
+
+	server.start(boost::asio::ip::tcp::endpoint{ boost::asio::ip::tcp::v4(), 5555 });
 
     return 0;
 }

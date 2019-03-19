@@ -11,6 +11,8 @@ set(NLOHMANN_JSON_DIR ../../nlohmann_json/include)
 set(JSON_SERIALIZATION_NLOHMANN_DIR ../../rttr/src/examples/json_serialization_nlohmann)
 
 find_package(RTTR CONFIG REQUIRED Core)
+find_package(Boost 1.69 COMPONENTS date_time REQUIRED )
+
 #find_package(nlohmann_json 3.2.0 REQUIRED)
 #find_package(jsonrpcpp REQUIRED)
 
@@ -20,6 +22,7 @@ set(HEADER_FILES ${JSON_SERIALIZATION_NLOHMANN_DIR}/to_json.h
                  )
 
 set(SOURCE_FILES main.cpp
+				 RttRpcBeastServer.cpp
 				 RttRpcServiceRepository.cpp
 				 RttRpcService.cpp
 				 RttRpcServiceMethod.cpp
@@ -34,11 +37,13 @@ include_directories(${JSONRPCPP_DIR})
 include_directories(${JSON_SERIALIZATION_NLOHMANN_DIR})
 #include_directories(${Boost_INCLUDE_DIR})
 #link_directories(${JSONRPCPP_LIB_DIR})
-#link_directories(${Boost_LIBRARY_DIRS})
+
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES})
 
-target_link_libraries(${PROJECT_NAME} RTTR::Core)  
+target_link_libraries(${PROJECT_NAME} RTTR::Core )  
 
 install(
     TARGETS ${PROJECT_NAME}

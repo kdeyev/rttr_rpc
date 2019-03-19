@@ -69,14 +69,16 @@ RTTR_REGISTRATION {
         .method("func", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
             parameter_names("val1", "val2"))
-
         .method("func3", &MyStruct::func3)(
             // parameters are required for json schemas
             parameter_names("al"))
-
         .method("func4", &MyStruct::func4)(
 			// default values cannot go together with names
-			default_arguments(42.0));
+			default_arguments(double(42.0)),
+			// parameters are required for json schemas
+			parameter_names("val1"))
+
+        .property("data", &MyStruct::data);
 
     rttr::registration::class_<point2d>("point2d").constructor()(rttr::policy::ctor::as_object).property("x", &point2d::x).property("y", &point2d::y);
 
@@ -112,7 +114,7 @@ int main(int argc, char** argv) {
     rerponse = repo.processMessage(m);
     std::cout << rerponse->to_json().dump(4) << std::endl;
 
-    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": {"val1" : 24}, "id": 2})"));
+    m        = parser.parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [24], "id": 2})"));
     rerponse = repo.processMessage(m);
     std::cout << rerponse->to_json().dump(4) << std::endl;
 

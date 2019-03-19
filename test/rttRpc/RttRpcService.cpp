@@ -157,6 +157,10 @@ void RttRpcService::scanMethods () {
         RttRpcServiceMethodPtr method_obj = std::make_shared<RttRpcServiceMethod> (method);
         _methods[mathod_name].push_back (method_obj);
     }
+
+	//for (auto& prop : _serviceObjType.get_properties()) {
+
+	//}
 }
 
 RttRpcService::~RttRpcService () {

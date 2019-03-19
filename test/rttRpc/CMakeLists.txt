@@ -26,6 +26,7 @@ set(SOURCE_FILES main.cpp
 				 RttRpcServiceRepository.cpp
 				 RttRpcService.cpp
 				 RttRpcServiceMethod.cpp
+				 RttRpcServiceParam.cpp
                  ${JSON_SERIALIZATION_NLOHMANN_DIR}/to_json.cpp
                  ${JSON_SERIALIZATION_NLOHMANN_DIR}/from_json.cpp
 				 ${JSONRPCPP_DIR}/jsonrp.cpp

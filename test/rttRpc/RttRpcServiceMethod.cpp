@@ -14,13 +14,13 @@ RttRpcServiceParam::RttRpcServiceParam(const rttr::parameter_info& info)
 }
 
 std::string RttRpcServiceParam::get_json_type_name(const rttr::type& type) {
-    //std::string type_nane = to_string(type.get_name());
+    std::string type_nane = to_string(type.get_name());
 
-    if(type == rttr::type::get(nullptr)) {
+    if(type == rttr::type::get(nullptr) || type_nane == "void") {
         return "null";
     } else if(type == rttr::type::get<bool>()) {
         return "boolean";
-    } else if(type == rttr::type::get<std::string>()) {
+    } else if(type == rttr::type::get<std::string>() || type.is_enumeration()) {
         return "string";
     } else if(type.is_arithmetic()) {
         return "number";
@@ -33,32 +33,66 @@ std::string RttRpcServiceParam::get_json_type_name(const rttr::type& type) {
     return "undefined";
 }
 
-nlohmann::json RttRpcServiceParam::create_parameter_description(const std::string& desc, const rttr::type& type) {
+nlohmann::json RttRpcServiceParam::create_parameter_description(const std::string& desc, const rttr::type& type, nlohmann::json& defs) {
     nlohmann::json param;
+    param["description"] = desc;
     if(type.is_enumeration()) {
-        param["description"] = desc;
-        param["type"]        = "string"; // hard coded type
-        param["values"]      = nlohmann::json::array();
+        nlohmann::json values = nlohmann::json::array();
 
         for(const rttr::string_view& name : type.get_enumeration().get_names()) {
-            param["enum"].push_back(to_string(name));
+            values.push_back(to_string(name));
         }
+        param["enum"] = values;
+    }
+    if(type.is_class() && type != rttr::type::get<std::string>()) {
+        std::string class_name = to_string(type.get_name());
+        param["$ref"]          = "#/definitions/" + class_name;
 
-        //desc["default"] = type;
+        if(defs.count(class_name) == 0) {
+            defs[class_name] = create_class_definition(type, defs);
+        }
     } else {
-        param["description"] = desc;
-        param["type"]        = get_json_type_name(type);
+        param["type"] = get_json_type_name(type);
         //desc["default"] = _info.h;
     }
     return param;
 }
 
-nlohmann::json RttRpcServiceParam::create_parameter_description() const {
-    nlohmann::json param = create_parameter_description(_name, _type);
+nlohmann::json RttRpcServiceParam::create_parameter_description(nlohmann::json& defs) const {
+    nlohmann::json param = create_parameter_description(_name, _type, defs);
     if(_has_default_value) {
         param["default"] = io::to_json_obj(_info.get_default_value());
     }
     return param;
+}
+
+nlohmann::json RttRpcServiceParam::create_class_definition(const rttr::type& type, nlohmann::json& defs) {
+    nlohmann::json def;
+    // it's always object
+    def["type"] = "object";
+
+    nlohmann::json properties = nlohmann::json::object();
+    nlohmann::json required   = nlohmann::json::array();
+
+    // iterate over class properties
+    for(auto prop : type.get_properties()) {
+        std::string name = to_string(prop.get_name());
+
+        std::string description = name;
+        auto        m           = prop.get_metadata(MetaData_Type::DESCRIPTION);
+        if(m.is_valid()) {
+            description = m.get_value<std::string>();
+        }
+
+        // add properties recursively
+        properties[name] = create_parameter_description(description, prop.get_type(), defs);
+
+        // all of properties are reuired
+        required.push_back(name);
+    }
+    def["properties"] = properties;
+    def["required"]   = required;
+    return def;
 }
 
 RttRpcServiceMethod::RttRpcServiceMethod(const rttr::method& method) : _method(method), _name(to_string(method.get_name())) {
@@ -224,14 +258,29 @@ nlohmann::json RttRpcServiceMethod::createJsonSchema() const {
 
     nlohmann::json properties;
 
+    nlohmann::json required    = nlohmann::json::array();
+    nlohmann::json definitions = nlohmann::json::object();
     for(const auto& param : _params) {
-        properties[param._name] = param.create_parameter_description();
+        properties[param._name] = param.create_parameter_description(definitions);
+
+        if(param._has_default_value == false) {
+            // add to the list of required parameters
+            required.push_back(param._name);
+        }
     }
+    nlohmann::json result = RttRpcServiceParam::create_parameter_description("return value", _method.get_return_type(), definitions);
+
     nlohmann::json params;
     params["type"]       = "object";
+    params["$schema"]    = "http://json-schema.org/draft-07/schema#";
     params["properties"] = properties;
+    params["required"]   = required;
+    if(definitions.size()) {
+        params["definitions"] = definitions;
+    }
 
     method_desc["params"] = params;
-    method_desc["result"] = RttRpcServiceParam::create_parameter_description("return value", _method.get_return_type());
+    method_desc["result"] = result;
+
     return method_desc;
 }

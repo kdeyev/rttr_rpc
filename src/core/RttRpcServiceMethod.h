@@ -8,12 +8,14 @@
 
 #include <nlohmann/json.hpp>
 
+#include "rttr_rpc_core_export.h"
+
 #include "jsonrp.hpp" // jsonrpcpp::Error
 
 #include "RttRpcServiceParam.h"
 
 
-class RttRpcServiceMethod {
+class RTTR_RPC_CORE_EXPORT RttRpcServiceMethod {
 public:
     RttRpcServiceMethod(const rttr::method& method);
 

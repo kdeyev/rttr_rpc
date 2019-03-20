@@ -4,11 +4,13 @@
 #include <rttr/type.h>
 #include <nlohmann/json.hpp>
 
+#include "rttr_rpc_core_export.h"
+
 // TODO: move to global
-enum class MetaData_Type { THREAD_SAVE_OBJ, DESCRIPTION, VERSION };
+enum class RTTR_RPC_CORE_EXPORT MetaData_Type { THREAD_SAVE_OBJ, DESCRIPTION, VERSION };
 std::string to_string(const rttr::string_view& in);
 
-class RttRpcServiceParam {
+class RTTR_RPC_CORE_EXPORT RttRpcServiceParam {
 public:
     RttRpcServiceParam(const rttr::parameter_info& info);
 

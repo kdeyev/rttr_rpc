@@ -8,6 +8,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "rttr_rpc_core_export.h"
+
 #include "jsonrp.hpp"
 namespace jsonrpcpp {
     typedef std::shared_ptr<Entity>       MessagePtr;
@@ -25,7 +27,7 @@ namespace jsonrpcpp {
  * @brief Service wrapper over QOblect is responsible for QObjects methods ivocation according to JSON-RPC requests messages.
  * 
  */
-class RttRpcService {
+class RTTR_RPC_CORE_EXPORT RttRpcService {
 public:
     /**
      * @brief Construct a new RttRpcService object

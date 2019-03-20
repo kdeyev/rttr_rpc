@@ -8,6 +8,8 @@
 #include <rttr/type.h>
 #include <rttr/instance.h>
 
+#include "rttr_rpc_core_export.h"
+
 #include "jsonrp.hpp"
 namespace jsonrpcpp {
 	typedef Entity Message;
@@ -27,7 +29,7 @@ namespace jsonrpcpp {
  * @brief The main entity of RttRpc represents service repository and provides API for a JSON-RPC method invokation.
  * 
  */
-class RttRpcServiceRepository {
+class RTTR_RPC_CORE_EXPORT RttRpcServiceRepository {
 public:
     RttRpcServiceRepository ();
     ~RttRpcServiceRepository ();

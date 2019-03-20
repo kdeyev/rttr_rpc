@@ -569,7 +569,7 @@ namespace rttr_rpc {
             if(methods_list.size() == 1) {
                 jsonrpcpp::Error err;
                 // invoke
-                if(methods_list.front()->invoke(service_instance_, request->_origParams, response_json, err, m)) {
+                if(methods_list.front()->invoke(service_instance_, request->params, response_json, err, m)) {
                     // it the invokation finished successfully - return a responce
                     return request->createResponse(response_json);
                 }
@@ -579,7 +579,7 @@ namespace rttr_rpc {
                 std::stringstream errors;
                 for(auto& method : methods_list) {
                     jsonrpcpp::Error err;
-                    if(method->invoke(service_instance_, request->_origParams, response_json, err, m)) {
+                    if(method->invoke(service_instance_, request->params, response_json, err, m)) {
                         // it the invokation finished successfully - return a responce
                         return request->createResponse(response_json);
                     } else {

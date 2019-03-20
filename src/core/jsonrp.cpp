@@ -12,54 +12,54 @@ using namespace std;
 
 namespace jsonrpcpp {
 
-    static void extractServiceName (const std::string& method, std::string& service_name, std::string& serviceMethod) {
-        service_name.clear ();
-        serviceMethod.clear ();
-        size_t pos = method.find ('.');
-        if (std::string::npos == pos) {
+    static void extractServiceName(const std::string& method, std::string& service_name, std::string& serviceMethod) {
+        service_name.clear();
+        serviceMethod.clear();
+        size_t pos = method.find('.');
+        if(std::string::npos == pos) {
             return;
         }
-        service_name   = method.substr (0, pos);
-        serviceMethod = method.substr (pos + 1);
+        service_name  = method.substr(0, pos);
+        serviceMethod = method.substr(pos + 1);
     }
 
     /////////////////////////// Entity implementation /////////////////////////////
 
-    Entity::Entity (entity_t type) : entity (type) {
+    Entity::Entity(entity_t type) : entity(type) {
     }
 
-    Entity::~Entity () {
+    Entity::~Entity() {
     }
 
-    bool Entity::is_exception () {
+    bool Entity::is_exception() {
         return (entity == entity_t::exception);
     }
 
-    bool Entity::is_id () {
-        return (entity == entity_t::id);
-    }
+    //bool Entity::is_id() {
+    //    return (entity == entity_t::id);
+    //}
 
-    bool Entity::is_error () {
+    bool Entity::is_error() {
         return (entity == entity_t::error);
     }
 
-    bool Entity::is_response () {
+    bool Entity::is_response() {
         return (entity == entity_t::response);
     }
 
-    bool Entity::is_request () {
+    bool Entity::is_request() {
         return (entity == entity_t::request);
     }
 
-    bool Entity::is_notification () {
+    bool Entity::is_notification() {
         return (entity == entity_t::notification);
     }
 
-    bool Entity::is_batch () {
+    bool Entity::is_batch() {
         return (entity == entity_t::batch);
     }
 
-    void Entity::parse (const char* json_str) {
+    void Entity::parse(const char* json_str) {
         // http://www.jsonrpc.org/specification
         //	code	message	meaning
         //	-32700	Parse error	Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.
@@ -69,24 +69,22 @@ namespace jsonrpcpp {
         //	-32603	Internal error	Internal JSON-RPC error.
         //	-32000 to -32099	Server error	Reserved for implementation-defined server-errors.
         try {
-            parse_json (Json::parse (json_str));
-        } catch (const RpcException& /*e*/) {
+            parse_json(Json::parse(json_str));
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw ParseErrorException (e.what ());
+        } catch(const exception& e) {
+            throw ParseErrorException(e.what());
         }
     }
 
-    void Entity::parse (const std::string& json_str) {
-        parse (json_str.c_str ());
+    void Entity::parse(const std::string& json_str) {
+        parse(json_str.c_str());
     }
 
-    std::string Entity::type_str () const {
-        switch (entity) {
+    std::string Entity::type_str() const {
+        switch(entity) {
         case entity_t::unknown:
             return "unknown";
-        case entity_t::id:
-            return "id";
         case entity_t::exception:
             return "exception";
         case entity_t::error:
@@ -104,57 +102,57 @@ namespace jsonrpcpp {
         }
     }
 
-	std::string Entity::to_string() const {
-		return to_json().dump();
-	}
+    std::string Entity::to_string() const {
+        return to_json().dump();
+    }
 
     /////////////////////////// NullableEntity implementation /////////////////////
 
-    NullableEntity::NullableEntity (entity_t type) : Entity (type), isNull (false) {
+    NullableEntity::NullableEntity() : isNull(false) {
     }
 
-    NullableEntity::NullableEntity (entity_t type, std::nullptr_t) : Entity (type), isNull (true) {
+    NullableEntity::NullableEntity(std::nullptr_t) : isNull(true) {
     }
 
-    NullableEntity::~NullableEntity (){};
+    NullableEntity::~NullableEntity(){};
 
     /////////////////////////// Id implementation /////////////////////////////////
 
-    Id::Id () : Entity (entity_t::id), type (value_t::null), int_id (0), string_id ("") {
+    Id::Id() : type(value_t::null), int_id(0), string_id("") {
     }
 
-    Id::Id (int id) : Entity (entity_t::id), type (value_t::integer), int_id (id), string_id ("") {
+    Id::Id(int id) : type(value_t::integer), int_id(id), string_id("") {
     }
 
-    Id::Id (const char* id) : Entity (entity_t::id), type (value_t::string), int_id (0), string_id (id) {
+    Id::Id(const char* id) : type(value_t::string), int_id(0), string_id(id) {
     }
 
-    Id::Id (const std::string& id) : Id (id.c_str ()) {
+    Id::Id(const std::string& id) : Id(id.c_str()) {
     }
 
-    Id::Id (const Json& json_id) : Entity (entity_t::id), type (value_t::null) {
-        parse_json (json_id);
+    Id::Id(const Json& json_id) : type(value_t::null) {
+        parse_json(json_id);
     }
 
-    void Id::parse_json (const Json& json) {
-        if (json.is_null ()) {
+    void Id::parse_json(const Json& json) {
+        if(json.is_null()) {
             type = value_t::null;
-        } else if (json.is_number_integer ()) {
-            int_id = json.get<int> ();
+        } else if(json.is_number_integer()) {
+            int_id = json.get<int>();
             type   = value_t::integer;
-        } else if (json.is_string ()) {
-            string_id = json.get<std::string> ();
+        } else if(json.is_string()) {
+            string_id = json.get<std::string>();
             type      = value_t::string;
         } else
-            throw std::invalid_argument ("id must be integer, string or null");
+            throw std::invalid_argument("id must be integer, string or null");
     }
 
-    Json Id::to_json () const {
-        if (type == value_t::null)
+    Json Id::to_json() const {
+        if(type == value_t::null)
             return nullptr;
-        else if (type == value_t::string)
+        else if(type == value_t::string)
             return string_id;
-        else if (type == value_t::integer)
+        else if(type == value_t::integer)
             return int_id;
 
         return nullptr;
@@ -162,346 +160,346 @@ namespace jsonrpcpp {
 
     //////////////////////// Error implementation /////////////////////////////////
 
-    Parameter::Parameter (std::nullptr_t) : NullableEntity (entity_t::id, nullptr), type (value_t::null) {
-    }
+    //Parameter::Parameter(std::nullptr_t) : NullableEntity(nullptr) {
+    //}
 
-    Parameter::Parameter (const Json& json) : NullableEntity (entity_t::id), type (value_t::null) {
-        if (json != nullptr)
-            parse_json (json);
-    }
+    //Parameter::Parameter(const Json& json) : NullableEntity() {
+    //    if(json != nullptr)
+    //        parse_json(json);
+    //}
 
-    Parameter::Parameter (const std::string& key1, const Json& value1, const std::string& key2, const Json& value2, const std::string& key3, const Json& value3,
-                          const std::string& key4, const Json& value4)
-        : NullableEntity (entity_t::id), type (value_t::map) {
-        param_map[key1] = value1;
-        if (!key2.empty ())
-            param_map[key2] = value2;
-        if (!key3.empty ())
-            param_map[key3] = value3;
-        if (!key4.empty ())
-            param_map[key4] = value4;
-    }
+    //Parameter::Parameter(const std::string& key1, const Json& value1, const std::string& key2, const Json& value2, const std::string& key3, const Json& value3,
+    //                     const std::string& key4, const Json& value4)
+    //    : NullableEntity() {
+    //    param_map[key1] = value1;
+    //    if(!key2.empty())
+    //        param_map[key2] = value2;
+    //    if(!key3.empty())
+    //        param_map[key3] = value3;
+    //    if(!key4.empty())
+    //        param_map[key4] = value4;
+    //}
 
-    void Parameter::parse_json (const Json& json) {
-        if (json.is_array ()) {
-            param_array = json.get<std::vector<Json>> ();
-            param_map.clear ();
-            type = value_t::array;
-        } else {
-            param_map = json.get<std::map<std::string, Json>> ();
-            param_array.clear ();
-            type = value_t::map;
-        }
-    }
+    //void Parameter::parse_json(const Json& json) {
+    //    if(json.is_array()) {
+    //        param_array = json.get<std::vector<Json>>();
+    //        param_map.clear();
+    //        type = value_t::array;
+    //    } else {
+    //        param_map = json.get<std::map<std::string, Json>>();
+    //        param_array.clear();
+    //        type = value_t::map;
+    //    }
+    //}
 
-    Json Parameter::to_json () const {
-        if (type == value_t::array)
-            return param_array;
-        else if (type == value_t::map)
-            return param_map;
-        else
-            return nullptr;
-    }
+    //Json Parameter::to_json() const {
+    //    if(type == value_t::array)
+    //        return param_array;
+    //    else if(type == value_t::map)
+    //        return param_map;
+    //    else
+    //        return nullptr;
+    //}
 
-    bool Parameter::is_array () const {
-        return type == value_t::array;
-    }
+    //bool Parameter::is_array() const {
+    //    return type == value_t::array;
+    //}
 
-    bool Parameter::is_map () const {
-        return type == value_t::map;
-    }
+    //bool Parameter::is_map() const {
+    //    return type == value_t::map;
+    //}
 
-    bool Parameter::is_null () const {
-        return isNull;
-    }
+    //bool Parameter::is_null() const {
+    //    return isNull;
+    //}
 
-    bool Parameter::has (const std::string& key) const {
-        if (type != value_t::map)
-            return false;
-        return (param_map.find (key) != param_map.end ());
-    }
+    //bool Parameter::has(const std::string& key) const {
+    //    if(type != value_t::map)
+    //        return false;
+    //    return (param_map.find(key) != param_map.end());
+    //}
 
-    Json Parameter::get (const std::string& key) const {
-        return param_map.at (key);
-    }
+    //Json Parameter::get(const std::string& key) const {
+    //    return param_map.at(key);
+    //}
 
-    bool Parameter::has (size_t idx) const {
-        if (type != value_t::array)
-            return false;
-        return (param_array.size () > idx);
-    }
+    //bool Parameter::has(size_t idx) const {
+    //    if(type != value_t::array)
+    //        return false;
+    //    return (param_array.size() > idx);
+    //}
 
-    Json Parameter::get (size_t idx) const {
-        return param_array.at (idx);
-    }
+    //Json Parameter::get(size_t idx) const {
+    //    return param_array.at(idx);
+    //}
 
     //////////////////////// Error implementation /////////////////////////////////
 
-    Error Error::invalidRequest (std::string message, const Json& data) {
-        if (message.empty ()) {
+    Error Error::invalidRequest(std::string message, const Json& data) {
+        if(message.empty()) {
             message = "Invalid request";
         }
-        return Error (message, Error::ErrorCode::InvalidRequest, data);
+        return Error(message, Error::ErrorCode::InvalidRequest, data);
     }
 
-    Error Error::methodNotFound (std::string message, const Json& data) {
-        if (message.empty ()) {
+    Error Error::methodNotFound(std::string message, const Json& data) {
+        if(message.empty()) {
             message = "Method not found";
         }
-        return Error (message, Error::ErrorCode::MethodNotFound, data);
+        return Error(message, Error::ErrorCode::MethodNotFound, data);
     }
 
-    Error Error::invalidParams (std::string message, const Json& data) {
-        if (message.empty ()) {
+    Error Error::invalidParams(std::string message, const Json& data) {
+        if(message.empty()) {
             message = "Internal error";
         }
-        return Error (message, Error::ErrorCode::InternalError, data);
+        return Error(message, Error::ErrorCode::InternalError, data);
     }
 
-    Error Error::internalError (std::string message, const Json& data) {
-        if (message.empty ()) {
+    Error Error::internalError(std::string message, const Json& data) {
+        if(message.empty()) {
             message = "Internal error";
         }
-        return Error (message, Error::ErrorCode::InternalError, data);
+        return Error(message, Error::ErrorCode::InternalError, data);
     }
 
-    Error::Error (const Json& json) : Error ("Internal error", -32603, nullptr) {
-        if (json != nullptr)
-            parse_json (json);
+    Error::Error(const Json& json) : Error("Internal error", -32603, nullptr) {
+        if(json != nullptr)
+            parse_json(json);
     }
 
-    Error::Error (std::nullptr_t) : NullableEntity (entity_t::error, nullptr), code (0), message (""), data (nullptr) {
+    Error::Error(std::nullptr_t) : NullableEntity(nullptr), code(0), message(""), data(nullptr) {
     }
 
-    Error::Error (const std::string& message, int code, const Json& data) : NullableEntity (entity_t::error), code (code), message (message), data (data) {
+    Error::Error(const std::string& message, int code, const Json& data) : NullableEntity(), code(code), message(message), data(data) {
     }
 
-    void Error::parse_json (const Json& json) {
+    void Error::parse_json(const Json& json) {
         try {
-            if (json.count ("code") == 0)
-                throw RpcException ("code is missing");
+            if(json.count("code") == 0)
+                throw RpcException("code is missing");
             code = json["code"];
-            if (json.count ("message") == 0)
-                throw RpcException ("message is missing");
-            message = json["message"].get<std::string> ();
-            if (json.count ("data"))
+            if(json.count("message") == 0)
+                throw RpcException("message is missing");
+            message = json["message"].get<std::string>();
+            if(json.count("data"))
                 data = json["data"];
             else
                 data = nullptr;
-        } catch (const RpcException& /*e*/) {
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw RpcException (e.what ());
+        } catch(const exception& e) {
+            throw RpcException(e.what());
         }
     }
 
-    Json Error::to_json () const {
+    Json Error::to_json() const {
         Json j = {
             {"code", code},
             {"message", message},
         };
 
-        if (!data.is_null ())
+        if(!data.is_null())
             j["data"] = data;
         return j;
     }
 
     ////////////////////// Request implementation /////////////////////////////////
 
-    Request::Request (const Json& json) : Notification (entity_t::request, ""), id () {
-        if (json != nullptr)
-            parse_json (json);
+    Request::Request(const Json& json) : Notification(entity_t::request, ""), id() {
+        if(json != nullptr)
+            parse_json(json);
     }
 
-    Request::Request (const Id& id, const std::string& method, const Parameter& params) : Notification (entity_t::request, method.c_str (), params), id (id) {
+    Request::Request(const Id& id, const std::string& method, const Json& params) : Notification(entity_t::request, method.c_str(), params), id(id) {
     }
 
-    std::shared_ptr<Response> Request::createErrorResponse (const Error& error) const {
-        return make_shared<Response> (id, error);
+    std::shared_ptr<Response> Request::createErrorResponse(const Error& error) const {
+        return make_shared<Response>(id, error);
     }
 
-    std::shared_ptr<Response> Request::createResponse (const Json& result) const {
-        return make_shared<Response> (id, result);
+    std::shared_ptr<Response> Request::createResponse(const Json& result) const {
+        return make_shared<Response>(id, result);
     }
 
-    void Request::parse_json (const Json& json) {
+    void Request::parse_json(const Json& json) {
         try {
-            if (json.count ("id") == 0)
-                throw InvalidRequestException ("id is missing");
+            if(json.count("id") == 0)
+                throw InvalidRequestException("id is missing");
 
             try {
-                id = Id (json["id"]);
-            } catch (const std::exception& e) {
-                throw InvalidRequestException (e.what ());
+                id = Id(json["id"]);
+            } catch(const std::exception& e) {
+                throw InvalidRequestException(e.what());
             }
 
-            Notification::parse_json (json);
-        } catch (const RequestException& /*e*/) {
+            Notification::parse_json(json);
+        } catch(const RequestException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw InternalErrorException (e.what (), id);
+        } catch(const exception& e) {
+            throw InternalErrorException(e.what(), id);
         }
     }
 
-    Json Request::to_json () const {
-        Json json  = Notification::to_json ();
-        json["id"] = id.to_json ();
+    Json Request::to_json() const {
+        Json json  = Notification::to_json();
+        json["id"] = id.to_json();
         return json;
     }
 
-    RpcException::RpcException (const char* text) : text_(text) {
+    RpcException::RpcException(const char* text) : text_(text) {
     }
 
-    RpcException::RpcException (const std::string& text) : RpcException (text.c_str ()) {
+    RpcException::RpcException(const std::string& text) : RpcException(text.c_str()) {
     }
 
-    RpcException::RpcException (const RpcException& e) : RpcException (e.what ()) {
+    RpcException::RpcException(const RpcException& e) : RpcException(e.what()) {
     }
 
-    RpcException::~RpcException () throw () {
+    RpcException::~RpcException() throw() {
     }
 
-    const char* RpcException::what () const noexcept {
+    const char* RpcException::what() const noexcept {
         return text_.c_str();
     }
 
-    ParseErrorException::ParseErrorException (const Error& error) : RpcException (error.message), Entity (entity_t::exception), error (error) {
+    ParseErrorException::ParseErrorException(const Error& error) : RpcException(error.message), Entity(entity_t::exception), error(error) {
     }
 
-    ParseErrorException::ParseErrorException (const ParseErrorException& e) : RpcException (e.what ()), Entity (entity_t::exception), error (e.error) {
+    ParseErrorException::ParseErrorException(const ParseErrorException& e) : RpcException(e.what()), Entity(entity_t::exception), error(e.error) {
     }
 
-    ParseErrorException::ParseErrorException (const std::string& data) : ParseErrorException (Error ("Parse error", Error::ErrorCode::ParseError, data)) {
+    ParseErrorException::ParseErrorException(const std::string& data) : ParseErrorException(Error("Parse error", Error::ErrorCode::ParseError, data)) {
     }
 
-    Json ParseErrorException::to_json () const {
-        Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json ()}, {"id", nullptr}};
+    Json ParseErrorException::to_json() const {
+        Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json()}, {"id", nullptr}};
 
         return response;
     }
 
-    void ParseErrorException::parse_json (const Json& /*json*/) {
+    void ParseErrorException::parse_json(const Json& /*json*/) {
     }
 
-    RequestException::RequestException (const Error& error, const Id& requestId)
-        : RpcException (error.message), Entity (entity_t::exception), error (error), id (requestId) {
+    RequestException::RequestException(const Error& error, const Id& requestId)
+        : RpcException(error.message), Entity(entity_t::exception), error(error), id(requestId) {
     }
 
-    RequestException::RequestException (const RequestException& e) : RpcException (e.what ()), Entity (entity_t::exception), error (e.error), id (e.id) {
+    RequestException::RequestException(const RequestException& e) : RpcException(e.what()), Entity(entity_t::exception), error(e.error), id(e.id) {
     }
 
-    Json RequestException::to_json () const {
-        Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json ()}, {"id", id.to_json ()}};
+    Json RequestException::to_json() const {
+        Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json()}, {"id", id.to_json()}};
 
         return response;
     }
 
-    void RequestException::parse_json (const Json& /*json*/) {
+    void RequestException::parse_json(const Json& /*json*/) {
     }
 
-    InvalidRequestException::InvalidRequestException (const Id& requestId) : RequestException (Error::invalidRequest (), requestId) {
+    InvalidRequestException::InvalidRequestException(const Id& requestId) : RequestException(Error::invalidRequest(), requestId) {
     }
 
-    InvalidRequestException::InvalidRequestException (const Request& request) : InvalidRequestException (request.id) {
+    InvalidRequestException::InvalidRequestException(const Request& request) : InvalidRequestException(request.id) {
     }
 
-    InvalidRequestException::InvalidRequestException (const char* data, const Id& requestId) : RequestException (Error::invalidRequest (data), requestId) {
+    InvalidRequestException::InvalidRequestException(const char* data, const Id& requestId) : RequestException(Error::invalidRequest(data), requestId) {
     }
 
-    InvalidRequestException::InvalidRequestException (const std::string& data, const Id& requestId) : InvalidRequestException (data.c_str (), requestId) {
+    InvalidRequestException::InvalidRequestException(const std::string& data, const Id& requestId) : InvalidRequestException(data.c_str(), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException (const Id& requestId) : RequestException (Error::methodNotFound (), requestId) {
+    MethodNotFoundException::MethodNotFoundException(const Id& requestId) : RequestException(Error::methodNotFound(), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException (const Request& request) : MethodNotFoundException (request.id) {
+    MethodNotFoundException::MethodNotFoundException(const Request& request) : MethodNotFoundException(request.id) {
     }
 
-    MethodNotFoundException::MethodNotFoundException (const char* data, const Id& requestId) : RequestException (Error::methodNotFound (data), requestId) {
+    MethodNotFoundException::MethodNotFoundException(const char* data, const Id& requestId) : RequestException(Error::methodNotFound(data), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException (const std::string& data, const Id& requestId) : MethodNotFoundException (data.c_str (), requestId) {
+    MethodNotFoundException::MethodNotFoundException(const std::string& data, const Id& requestId) : MethodNotFoundException(data.c_str(), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException (const Id& requestId) : RequestException (Error::invalidParams (), requestId) {
+    InvalidParamsException::InvalidParamsException(const Id& requestId) : RequestException(Error::invalidParams(), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException (const Request& request) : InvalidParamsException (request.id) {
+    InvalidParamsException::InvalidParamsException(const Request& request) : InvalidParamsException(request.id) {
     }
 
-    InvalidParamsException::InvalidParamsException (const char* data, const Id& requestId) : RequestException (Error::invalidParams (data), requestId) {
+    InvalidParamsException::InvalidParamsException(const char* data, const Id& requestId) : RequestException(Error::invalidParams(data), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException (const std::string& data, const Id& requestId) : InvalidParamsException (data.c_str (), requestId) {
+    InvalidParamsException::InvalidParamsException(const std::string& data, const Id& requestId) : InvalidParamsException(data.c_str(), requestId) {
     }
 
-    InternalErrorException::InternalErrorException (const Id& requestId) : RequestException (Error::invalidParams (), requestId) {
+    InternalErrorException::InternalErrorException(const Id& requestId) : RequestException(Error::invalidParams(), requestId) {
     }
 
-    InternalErrorException::InternalErrorException (const Request& request) : InternalErrorException (request.id) {
+    InternalErrorException::InternalErrorException(const Request& request) : InternalErrorException(request.id) {
     }
 
-    InternalErrorException::InternalErrorException (const char* data, const Id& requestId) : RequestException (Error::invalidParams (data), requestId) {
+    InternalErrorException::InternalErrorException(const char* data, const Id& requestId) : RequestException(Error::invalidParams(data), requestId) {
     }
 
-    InternalErrorException::InternalErrorException (const std::string& data, const Id& requestId) : InternalErrorException (data.c_str (), requestId) {
+    InternalErrorException::InternalErrorException(const std::string& data, const Id& requestId) : InternalErrorException(data.c_str(), requestId) {
     }
 
     ///////////////////// Response implementation /////////////////////////////////
 
-    Response::Response (const Json& json) : Entity (entity_t::response) {
-        if (json != nullptr)
-            parse_json (json);
+    Response::Response(const Json& json) : Entity(entity_t::response) {
+        if(json != nullptr)
+            parse_json(json);
     }
 
-    Response::Response (const Id& id, const Json& result) : Entity (entity_t::response), id (id), result (result), error (nullptr) {
+    Response::Response(const Id& id, const Json& result) : Entity(entity_t::response), id(id), result(result), error(nullptr) {
     }
 
-    Response::Response (const Id& id, const Error& error) : Entity (entity_t::response), id (id), result (), error (error) {
+    Response::Response(const Id& id, const Error& error) : Entity(entity_t::response), id(id), result(), error(error) {
     }
 
-    Response::Response (const Request& request, const Json& result) : Response (request.id, result) {
+    Response::Response(const Request& request, const Json& result) : Response(request.id, result) {
     }
 
-    Response::Response (const Request& request, const Error& error) : Response (request.id, error) {
+    Response::Response(const Request& request, const Error& error) : Response(request.id, error) {
     }
 
-    Response::Response (const RequestException& exception) : Response (exception.id, exception.error) {
+    Response::Response(const RequestException& exception) : Response(exception.id, exception.error) {
     }
 
-    void Response::parse_json (const Json& json) {
+    void Response::parse_json(const Json& json) {
         try {
             error  = nullptr;
             result = nullptr;
-            if (json.count ("jsonrpc") == 0)
-                throw RpcException ("jsonrpc is missing");
-            string jsonrpc = json["jsonrpc"].get<string> ();
-            if (jsonrpc != "2.0")
-                throw RpcException ("invalid jsonrpc value: " + jsonrpc);
-            if (json.count ("id") == 0)
-                throw RpcException ("id is missing");
-            id = Id (json["id"]);
-            if (json.count ("result"))
+            if(json.count("jsonrpc") == 0)
+                throw RpcException("jsonrpc is missing");
+            string jsonrpc = json["jsonrpc"].get<string>();
+            if(jsonrpc != "2.0")
+                throw RpcException("invalid jsonrpc value: " + jsonrpc);
+            if(json.count("id") == 0)
+                throw RpcException("id is missing");
+            id = Id(json["id"]);
+            if(json.count("result"))
                 result = json["result"];
-            else if (json.count ("error"))
-                error.parse_json (json["error"]);
+            else if(json.count("error"))
+                error.parse_json(json["error"]);
             else
-                throw RpcException ("response must contain result or error");
-        } catch (const RpcException& /*e*/) {
+                throw RpcException("response must contain result or error");
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw RpcException (e.what ());
+        } catch(const exception& e) {
+            throw RpcException(e.what());
         }
     }
 
-    Json Response::to_json () const {
+    Json Response::to_json() const {
         Json j = {
             {"jsonrpc", "2.0"},
-            {"id", id.to_json ()},
+            {"id", id.to_json()},
         };
 
-        if (error)
-            j["error"] = error.to_json ();
+        if(error)
+            j["error"] = error.to_json();
         else
             j["result"] = result;
 
@@ -510,254 +508,187 @@ namespace jsonrpcpp {
 
     ///////////////// Notification implementation /////////////////////////////////
 
-    Notification::Notification (const Json& json) : Entity (entity_t::notification) {
-        if (json != nullptr)
-            parse_json (json);
+    Notification::Notification(const Json& json) : Entity(entity_t::notification) {
+        if(json != nullptr)
+            parse_json(json);
     }
 
-    Notification::Notification (Entity::entity_t ent, const std::string& method, const Parameter& params) : Entity (ent), method (method), params (params) {
-        extractServiceName (method, _serviceName, _serviceMethod);
+    Notification::Notification(Entity::entity_t ent, const std::string& method, const Json& params) : Entity(ent), method(method), params(params) {
+        extractServiceName(method, _serviceName, _serviceMethod);
     }
 
-    Notification::Notification (const char* method, const Parameter& params) : Notification (entity_t::notification, method, params) {
+    Notification::Notification(const char* method, const Json& params) : Notification(entity_t::notification, method, params) {
     }
 
-    Notification::Notification (const std::string& method, const Parameter& params) : Notification (method.c_str (), params) {
+    Notification::Notification(const std::string& method, const Json& params) : Notification(method.c_str(), params) {
     }
 
-    std::shared_ptr<Response> Notification::createErrorResponse (const Error& error) const {
-        return make_shared<Response> (error);
+    std::shared_ptr<Response> Notification::createErrorResponse(const Error& error) const {
+        return make_shared<Response>(error);
     }
 
-    std::shared_ptr<Response> Notification::createErrorResponse (Error::ErrorCode code, const std::string& message) const {
-        return createErrorResponse(Error (message, code));
+    std::shared_ptr<Response> Notification::createErrorResponse(Error::ErrorCode code, const std::string& message) const {
+        return createErrorResponse(Error(message, code));
     }
 
-    std::shared_ptr<Response> Notification::createResponse (const Json& result) const {
-        return make_shared<Response> (result);
+    std::shared_ptr<Response> Notification::createResponse(const Json& result) const {
+        return make_shared<Response>(result);
     }
-    //
-    //std::shared_ptr<Entity> Notification::invalidRequest(const std::string& message) const {
-    //	return createErrorResponse(Error::invalidRequest(message));
-    //}
-    //
-    //std::shared_ptr<Entity> Notification::methodNotFound(const std::string& message) const {
-    //	return createErrorResponse(Error::methodNotFound(message));
-    //}
-    //
-    //std::shared_ptr<Entity> Notification::invalidParams(const std::string& message) const {
-    //	return createErrorResponse(Error::invalidParams(message));
-    //}
-    //
-    //std::shared_ptr<Entity> Notification::internalError(const std::string& message) const {
-    //	return createErrorResponse(Error::internalError(message));
-    //}
 
-    void Notification::parse_json (const Json& json) {
+    void Notification::parse_json(const Json& json) {
         try {
-            if (json.count ("jsonrpc") == 0)
-                throw RpcException ("jsonrpc is missing");
-            string jsonrpc = json["jsonrpc"].get<string> ();
-            if (jsonrpc != "2.0")
-                throw RpcException ("invalid jsonrpc value: " + jsonrpc);
+            if(json.count("jsonrpc") == 0)
+                throw RpcException("jsonrpc is missing");
+            string jsonrpc = json["jsonrpc"].get<string>();
+            if(jsonrpc != "2.0")
+                throw RpcException("invalid jsonrpc value: " + jsonrpc);
 
-            if (json.count ("method") == 0)
-                throw RpcException ("method is missing");
-            if (!json["method"].is_string ())
-                throw RpcException ("method must be a string value");
-            method = json["method"].get<std::string> ();
-            if (method.empty ())
-                throw RpcException ("method must not be empty");
+            if(json.count("method") == 0)
+                throw RpcException("method is missing");
+            if(!json["method"].is_string())
+                throw RpcException("method must be a string value");
+            method = json["method"].get<std::string>();
+            if(method.empty())
+                throw RpcException("method must not be empty");
 
-            extractServiceName (method, _serviceName, _serviceMethod);
+            extractServiceName(method, _serviceName, _serviceMethod);
 
-            if (json.count ("params")) {
-                _origParams = json["params"];
-                params.parse_json (json["params"]);
+            if(json.count("params")) {
+                params = json["params"];
             } else {
                 params = nullptr;
             }
-        } catch (const RpcException& /*e*/) {
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw RpcException (e.what ());
+        } catch(const exception& e) {
+            throw RpcException(e.what());
         }
     }
 
-    Json Notification::to_json () const {
+    Json Notification::to_json() const {
         Json json = {
             {"jsonrpc", "2.0"},
             {"method", method},
         };
 
-        if (params)
-            json["params"] = params.to_json ();
+        if(params)
+            json["params"] = params;
 
         return json;
     }
 
     //////////////////////// Batch implementation /////////////////////////////////
 
-    Batch::Batch (const Json& json) : Entity (entity_t::batch) {
-        if (json != nullptr)
-            parse_json (json);
+    Batch::Batch(const Json& json) : Entity(entity_t::batch) {
+        if(json != nullptr)
+            parse_json(json);
     }
 
-    void Batch::parse_json (const Json& json) {
+    void Batch::parse_json(const Json& json) {
         //	cout << "Batch::parse: " << json.dump() << "\n";
-        entities.clear ();
-        for (auto it = json.begin (); it != json.end (); ++it) {
+        entities.clear();
+        for(auto it = json.begin(); it != json.end(); ++it) {
             //		cout << "x: " << it->dump() << "\n";
-            entity_ptr ent (nullptr);
+            entity_ptr ent(nullptr);
             try {
-                ent = Parser::do_parse_json (*it);
-                if (!ent)
-                    ent = make_shared<Error> ("Invalid Request", -32600);
-            } catch (const RequestException& e) {
-                ent = make_shared<RequestException> (e);
-            } catch (const std::exception& e) {
-                ent = make_shared<Error> (e.what (), -32600);
+                ent = Parser::parse_json(*it);
+                if(!ent)
+                    ent = make_shared<Response>(Error("Invalid Request", -32600));
+            } catch(const RequestException& e) {
+                ent = make_shared<RequestException>(e);
+            } catch(const std::exception& e) {
+                ent = make_shared<Response>(Error(e.what(), -32600));
             }
-            entities.push_back (ent);
+            entities.push_back(ent);
         }
-        if (entities.empty ())
-            throw InvalidRequestException ();
+        if(entities.empty())
+            throw InvalidRequestException();
     }
 
-    Json Batch::to_json () const {
+    Json Batch::to_json() const {
         Json result;
-        for (const auto& j : entities)
-            result.push_back (j->to_json ());
+        for(const auto& j : entities)
+            result.push_back(j->to_json());
         return result;
     }
 
-    /*void Batch::add(const entity_ptr ent)
-{
-	entities.push_back(ent);
-}
-*/
-
     //////////////////////// Parser implementation ////////////////////////////////
 
-    Parser::Parser () {
-    }
-
-    Parser::~Parser () {
-    }
-
-    void Parser::register_notification_callback (const std::string& notification, notification_callback callback) {
-        if (callback)
-            notification_callbacks_[notification] = callback;
-    }
-
-    void Parser::register_request_callback (const std::string& request, request_callback callback) {
-        if (callback)
-            request_callbacks_[request] = callback;
-    }
-
-    entity_ptr Parser::parse (const std::string& json_str) {
-        //std::cout << "parse: " << json_str << "\n";
-        entity_ptr entity = do_parse (json_str);
-        if (entity && entity->is_notification ()) {
-            notification_ptr notification = dynamic_pointer_cast<jsonrpcpp::Notification> (entity);
-            if (notification_callbacks_.find (notification->method) != notification_callbacks_.end ()) {
-                notification_callback callback = notification_callbacks_[notification->method];
-                if (callback)
-                    callback (notification->params);
-            }
-        } else if (entity && entity->is_request ()) {
-            request_ptr request = dynamic_pointer_cast<jsonrpcpp::Request> (entity);
-            if (request_callbacks_.find (request->method) != request_callbacks_.end ()) {
-                request_callback callback = request_callbacks_[request->method];
-                if (callback) {
-                    jsonrpcpp::response_ptr response = callback (request->id, request->params);
-                    if (response)
-                        return response;
-                }
-            }
-        }
-        return entity;
-    }
-
-    entity_ptr Parser::parse_json (const Json& json) {
-        return do_parse_json (json);
-    }
-
-    entity_ptr Parser::do_parse (const std::string& json_str) {
+    entity_ptr Parser::parse(const std::string& json_str) {
         try {
-            return do_parse_json (Json::parse (json_str));
-        } catch (const RpcException& /*e*/) {
+            return parse_json(Json::parse(json_str));
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw ParseErrorException (e.what ());
+        } catch(const exception& e) {
+            throw ParseErrorException(e.what());
         }
     }
 
-    entity_ptr Parser::do_parse_json (const Json& json) {
+    entity_ptr Parser::parse_json(const Json& json) {
         try {
-            if (is_request (json))
-                return make_shared<Request> (json);
-            else if (is_notification (json))
-                return make_shared<Notification> (json);
-            else if (is_response (json))
-                return make_shared<Response> (json);
-            else if (is_batch (json))
-                return make_shared<Batch> (json);
-        } catch (const RpcException& /*e*/) {
+            if(is_request(json))
+                return make_shared<Request>(json);
+            else if(is_notification(json))
+                return make_shared<Notification>(json);
+            else if(is_response(json))
+                return make_shared<Response>(json);
+            else if(is_batch(json))
+                return make_shared<Batch>(json);
+        } catch(const RpcException& /*e*/) {
             throw;
-        } catch (const exception& e) {
-            throw RpcException (e.what ());
+        } catch(const exception& e) {
+            throw RpcException(e.what());
         }
 
         return nullptr;
     }
 
-    bool Parser::is_request (const std::string& json_str) {
+    bool Parser::is_request(const std::string& json_str) {
         try {
-            return is_request (Json::parse (json_str));
-        } catch (const exception& /*e*/) {
+            return is_request(Json::parse(json_str));
+        } catch(const exception& /*e*/) {
             return false;
         }
     }
 
-    bool Parser::is_request (const Json& json) {
-        return (json.count ("method") && json.count ("id"));
+    bool Parser::is_request(const Json& json) {
+        return (json.count("method") && json.count("id"));
     }
 
-    bool Parser::is_notification (const std::string& json_str) {
+    bool Parser::is_notification(const std::string& json_str) {
         try {
-            return is_notification (Json::parse (json_str));
-        } catch (const exception& /*e*/) {
+            return is_notification(Json::parse(json_str));
+        } catch(const exception& /*e*/) {
             return false;
         }
     }
 
-    bool Parser::is_notification (const Json& json) {
-        return (json.count ("method") && (json.count ("id") == 0));
+    bool Parser::is_notification(const Json& json) {
+        return (json.count("method") && (json.count("id") == 0));
     }
 
-    bool Parser::is_response (const std::string& json_str) {
+    bool Parser::is_response(const std::string& json_str) {
         try {
-            return is_response (Json::parse (json_str));
-        } catch (const exception& /*e*/) {
+            return is_response(Json::parse(json_str));
+        } catch(const exception& /*e*/) {
             return false;
         }
     }
 
-    bool Parser::is_response (const Json& json) {
-        return (json.count ("result") && json.count ("id"));
+    bool Parser::is_response(const Json& json) {
+        return (json.count("result") && json.count("id"));
     }
 
-    bool Parser::is_batch (const std::string& json_str) {
+    bool Parser::is_batch(const std::string& json_str) {
         try {
-            return is_batch (Json::parse (json_str));
-        } catch (const exception& /*e*/) {
+            return is_batch(Json::parse(json_str));
+        } catch(const exception& /*e*/) {
             return false;
         }
     }
 
-    bool Parser::is_batch (const Json& json) {
-        return (json.is_array ());
+    bool Parser::is_batch(const Json& json) {
+        return (json.is_array());
     }
 
 } // namespace jsonrpcpp

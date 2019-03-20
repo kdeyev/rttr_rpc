@@ -6,7 +6,7 @@
     of the MIT license.  See the LICENSE file for details.
 ***/
 
-#include "jsonrp.hpp"
+#include "jsonrp.h"
 
 using namespace std;
 

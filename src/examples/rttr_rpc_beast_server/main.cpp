@@ -6,6 +6,7 @@ using namespace rttr;
 #include "RttRpcBeastServer.h"
 #include "core/repository.h"
 using namespace rttr_rpc::core;
+using namespace rttr_rpc;
 
 enum class E_Alignment { AlignLeft = 0x0001, AlignRight = 0x0002, AlignHCenter = 0x0004, AlignJustify = 0x0008 };
 
@@ -62,32 +63,32 @@ struct MyStruct {
 RTTR_REGISTRATION {
     registration::class_<MyStruct>("MyStruct")(
         // class meta data
-        metadata(MetaData_Type::THREAD_SAVE_OBJ, true), metadata(MetaData_Type::DESCRIPTION, "My cool service obj"), metadata(MetaData_Type::VERSION, "0.1a"))
+        metadata(meta_data_type::thread_safe, true), metadata(meta_data_type::description, "My cool service obj"), metadata(meta_data_type::version, "0.1a"))
         .property("data", &MyStruct::data)
         .method("func", select_overload<void(double, double)>(&MyStruct::func))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"), metadata(MetaData_Type::DESCRIPTION, "My cool method func"))
+            parameter_names("val1", "val2"), metadata(meta_data_type::description, "My cool method func"))
         .method("func2", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"), metadata(MetaData_Type::DESCRIPTION, "My cool method func2"))
+            parameter_names("val1", "val2"), metadata(meta_data_type::description, "My cool method func2"))
         .method("func", select_overload<double(point2d, point2d)>(&MyStruct::func2))(
             // parameters are required for json schemas
-            parameter_names("val1", "val2"), metadata(MetaData_Type::DESCRIPTION, "My cool method func2"))
+            parameter_names("val1", "val2"), metadata(meta_data_type::description, "My cool method func2"))
         .method("func3", &MyStruct::func3)(
             // parameters are required for json schemas
-            parameter_names("al"), metadata(MetaData_Type::DESCRIPTION, "My cool method func3"))
+            parameter_names("al"), metadata(meta_data_type::description, "My cool method func3"))
         .method("func4", &MyStruct::func4)(
             // default values cannot go together with names
             default_arguments(double(42.0)),
             // parameters are required for json schemas
-            parameter_names("val1"), metadata(MetaData_Type::DESCRIPTION, "My cool method func4"))
+            parameter_names("val1"), metadata(meta_data_type::description, "My cool method func4"))
 
         .property("data", &MyStruct::data);
 
     rttr::registration::class_<point2d>("point2d")
         .constructor()(rttr::policy::ctor::as_object)
-        .property("x", &point2d::x)(metadata(MetaData_Type::DESCRIPTION, "x coordinate"))
-        .property("y", &point2d::y)(metadata(MetaData_Type::DESCRIPTION, "y coordinate"));
+        .property("x", &point2d::x)(metadata(meta_data_type::description, "x coordinate"))
+        .property("y", &point2d::y)(metadata(meta_data_type::description, "y coordinate"));
 
     rttr::registration::enumeration<E_Alignment>("E_Alignment")(value("AlignLeft", E_Alignment::AlignLeft), value("AlignRight", E_Alignment::AlignRight),
                                                                 value("AlignHCenter", E_Alignment::AlignHCenter),

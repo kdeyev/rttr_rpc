@@ -13,8 +13,10 @@ file(GLOB_RECURSE HPP_FILES *.h)
 add_library(${PROJECT_NAME} SHARED ${UnityBuild} ${SRC_FILES} ${HPP_FILES})
 add_library(RTTR_RPC::IO ALIAS ${PROJECT_NAME})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE RTTR_RPC_DLL_EXPORTS)
-target_compile_definitions(${PROJECT_NAME} PUBLIC RTTR_RPC_DLL)
+# generate export
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME})
+file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h DESTINATION ${PROJECT_SOURCE_DIR})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 					  VERSION ${RTTR_RPC_VERSION} SOVERSION ${RTTR_RPC_VERSION}

@@ -24,17 +24,22 @@ of the MIT license.  See the LICENSE file for details.
 #include <exception>
 #include <nlohmann/json.hpp>
 
-using Json = nlohmann::json;
+#include "rttr_rpc_core_export.h"
+
+#pragma warning (disable : 4251)
+#pragma warning (disable : 4275)
 
 namespace jsonrpcpp {
+	using Json = nlohmann::json;
 
-    class Entity;
-    class Request;
-    class Notification;
-    class Parameter;
-    class Response;
-    class Error;
-    class Batch;
+
+    class RTTR_RPC_CORE_EXPORT Entity;
+    class RTTR_RPC_CORE_EXPORT Request;
+    class RTTR_RPC_CORE_EXPORT Notification;
+    class RTTR_RPC_CORE_EXPORT Parameter;
+    class RTTR_RPC_CORE_EXPORT Response;
+    class RTTR_RPC_CORE_EXPORT Error;
+    class RTTR_RPC_CORE_EXPORT Batch;
 
     typedef std::shared_ptr<Entity>       entity_ptr;
     typedef std::shared_ptr<Request>      request_ptr;
@@ -44,7 +49,7 @@ namespace jsonrpcpp {
     typedef std::shared_ptr<Error>        error_ptr;
     typedef std::shared_ptr<Batch>        batch_ptr;
 
-    class Entity {
+    class RTTR_RPC_CORE_EXPORT Entity {
     public:
         enum class entity_t : uint8_t { unknown, exception, id, error, response, request, notification, batch };
 
@@ -75,7 +80,7 @@ namespace jsonrpcpp {
         entity_t entity;
     };
 
-    class NullableEntity : public Entity {
+    class RTTR_RPC_CORE_EXPORT NullableEntity : public Entity {
     public:
         NullableEntity (entity_t type);
         NullableEntity (entity_t type, std::nullptr_t);
@@ -93,7 +98,7 @@ namespace jsonrpcpp {
         bool isNull;
     };
 
-    class Id : public Entity {
+    class RTTR_RPC_CORE_EXPORT Id : public Entity {
     public:
         enum class value_t : uint8_t { null, string, integer };
 
@@ -116,7 +121,7 @@ namespace jsonrpcpp {
         std::string string_id;
     };
 
-    class Parameter : public NullableEntity {
+    class RTTR_RPC_CORE_EXPORT Parameter : public NullableEntity {
     public:
         enum class value_t : uint8_t { null, array, map };
 
@@ -168,7 +173,7 @@ namespace jsonrpcpp {
         std::map<std::string, Json> param_map;
     };
 
-    class Error : public NullableEntity {
+    class RTTR_RPC_CORE_EXPORT Error : public NullableEntity {
     public:
         enum ErrorCode : int { ParseError = -32700, InvalidRequest = -32600, MethodNotFound = -32601, InvalidParams = -32602, InternalError = -32603 };
 
@@ -195,7 +200,7 @@ namespace jsonrpcpp {
 	* Currently no named parameters are supported, but only array parameters
 	*/
 
-    class Notification : public Entity {
+    class RTTR_RPC_CORE_EXPORT Notification : public Entity {
     public:
         std::string method;
         std::string _serviceName;
@@ -222,7 +227,7 @@ namespace jsonrpcpp {
         virtual void parse_json (const Json& json);
     };
 
-    class Request : public Notification {
+    class RTTR_RPC_CORE_EXPORT Request : public Notification {
     public:
         Request (const Json& json = nullptr);
         Request (const Id& id, const std::string& method, const Parameter& params = nullptr);
@@ -236,7 +241,7 @@ namespace jsonrpcpp {
         Id id;
     };
 
-    class RpcException : public std::exception {
+    class RTTR_RPC_CORE_EXPORT RpcException : public std::exception {
         std::string text_;
 
     public:
@@ -248,7 +253,7 @@ namespace jsonrpcpp {
         virtual const char* what () const noexcept;
     };
 
-    class ParseErrorException : public RpcException, public Entity {
+    class RTTR_RPC_CORE_EXPORT ParseErrorException : public RpcException, public Entity {
     public:
         Error error;
 
@@ -261,7 +266,7 @@ namespace jsonrpcpp {
         virtual void parse_json (const Json& json);
     };
 
-    class RequestException : public RpcException, public Entity {
+    class RTTR_RPC_CORE_EXPORT RequestException : public RpcException, public Entity {
     public:
         Error error;
         Id    id;
@@ -274,7 +279,7 @@ namespace jsonrpcpp {
         virtual void parse_json (const Json& json);
     };
 
-    class InvalidRequestException : public RequestException {
+    class RTTR_RPC_CORE_EXPORT InvalidRequestException : public RequestException {
     public:
         InvalidRequestException (const Id& requestId = Id ());
         InvalidRequestException (const Request& request);
@@ -282,7 +287,7 @@ namespace jsonrpcpp {
         InvalidRequestException (const std::string& data, const Id& requestId = Id ());
     };
 
-    class MethodNotFoundException : public RequestException {
+    class RTTR_RPC_CORE_EXPORT MethodNotFoundException : public RequestException {
     public:
         MethodNotFoundException (const Id& requestId = Id ());
         MethodNotFoundException (const Request& request);
@@ -290,7 +295,7 @@ namespace jsonrpcpp {
         MethodNotFoundException (const std::string& data, const Id& requestId = Id ());
     };
 
-    class InvalidParamsException : public RequestException {
+    class RTTR_RPC_CORE_EXPORT InvalidParamsException : public RequestException {
     public:
         InvalidParamsException (const Id& requestId = Id ());
         InvalidParamsException (const Request& request);
@@ -298,7 +303,7 @@ namespace jsonrpcpp {
         InvalidParamsException (const std::string& data, const Id& requestId = Id ());
     };
 
-    class InternalErrorException : public RequestException {
+    class RTTR_RPC_CORE_EXPORT InternalErrorException : public RequestException {
     public:
         InternalErrorException (const Id& requestId = Id ());
         InternalErrorException (const Request& request);
@@ -306,7 +311,7 @@ namespace jsonrpcpp {
         InternalErrorException (const std::string& data, const Id& requestId = Id ());
     };
 
-    class Response : public Entity {
+    class RTTR_RPC_CORE_EXPORT Response : public Entity {
     public:
         Id    id;
         Json  result;
@@ -326,7 +331,7 @@ namespace jsonrpcpp {
     typedef std::function<void(const Parameter& params)>                                   notification_callback;
     typedef std::function<jsonrpcpp::response_ptr (const Id& id, const Parameter& params)> request_callback;
 
-    class Parser {
+    class RTTR_RPC_CORE_EXPORT Parser {
     public:
         Parser ();
         virtual ~Parser ();
@@ -353,7 +358,7 @@ namespace jsonrpcpp {
         std::map<std::string, request_callback>      request_callbacks_;
     };
 
-    class Batch : public Entity {
+    class RTTR_RPC_CORE_EXPORT Batch : public Entity {
     public:
         std::vector<entity_ptr> entities;
 

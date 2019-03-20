@@ -713,15 +713,15 @@ public:
 
 class RttRpcBeastImpl {
 public:
-	RttRpcBeastImpl(size_t threadCount) : ioc(threadCount), _threadCount(threadCount) {
+	RttRpcBeastImpl(int threadCount) : ioc(threadCount), _threadCount(threadCount) {
 	}
 
     // The io_context is required for all I/O
     boost::asio::io_context ioc;
-	size_t _threadCount;
+	int _threadCount;
 };
 
-RttRpcBeastServer::RttRpcBeastServer(size_t threadCount) : _impl (new RttRpcBeastImpl(threadCount)) {
+RttRpcBeastServer::RttRpcBeastServer(int threadCount) : _impl (new RttRpcBeastImpl(threadCount)) {
 }
 
 RttRpcBeastServer::~RttRpcBeastServer() {

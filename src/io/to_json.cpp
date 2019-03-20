@@ -35,6 +35,8 @@
 #include <rttr/type>
 #include <nlohmann/json.hpp>
 
+#include "to_json.h"
+
 using namespace nlohmann;
 using namespace rttr;
 
@@ -266,7 +268,7 @@ namespace io
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-nlohmann::json to_json_obj(rttr::instance obj)
+nlohmann::json to_json_obj(const rttr::instance& obj)
 {
 	if (!obj.is_valid())
 		return nlohmann::json();
@@ -278,7 +280,7 @@ nlohmann::json to_json_obj(rttr::instance obj)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-std::string to_json(rttr::instance obj)
+std::string to_json(const rttr::instance& obj)
 {
     if (!obj.is_valid())
         return std::string();

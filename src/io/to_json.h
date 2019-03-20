@@ -29,19 +29,18 @@
 #include <rttr/type>
 #include <nlohmann/json.hpp>
 
-namespace io
-{
+#include "rttr_rpc_io_export.h"
 
-/*!
- * Serialize the given instance to a json encoded string.
- */
-std::string to_json(const rttr::instance& obj);
+namespace io {
+    /*!
+	 * Serialize the given instance to a json encoded string.
+	 */
+    std::string RTTR_RPC_IO_EXPORT to_json(const rttr::instance& obj);
 
-/*!
-* Serialize the given instance to a json object.
-*/
-nlohmann::json to_json_obj(const rttr::instance& obj);
+    /*!
+	 * Serialize the given instance to a json object.
+	 */
+    nlohmann::json RTTR_RPC_IO_EXPORT to_json_obj(const rttr::instance& obj);
 
-nlohmann::json to_json_obj(const rttr::variant& var);
-}
-
+    nlohmann::json RTTR_RPC_IO_EXPORT to_json_obj(const rttr::variant& var);
+} // namespace io

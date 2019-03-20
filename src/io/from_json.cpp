@@ -35,6 +35,8 @@
 #include <rttr/type>
 #include <nlohmann/json.hpp>
 
+#include "from_json.h"
+
 using namespace nlohmann;
 using namespace rttr;
 

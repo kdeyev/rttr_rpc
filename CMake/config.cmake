@@ -1,6 +1,6 @@
 # setup version numbers
 set(RTTR_RPC_VERSION_MAJOR 0)
-set(RTTR_RPC_VERSION_MINOR 1)
+set(RTTR_RPC_VERSION_MINOR 0)
 set(RTTR_RPC_VERSION_PATCH 1)
 set(RTTR_RPC_VERSION ${RTTR_RPC_VERSION_MAJOR}.${RTTR_RPC_VERSION_MINOR}.${RTTR_RPC_VERSION_PATCH})
 set(RTTR_RPC_VERSION_STR "${RTTR_RPC_VERSION_MAJOR}.${RTTR_RPC_VERSION_MINOR}.${RTTR_RPC_VERSION_PATCH}")
@@ -89,7 +89,7 @@ endif()
 # use standard c++ insteaf of extented (-std=c++17 vs. std=gnu++17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#enable_rtti(BUILD_WITH_RTTI)
+enable_rtti(ON)
 
 get_latest_supported_cxx(CXX_STANDARD)
 set(MAX_CXX_STANDARD ${CXX_STANDARD})
@@ -132,13 +132,13 @@ endif()
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/CMake/rttr-config-version.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/CMake/rttr-rpc-config-version.cmake"
     VERSION ${RTTR_RPC_VERSION_STR}
     COMPATIBILITY AnyNewerVersion
 )
 
 if (BUILD_INSTALLER)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CMake/rttr-config-version.cmake"
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CMake/rttr-rpc-config-version.cmake"
             DESTINATION ${RTTR_RPC_CMAKE_CONFIG_INSTALL_DIR}
             COMPONENT Devel)
 

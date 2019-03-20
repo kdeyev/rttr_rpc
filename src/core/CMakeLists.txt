@@ -1,24 +1,24 @@
-project(rttr_rpc_io LANGUAGES CXX)
+project(rttr_rpc_core LANGUAGES CXX)
 
 message(STATUS "Scanning "  ${PROJECT_NAME} " module.")
 message(STATUS "===========================")
 
 generateLibraryVersionVariables(${RTTR_RPC_VERSION_MAJOR} ${RTTR_RPC_VERSION_MINOR} ${RTTR_RPC_VERSION_PATCH}
-                                "RTTR-RPC-IO" "" "MIT License")
+                                "RTTR-RPC-CORE" "" "MIT License")
 
 #loadFolder("io" HPP_FILES SRC_FILES BUILD_INSTALLER)
 file(GLOB_RECURSE SRC_FILES *.cpp)
 file(GLOB_RECURSE HPP_FILES *.h)
 
 add_library(${PROJECT_NAME} SHARED ${UnityBuild} ${SRC_FILES} ${HPP_FILES})
-add_library(RTTR_RPC::IO ALIAS ${PROJECT_NAME})
+add_library(RTTR_RPC_CORE::Core ALIAS ${PROJECT_NAME})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE RTTR_RPC_DLL_EXPORTS)
 target_compile_definitions(${PROJECT_NAME} PUBLIC RTTR_RPC_DLL)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 					  VERSION ${RTTR_RPC_VERSION} SOVERSION ${RTTR_RPC_VERSION}
-					  EXPORT_NAME IO
+					  EXPORT_NAME CORE
 					  DEBUG_POSTFIX ${RTTR_RPC_DEBUG_POSTFIX}
 					  CXX_STANDARD ${MAX_CXX_STANDARD}
 					  CXX_VISIBILITY_PRESET hidden
@@ -27,7 +27,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 include_directories(${NLOHMANN_JSON_INCLUDE_DIR})
 					  
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS})
-target_link_libraries(${PROJECT_NAME} RTTR::Core)
+target_link_libraries(${PROJECT_NAME} RTTR::Core RTTR_RPC::IO)
 					  
 					  
 if(${CMAKE_VERSION} VERSION_GREATER "3.8.0") 
@@ -57,7 +57,7 @@ if(BUILD_INSTALLER)
 	install(EXPORT rttr_rpc_targets
 		DESTINATION ${RTTR_RPC_CMAKE_CONFIG_INSTALL_DIR}
 		NAMESPACE RTTR_RPC::
-		FILE rttr-rpc-io-config.cmake)
+		FILE rttr-rpc-core-config.cmake)
 endif()
 
 

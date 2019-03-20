@@ -12,14 +12,14 @@ using namespace std;
 
 namespace jsonrpcpp {
 
-    static void extractServiceName (const std::string& method, std::string& serviceName, std::string& serviceMethod) {
-        serviceName.clear ();
+    static void extractServiceName (const std::string& method, std::string& service_name, std::string& serviceMethod) {
+        service_name.clear ();
         serviceMethod.clear ();
         size_t pos = method.find ('.');
         if (std::string::npos == pos) {
             return;
         }
-        serviceName   = method.substr (0, pos);
+        service_name   = method.substr (0, pos);
         serviceMethod = method.substr (pos + 1);
     }
 

@@ -4,7 +4,8 @@
 using namespace rttr;
 
 #include "RttRpcBeastServer.h"
-#include "core/RttRpcServiceRepository.h"
+#include "core/repository.h"
+using namespace rttr_rpc::core;
 
 enum class E_Alignment { AlignLeft = 0x0001, AlignRight = 0x0002, AlignHCenter = 0x0004, AlignJustify = 0x0008 };
 
@@ -96,8 +97,8 @@ RTTR_REGISTRATION {
 int main(int argc, char** argv) {
     MyStruct obj;
 
-    RttRpcBeastServer        server(1);
-    RttRpcServiceRepository& repo = server._serviceRepository;
+    RttRpcBeastServer server(1);
+    repository&       repo = server._serviceRepository;
 
     repo.addService("test", obj);
 

@@ -4,7 +4,7 @@ message(STATUS "Scanning "  ${PROJECT_NAME} " module.")
 message(STATUS "===========================")
 
 generateLibraryVersionVariables(${RTTR_RPC_VERSION_MAJOR} ${RTTR_RPC_VERSION_MINOR} ${RTTR_RPC_VERSION_PATCH}
-                                "RTTR-RPC Examples: beast RPC server" "" "MIT License")
+                                "RTTR-RPC Examples: Boost.Beast RPC server" "" "MIT License")
 
 #loadFolder("files" HPP_FILES SRC_FILES)
 file(GLOB_RECURSE SRC_FILES *.cpp)

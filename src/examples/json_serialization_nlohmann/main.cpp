@@ -11,6 +11,7 @@
 #include "io/from_json.h"
 
 using namespace rttr;
+using namespace rttr_rpc;
 
 enum class color
 {

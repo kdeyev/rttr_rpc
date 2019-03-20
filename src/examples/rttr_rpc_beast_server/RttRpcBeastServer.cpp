@@ -23,6 +23,7 @@
 using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;            // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+using namespace rttr_rpc::core;
 
 // This function produces an HTTP response for the given
 // request. The type of the response object depends on the
@@ -33,7 +34,7 @@ template<
     class Send>
 void
 handle_request(
-	RttRpcServiceRepository* serviceRepository,
+	repository* serviceRepository,
 	jsonrpcpp::Parser* parser,
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send)
@@ -102,12 +103,12 @@ class websocket_session : public std::enable_shared_from_this<websocket_session>
     boost::asio::steady_timer timer_;
     boost::beast::multi_buffer buffer_;
     char ping_state_ = 0;
-	RttRpcServiceRepository* _serviceRepository;
+	repository* _serviceRepository;
 	jsonrpcpp::Parser* _parser;
 public:
     // Take ownership of the socket
     explicit
-    websocket_session(tcp::socket socket, RttRpcServiceRepository* serviceRepository, jsonrpcpp::Parser* parser)
+    websocket_session(tcp::socket socket, repository* serviceRepository, jsonrpcpp::Parser* parser)
         : ws_(std::move(socket))
         , strand_(ws_.get_executor())
         , timer_(ws_.get_executor().context(),
@@ -451,7 +452,7 @@ class http_session : public std::enable_shared_from_this<http_session>
         boost::asio::io_context::executor_type> strand_;
     boost::asio::steady_timer timer_;
     boost::beast::flat_buffer buffer_;
-	RttRpcServiceRepository* serviceRepository_;
+	repository* serviceRepository_;
 	jsonrpcpp::Parser* parser_;
     http::request<http::string_body> req_;
     queue queue_;
@@ -461,7 +462,7 @@ public:
     explicit
     http_session(
         tcp::socket socket,
-		RttRpcServiceRepository* serviceRepository_, jsonrpcpp::Parser* parser)
+		repository* serviceRepository_, jsonrpcpp::Parser* parser)
         : socket_(std::move(socket))
         , strand_(socket_.get_executor())
         , timer_(socket_.get_executor().context(),
@@ -621,14 +622,14 @@ class listener : public std::enable_shared_from_this<listener>
 {
     tcp::acceptor acceptor_;
     tcp::socket socket_;
-	RttRpcServiceRepository* serviceRepository_;
+	repository* serviceRepository_;
 	jsonrpcpp::Parser* _parser;
 
 public:
     listener(
         boost::asio::io_context& ioc,
         tcp::endpoint endpoint,
-		RttRpcServiceRepository* serviceRepository,
+		repository* serviceRepository,
 		jsonrpcpp::Parser* parser)
         : acceptor_(ioc)
         , socket_(ioc)

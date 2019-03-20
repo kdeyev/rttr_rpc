@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/RttRpcServiceRepository.h"
+#include "core/repository.h"
 
 #include <boost/asio/ip/tcp.hpp>
 
@@ -12,7 +12,7 @@ public:
 	~RttRpcBeastServer();
 	void start (const boost::asio::ip::tcp::endpoint& ep);
 
-	RttRpcServiceRepository _serviceRepository;
+	rttr_rpc::core::repository _serviceRepository;
 	jsonrpcpp::Parser _parser;
 private:
 	RttRpcBeastImpl* _impl;

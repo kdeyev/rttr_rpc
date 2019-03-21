@@ -13,104 +13,104 @@ using namespace std;
 
 namespace jsonrpc {
 
-    //RpcException::RpcException(const char* text) : error(Error::internalError(text)), message(entity_t::exception) {
+    //rpc_exception::rpc_exception(const char* text) : error(message_error::internalError(text)), message(entity_t::exception) {
     //}
 
-    //RpcException::RpcException(const std::string& text) : error(Error::internalError(text.c_str())), message(entity_t::exception) {
+    //rpc_exception::rpc_exception(const std::string& text) : error(message_error::internalError(text.c_str())), message(entity_t::exception) {
     //}
 
-    //RpcException::RpcException(const RpcException& e) : error(e.error), message(entity_t::exception) {
+    //rpc_exception::rpc_exception(const rpc_exception& e) : error(e.error), message(entity_t::exception) {
     //}
 
-    RpcException::RpcException(const Error& e) : error(e), message(entity_t::exception) {
+    rpc_exception::rpc_exception(const message_error& e) : error(e), message(entity_t::error) {
     }
 
-    RpcException::~RpcException() throw() {
+    rpc_exception::~rpc_exception() throw() {
     }
 
-    const char* RpcException::what() const noexcept {
+    const char* rpc_exception::what() const noexcept {
         return error.message.c_str();
     }
 
-    Json RpcException::to_json() const {
+    Json rpc_exception::to_json() const {
         Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json()}, {"id", nullptr}};
 
         return response;
     }
 
-    void RpcException::parse_json(const Json& /*json*/) {
+    void rpc_exception::parse_json(const Json& /*json*/) {
     }
 
-    ParseErrorException::ParseErrorException(const Error& error) : RpcException(error) {
+    parse_error_exception::parse_error_exception(const message_error& error) : rpc_exception(error) {
     }
 
-    ParseErrorException::ParseErrorException(const ParseErrorException& e) : RpcException(e) {
+    parse_error_exception::parse_error_exception(const parse_error_exception& e) : rpc_exception(e) {
     }
 
-    ParseErrorException::ParseErrorException(const std::string& data) : ParseErrorException(Error("Parse error", Error::ErrorCode::ParseError, data)) {
+    parse_error_exception::parse_error_exception(const std::string& data) : parse_error_exception(message_error(data.c_str(), message_error::error_code::ParseError)) {
     }
 
-    RequestException::RequestException(const Error& error, const Id& requestId) : RpcException(error), id(requestId) {
+    request_exception::request_exception(const message_error& error, const message_id& requestId) : rpc_exception(error), id(requestId) {
     }
 
-    RequestException::RequestException(const RequestException& e) : RpcException(e), id(e.id) {
+    request_exception::request_exception(const request_exception& e) : rpc_exception(e), id(e.id) {
     }
 
-    Json RequestException::to_json() const {
+    Json request_exception::to_json() const {
         Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json()}, {"id", id.to_json()}};
 
         return response;
     }
 
-    void RequestException::parse_json(const Json& /*json*/) {
+    void request_exception::parse_json(const Json& /*json*/) {
     }
 
-    InvalidRequestException::InvalidRequestException(const Id& requestId) : RequestException(Error::invalidRequest(), requestId) {
+    invalid_request_exception::invalid_request_exception(const message_id& requestId) : request_exception(message_error::invalidRequest(), requestId) {
     }
 
-    InvalidRequestException::InvalidRequestException(const Request& request) : InvalidRequestException(request.id) {
+    invalid_request_exception::invalid_request_exception(const request& request) : invalid_request_exception(request.id) {
     }
 
-    InvalidRequestException::InvalidRequestException(const char* data, const Id& requestId) : RequestException(Error::invalidRequest(data), requestId) {
+    invalid_request_exception::invalid_request_exception(const char* data, const message_id& requestId) : request_exception(message_error::invalidRequest(data), requestId) {
     }
 
-    InvalidRequestException::InvalidRequestException(const std::string& data, const Id& requestId) : InvalidRequestException(data.c_str(), requestId) {
+    invalid_request_exception::invalid_request_exception(const std::string& data, const message_id& requestId) : invalid_request_exception(data.c_str(), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException(const Id& requestId) : RequestException(Error::methodNotFound(), requestId) {
+    method_not_found_exception::method_not_found_exception(const message_id& requestId) : request_exception(message_error::methodNotFound(), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException(const Request& request) : MethodNotFoundException(request.id) {
+    method_not_found_exception::method_not_found_exception(const request& request) : method_not_found_exception(request.id) {
     }
 
-    MethodNotFoundException::MethodNotFoundException(const char* data, const Id& requestId) : RequestException(Error::methodNotFound(data), requestId) {
+    method_not_found_exception::method_not_found_exception(const char* data, const message_id& requestId) : request_exception(message_error::methodNotFound(data), requestId) {
     }
 
-    MethodNotFoundException::MethodNotFoundException(const std::string& data, const Id& requestId) : MethodNotFoundException(data.c_str(), requestId) {
+    method_not_found_exception::method_not_found_exception(const std::string& data, const message_id& requestId) : method_not_found_exception(data.c_str(), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException(const Id& requestId) : RequestException(Error::invalidParams(), requestId) {
+    invalid_params_exception::invalid_params_exception(const message_id& requestId) : request_exception(message_error::invalidParams(), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException(const Request& request) : InvalidParamsException(request.id) {
+    invalid_params_exception::invalid_params_exception(const request& request) : invalid_params_exception(request.id) {
     }
 
-    InvalidParamsException::InvalidParamsException(const char* data, const Id& requestId) : RequestException(Error::invalidParams(data), requestId) {
+    invalid_params_exception::invalid_params_exception(const char* data, const message_id& requestId) : request_exception(message_error::invalidParams(data), requestId) {
     }
 
-    InvalidParamsException::InvalidParamsException(const std::string& data, const Id& requestId) : InvalidParamsException(data.c_str(), requestId) {
+    invalid_params_exception::invalid_params_exception(const std::string& data, const message_id& requestId) : invalid_params_exception(data.c_str(), requestId) {
     }
 
-    InternalErrorException::InternalErrorException(const Id& requestId) : RequestException(Error::invalidParams(), requestId) {
+    internal_error_exception::internal_error_exception(const message_id& requestId) : request_exception(message_error::invalidParams(), requestId) {
     }
 
-    InternalErrorException::InternalErrorException(const Request& request) : InternalErrorException(request.id) {
+    internal_error_exception::internal_error_exception(const request& request) : internal_error_exception(request.id) {
     }
 
-    InternalErrorException::InternalErrorException(const char* data, const Id& requestId) : RequestException(Error::invalidParams(data), requestId) {
+    internal_error_exception::internal_error_exception(const char* data, const message_id& requestId) : request_exception(message_error::invalidParams(data), requestId) {
     }
 
-    InternalErrorException::InternalErrorException(const std::string& data, const Id& requestId) : InternalErrorException(data.c_str(), requestId) {
+    internal_error_exception::internal_error_exception(const std::string& data, const message_id& requestId) : internal_error_exception(data.c_str(), requestId) {
     }
 
 } // namespace jsonrpc

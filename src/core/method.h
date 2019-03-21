@@ -21,11 +21,11 @@ namespace rttr_rpc {
         public:
             method(const rttr::method& method);
 
-            bool parse_named_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::Error& err) const;
-            bool parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::Error& err) const;
+            bool parse_named_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const;
+            bool parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const;
 
             rttr::variant invoke(const rttr::instance& service_instance, const std::vector<rttr::argument>& args) const;
-            bool          invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::Error& err,
+            bool          invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::message_error& err,
                                  std::mutex* m) const;
 
             nlohmann::json createJsonSchema() const;

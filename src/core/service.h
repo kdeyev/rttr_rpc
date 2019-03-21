@@ -60,7 +60,7 @@ namespace rttr_rpc {
 			 * @param message JSON-RPC message
 			 * @return jsonrpc::MessagePtr JSON-RPC response message
 			 */
-            jsonrpc::PesponsePtr dispatch(const jsonrpc::NotificationPtr& request) const;
+            jsonrpc::response_ptr dispatch(const jsonrpc::notification_ptr& request) const;
 
         private:
             void           scan_metadata();

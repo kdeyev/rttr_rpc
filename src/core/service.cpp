@@ -436,7 +436,7 @@ namespace rttr_rpc {
         //    }
         //}
         //
-        //jsonrpc::MessagePtr service::invokeMethod (int methodIndex, const jsonrpc::NotificationPtr& request) const {
+        //jsonrpc::MessagePtr service::invokeMethod (int methodIndex, const jsonrpc::notification_ptr& request) const {
         //    const service::MethodInfo& info = _methodInfoHash[methodIndex];
         //
         //    QVariantList arguments;
@@ -464,7 +464,7 @@ namespace rttr_rpc {
         //        if (!argument.isValid ()) {
         //            QString message = incomingArgument.isUndefined () ? QString ("failed to construct default object for '%1'").arg (parameterInfo.name_)
         //                                                              : QString ("failed to convert from JSON for '%1'").arg (parameterInfo.name_);
-        //            return request.createErrorResponse (RttRpc::InvalidParams, message);
+        //            return request.create_error_response (RttRpc::InvalidParams, message);
         //        }
         //
         //        arguments.push_back (argument);
@@ -484,7 +484,7 @@ namespace rttr_rpc {
         //
         //    if (!success) {
         //        QString message = QString ("dispatch for method '%1' failed").arg (info.name_);
-        //        return request.createErrorResponse (RttRpc::InvalidRequest, message);
+        //        return request.create_error_response (RttRpc::InvalidRequest, message);
         //    }
         //
         //    if (info._hasOut) {
@@ -495,22 +495,22 @@ namespace rttr_rpc {
         //            if (info._parameters.at (i)._out)
         //                ret.append (service::convertReturnValue (arguments[i]));
         //        if (ret.size () > 1)
-        //            return request.createResponse (ret);
-        //        return request.createResponse (ret.first ());
+        //            return request.create_response (ret);
+        //        return request.create_response (ret.first ());
         //    }
         //
-        //    return request.createResponse (service::convertReturnValue (returnValue));
+        //    return request.create_response (service::convertReturnValue (returnValue));
         //}
         //
         //// getter
         //jsonrpc::MessagePtr service::callGetter (int propertyIndex, const jsonrpc::MessagePtr& request) const {
         //    //if (usingNamedParameters) {
-        //    //	return request.createErrorResponse(RttRpc::InvalidRequest, "getters are supporting only array-styled requests");
+        //    //	return request.create_error_response(RttRpc::InvalidRequest, "getters are supporting only array-styled requests");
         //    //}
         //    const QJsonValue& params = request.params ();
         //    QJsonArray        arr    = params.toArray ();
         //    if (arr.size () != 0) {
-        //        return request.createErrorResponse (RttRpc::InvalidRequest, "getter shouldn't have parameters");
+        //        return request.create_error_response (RttRpc::InvalidRequest, "getter shouldn't have parameters");
         //    }
         //
         //    const service::PropInfo& prop = _propertyInfoHash[propertyIndex];
@@ -523,17 +523,17 @@ namespace rttr_rpc {
         //        returnValue = prop._prop.read (service_instance_.data ());
         //    }
         //
-        //    return request.createResponse (service::convertReturnValue (returnValue));
+        //    return request.create_response (service::convertReturnValue (returnValue));
         //}
         //
         //jsonrpc::MessagePtr service::callSetter (int propertyIndex, const jsonrpc::MessagePtr& request) const {
         //    //if (usingNamedParameters) {
-        //    //	return request.createErrorResponse(RttRpc::InvalidRequest, "setters are supporting only array-styled requests");
+        //    //	return request.create_error_response(RttRpc::InvalidRequest, "setters are supporting only array-styled requests");
         //    //}
         //    const QJsonValue& params = request.params ();
         //    QJsonArray        arr    = params.toArray ();
         //    if (arr.size () != 1) {
-        //        return request.createErrorResponse (RttRpc::InvalidRequest, "setter should have one parameter");
+        //        return request.create_error_response (RttRpc::InvalidRequest, "setter should have one parameter");
         //    }
         //
         //    const service::PropInfo& prop = _propertyInfoHash[propertyIndex];
@@ -549,16 +549,16 @@ namespace rttr_rpc {
         //
         //    // no return value
         //    QVariant returnValue;
-        //    return request.createResponse (service::convertReturnValue (returnValue));
+        //    return request.create_response (service::convertReturnValue (returnValue));
         //}
 
-        jsonrpc::PesponsePtr service::dispatch(const jsonrpc::NotificationPtr& request) const {
-            const std::string& method_name = request->_serviceMethod;
+        jsonrpc::response_ptr service::dispatch(const jsonrpc::notification_ptr& request) const {
+            const std::string& method_name = request->service_method_name_;
 
             auto iter2 = methods_.find(method_name);
 
             if(iter2 == methods_.end()) {
-                return request->createErrorResponse(jsonrpc::Error::ErrorCode::MethodNotFound, "Service: " + name_ + " - cannot find requested method");
+                return request->create_error_response(jsonrpc::message_error::error_code::MethodNotFound, "Service: " + name_ + " - cannot find requested method");
             }
 
             nlohmann::json response_json;
@@ -567,21 +567,21 @@ namespace rttr_rpc {
 
             const std::list<method_ptr>& methods_list = iter2->second;
             if(methods_list.size() == 1) {
-                jsonrpc::Error err;
+                jsonrpc::message_error err;
                 // invoke
-                if(methods_list.front()->invoke(service_instance_, request->params, response_json, err, m)) {
+                if(methods_list.front()->invoke(service_instance_, request->params_, response_json, err, m)) {
                     // it the invokation finished successfully - return a responce
-                    return request->createResponse(response_json);
+                    return request->create_response(response_json);
                 }
                 // return a error
-                return request->createErrorResponse(err);
+                return request->create_error_response(err);
             } else {
                 std::stringstream errors;
                 for(auto& method : methods_list) {
-                    jsonrpc::Error err;
-                    if(method->invoke(service_instance_, request->params, response_json, err, m)) {
+                    jsonrpc::message_error err;
+                    if(method->invoke(service_instance_, request->params_, response_json, err, m)) {
                         // it the invokation finished successfully - return a responce
-                        return request->createResponse(response_json);
+                        return request->create_response(response_json);
                     } else {
                         // accumulate errors
                         errors << "Service: " + name_ + " - method cannot be invoked: " << err.message << std::endl;
@@ -589,7 +589,7 @@ namespace rttr_rpc {
                 }
 
                 // all invocations were failed - return an accumulative error
-                return request->createErrorResponse(jsonrpc::Error::ErrorCode::MethodNotFound, errors.str());
+                return request->create_error_response(jsonrpc::message_error::error_code::MethodNotFound, errors.str());
             }
         }
     } // namespace core

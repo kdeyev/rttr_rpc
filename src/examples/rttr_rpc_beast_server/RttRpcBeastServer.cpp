@@ -66,8 +66,8 @@ handle_request(
 	if (req.method() != http::verb::post)
 		return send(bad_request("Unknown HTTP-method"));
 
-	jsonrpc::MessagePtr request = jsonrpc::Parser::parse(req.body());
-	jsonrpc::MessagePtr response = serviceRepository->process_message(request);
+	jsonrpc::message_ptr request = jsonrpc::parser::parse(req.body());
+	jsonrpc::message_ptr response = serviceRepository->process_message(request);
 
 	http::response<http::string_body> res{http::status::ok, req.version()};
 	res.body() = response->to_string();
@@ -301,10 +301,10 @@ public:
         // Note that there is activity
         activity();
 
-		jsonrpc::MessagePtr request = jsonrpc::Parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
+		jsonrpc::message_ptr request = jsonrpc::parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
 		buffer_.consume(buffer_.size());
 
-		jsonrpc::MessagePtr response = _serviceRepository->process_message(request);
+		jsonrpc::message_ptr response = _serviceRepository->process_message(request);
 		std::string response_body = response->to_string();
 
 		size_t n = buffer_copy(buffer_.prepare(response_body.size()), boost::asio::buffer(response_body.data(), response_body.size()));

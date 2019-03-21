@@ -14,73 +14,70 @@
 #pragma warning(disable : 4275)
 
 namespace jsonrpc {
-    class RTTR_RPC_JSONRPC_EXPORT Request;
+    class RTTR_RPC_JSONRPC_EXPORT request;
 
-    class RTTR_RPC_JSONRPC_EXPORT RpcException : public std::exception, public message {
+    class RTTR_RPC_JSONRPC_EXPORT rpc_exception : public std::exception, public message {
     public:
-        //RpcException(const char* text);
-        //RpcException(const std::string& text);
-        //RpcException(const RpcException& e);
-        RpcException(const Error& e);
+        rpc_exception(const message_error& e);
 
-        virtual ~RpcException() throw();
+        virtual ~rpc_exception() throw();
         virtual const char* what() const noexcept;
 
 		virtual Json to_json() const;
 
-		Error error;
+		message_error error;
 	protected:
 		virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT ParseErrorException : public RpcException {
+    class RTTR_RPC_JSONRPC_EXPORT parse_error_exception : public rpc_exception {
     public:
-        ParseErrorException(const Error& error);
-        ParseErrorException(const ParseErrorException& e);
-        ParseErrorException(const std::string& data);
+        parse_error_exception(const message_error& error);
+        parse_error_exception(const parse_error_exception& e);
+        parse_error_exception(const std::string& data);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT RequestException : public RpcException {
+    class RTTR_RPC_JSONRPC_EXPORT request_exception : public rpc_exception {
     public:
-        Id id;
+        message_id id;
 
-        RequestException(const Error& error, const Id& requestId = Id());
-        RequestException(const RequestException& e);
+        request_exception(const message_error& error, const message_id& requestId = message_id());
+        request_exception(const request_exception& e);
         virtual Json to_json() const;
 
     protected:
         virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT InvalidRequestException : public RequestException {
+    class RTTR_RPC_JSONRPC_EXPORT invalid_request_exception : public request_exception {
     public:
-        InvalidRequestException(const Id& requestId = Id());
-        InvalidRequestException(const Request& request);
-        InvalidRequestException(const char* data, const Id& requestId = Id());
-        InvalidRequestException(const std::string& data, const Id& requestId = Id());
+        invalid_request_exception(const message_id& requestId = message_id());
+        invalid_request_exception(const request& request);
+        invalid_request_exception(const char* data, const message_id& requestId = message_id());
+        invalid_request_exception(const std::string& data, const message_id& requestId = message_id());
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT MethodNotFoundException : public RequestException {
+    class RTTR_RPC_JSONRPC_EXPORT method_not_found_exception : public request_exception {
     public:
-        MethodNotFoundException(const Id& requestId = Id());
-        MethodNotFoundException(const Request& request);
-        MethodNotFoundException(const char* data, const Id& requestId = Id());
-        MethodNotFoundException(const std::string& data, const Id& requestId = Id());
+        method_not_found_exception(const message_id& requestId = message_id());
+        method_not_found_exception(const request& request);
+        method_not_found_exception(const char* data, const message_id& requestId = message_id());
+        method_not_found_exception(const std::string& data, const message_id& requestId = message_id());
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT InvalidParamsException : public RequestException {
+    class RTTR_RPC_JSONRPC_EXPORT invalid_params_exception : public request_exception {
     public:
-        InvalidParamsException(const Id& requestId = Id());
-        InvalidParamsException(const Request& request);
-        InvalidParamsException(const char* data, const Id& requestId = Id());
-        InvalidParamsException(const std::string& data, const Id& requestId = Id());
+        invalid_params_exception(const message_id& requestId = message_id());
+        invalid_params_exception(const request& request);
+        invalid_params_exception(const char* data, const message_id& requestId = message_id());
+        invalid_params_exception(const std::string& data, const message_id& requestId = message_id());
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT InternalErrorException : public RequestException {
+    class RTTR_RPC_JSONRPC_EXPORT internal_error_exception : public request_exception {
     public:
-        InternalErrorException(const Id& requestId = Id());
-        InternalErrorException(const Request& request);
-        InternalErrorException(const char* data, const Id& requestId = Id());
-        InternalErrorException(const std::string& data, const Id& requestId = Id());
+        internal_error_exception(const message_id& requestId = message_id());
+        internal_error_exception(const request& request);
+        internal_error_exception(const char* data, const message_id& requestId = message_id());
+        internal_error_exception(const std::string& data, const message_id& requestId = message_id());
     };
 } // namespace jsonrpc

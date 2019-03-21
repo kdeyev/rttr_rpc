@@ -106,29 +106,29 @@ int main(int argc, char** argv) {
     std::cout << repo.get_services_info().dump(4) << std::endl;
 
     //dispatch(obj);
-    jsonrpc::MessagePtr m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0, 41], "id": 1})"));
-    jsonrpc::MessagePtr rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    jsonrpc::message_ptr m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [42.0, 41], "id": 1})"));
+    jsonrpc::message_ptr response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-    m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func2", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
-    rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func2", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-    m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
-    rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func", "params": [{"x":42,"y":41}, {"x":41,"y":42}], "id": 2})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-    m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func3", "params": {"al" : "AlignJustify"}, "id": 2})"));
-    rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func3", "params": {"al" : "AlignJustify"}, "id": 2})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-    m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [24], "id": 2})"));
-    rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [24], "id": 2})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-    m        = jsonrpc::Parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [], "id": 2})"));
-    rerponse = repo.process_message(m);
-    std::cout << rerponse->to_json().dump(4) << std::endl;
+    m        = jsonrpc::parser::parse_json(nlohmann::json::parse(R"({"jsonrpc": "2.0", "method": "test.func4", "params": [], "id": 2})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
     server.start(boost::asio::ip::tcp::endpoint{boost::asio::ip::tcp::v4(), 5555});
 

@@ -12,65 +12,65 @@
 using namespace std;
 
 namespace jsonrpc {
-    Error Error::invalidRequest(std::string message, const Json& data) {
+    message_error message_error::invalidRequest(std::string message, const Json& data) {
         if(message.empty()) {
             message = "Invalid request";
         }
-        return Error(message, Error::ErrorCode::InvalidRequest, data);
+        return message_error(message, message_error::error_code::InvalidRequest, data);
     }
 
-    Error Error::methodNotFound(std::string message, const Json& data) {
+    message_error message_error::methodNotFound(std::string message, const Json& data) {
         if(message.empty()) {
             message = "Method not found";
         }
-        return Error(message, Error::ErrorCode::MethodNotFound, data);
+        return message_error(message, message_error::error_code::MethodNotFound, data);
     }
 
-    Error Error::invalidParams(std::string message, const Json& data) {
+    message_error message_error::invalidParams(std::string message, const Json& data) {
         if(message.empty()) {
             message = "Internal error";
         }
-        return Error(message, Error::ErrorCode::InternalError, data);
+        return message_error(message, message_error::error_code::InternalError, data);
     }
 
-    Error Error::internalError(std::string message, const Json& data) {
+    message_error message_error::internalError(std::string message, const Json& data) {
         if(message.empty()) {
             message = "Internal error";
         }
-        return Error(message, Error::ErrorCode::InternalError, data);
+        return message_error(message, message_error::error_code::InternalError, data);
     }
 
-    Error::Error(const Json& json) : Error("Internal error", -32603, nullptr) {
+    message_error::message_error(const Json& json) : message_error("Internal error", -32603, nullptr) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    Error::Error(std::nullptr_t) : NullableEntity(nullptr), code(0), message(""), data(nullptr) {
+    message_error::message_error(std::nullptr_t) : is_real_error(true), code(0), message(""), data(nullptr) {
     }
 
-    Error::Error(const std::string& message, int code, const Json& data) : NullableEntity(), code(code), message(message), data(data) {
+    message_error::message_error(const std::string& message, int code, const Json& data) : is_real_error(false), code(code), message(message), data(data) {
     }
 
-    void Error::parse_json(const Json& json) {
+    void message_error::parse_json(const Json& json) {
         try {
             if(json.count("code") == 0)
-                throw ParseErrorException("code is missing");
+                throw parse_error_exception("code is missing");
             code = json["code"];
             if(json.count("message") == 0)
-                throw ParseErrorException("message is missing");
+                throw parse_error_exception("message is missing");
             message = json["message"].get<std::string>();
             if(json.count("data"))
                 data = json["data"];
             else
                 data = nullptr;
-        } catch(const RpcException& /*e*/) {
+        } catch(const rpc_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw ParseErrorException(e.what());
+            throw parse_error_exception(e.what());
         }
     }
 
-    Json Error::to_json() const {
+    Json message_error::to_json() const {
         Json j = {
             {"code", code},
             {"message", message},

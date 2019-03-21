@@ -14,99 +14,100 @@ using namespace std;
 
 namespace jsonrpc {
 
-    Request::Request(const Json& json) : Notification(entity_t::request, ""), id() {
+    request::request(const Json& json) : notification(entity_t::request, ""), id() {
         if(json != nullptr)
             parse_json(json);
     }
 
-    Request::Request(const Id& id, const std::string& method, const Json& params) : Notification(entity_t::request, method.c_str(), params), id(id) {
+    request::request(const message_id& id, const std::string& method, const Json& params) : notification(entity_t::request, method.c_str(), params), id(id) {
     }
 
-    std::shared_ptr<Response> Request::createErrorResponse(const Error& error) const {
-        return make_shared<Response>(id, error);
+    std::shared_ptr<response> request::create_error_response(const message_error& error) const {
+        return make_shared<response>(id, error);
     }
 
-    std::shared_ptr<Response> Request::createResponse(const Json& result) const {
-        return make_shared<Response>(id, result);
+    std::shared_ptr<response> request::create_response(const Json& result) const {
+        return make_shared<response>(id, result);
     }
 
-    void Request::parse_json(const Json& json) {
+    void request::parse_json(const Json& json) {
         try {
             if(json.count("id") == 0)
-                throw InvalidRequestException("id is missing");
+                throw invalid_request_exception("id is missing");
 
             try {
-                id = Id(json["id"]);
+                id = message_id(json["id"]);
             } catch(const std::exception& e) {
-                throw InvalidRequestException(e.what());
+                throw invalid_request_exception(e.what());
             }
 
-            Notification::parse_json(json);
-        } catch(const RequestException& /*e*/) {
+            notification::parse_json(json);
+        } catch(const request_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw InternalErrorException(e.what(), id);
+            throw internal_error_exception(e.what(), id);
         }
     }
 
-    Json Request::to_json() const {
-        Json json  = Notification::to_json();
+    Json request::to_json() const {
+        Json json  = notification::to_json();
         json["id"] = id.to_json();
         return json;
     }
 
-    ///////////////////// Response implementation /////////////////////////////////
+    ///////////////////// response implementation /////////////////////////////////
 
-    Response::Response(const Json& json) : message(entity_t::response) {
+    response::response(const Json& json) : message(entity_t::response) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    Response::Response(const Id& id, const Json& result) : message(entity_t::response), id(id), result(result), error(nullptr) {
+    response::response(const message_id& id, const Json& result) : message(entity_t::response), id(id), result(result), error(nullptr) {
     }
 
-    Response::Response(const Id& id, const Error& error) : message(entity_t::response), id(id), result(), error(error) {
+    response::response(const message_id& id, const message_error& error) : message(entity_t::response), id(id), result(), error(error) {
     }
 
-    Response::Response(const Request& request, const Json& result) : Response(request.id, result) {
+    response::response(const request& request, const Json& result) : response(request.id, result) {
     }
 
-    Response::Response(const Request& request, const Error& error) : Response(request.id, error) {
+    response::response(const request& request, const message_error& error) : response(request.id, error) {
     }
 
-    Response::Response(const RequestException& exception) : Response(exception.id, exception.error) {
+    response::response(const request_exception& exception) : response(exception.id, exception.error) {
     }
 
-    void Response::parse_json(const Json& json) {
+    void response::parse_json(const Json& json) {
         try {
             error  = nullptr;
             result = nullptr;
             if(json.count("jsonrpc") == 0)
-                throw ParseErrorException("jsonrpc is missing");
+                throw parse_error_exception("jsonrpc is missing");
             string jsonrpc = json["jsonrpc"].get<string>();
             if(jsonrpc != "2.0")
-                throw ParseErrorException("invalid jsonrpc value: " + jsonrpc);
+                throw parse_error_exception("invalid jsonrpc value: " + jsonrpc);
             if(json.count("id") == 0)
-                throw ParseErrorException("id is missing");
-            id = Id(json["id"]);
+                throw parse_error_exception("id is missing");
+            id = message_id(json["id"]);
             if(json.count("result"))
                 result = json["result"];
             else if(json.count("error"))
                 error.parse_json(json["error"]);
             else
-                throw ParseErrorException("response must contain result or error");
-        } catch(const ParseErrorException& /*e*/) {
+                throw parse_error_exception("response must contain result or error");
+        } catch(const parse_error_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw ParseErrorException(e.what());
+            throw parse_error_exception(e.what());
         }
     }
 
-    Json Response::to_json() const {
-        Json j = {
-            {"jsonrpc", "2.0"},
-            {"id", id.to_json()},
-        };
+    Json response::to_json() const {
+        Json j = Json::object();
+
+        j["jsonrpc"] = "2.0";
+        if(id.type != message_id::value_t::null)
+            j["id"] = id.to_json();
 
         if(error)
             j["error"] = error.to_json();
@@ -116,14 +117,14 @@ namespace jsonrpc {
         return j;
     }
 
-    ///////////////// Notification implementation /////////////////////////////////
+    ///////////////// notification implementation /////////////////////////////////
 
-    Notification::Notification(const Json& json) : message(entity_t::notification) {
+    notification::notification(const Json& json) : message(entity_t::notification) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    static void extractServiceName(const std::string& method, std::string& service_name, std::string& serviceMethod) {
+    static void extract_service_name(const std::string& method, std::string& service_name, std::string& serviceMethod) {
         service_name.clear();
         serviceMethod.clear();
         size_t pos = method.find('.');
@@ -134,99 +135,90 @@ namespace jsonrpc {
         serviceMethod = method.substr(pos + 1);
     }
 
-    Notification::Notification(message::entity_t ent, const std::string& method, const Json& params) : message(ent), method(method), params(params) {
-        extractServiceName(method, _serviceName, _serviceMethod);
+    notification::notification(message::entity_t ent, const std::string& method, const Json& params) : message(ent), method_name_(method), params_(params) {
+        extract_service_name(method, service_name_, service_method_name_);
     }
 
-    Notification::Notification(const char* method, const Json& params) : Notification(entity_t::notification, method, params) {
+    notification::notification(const char* method, const Json& params) : notification(entity_t::notification, method, params) {
     }
 
-    Notification::Notification(const std::string& method, const Json& params) : Notification(method.c_str(), params) {
+    notification::notification(const std::string& method, const Json& params) : notification(method.c_str(), params) {
     }
 
-    std::shared_ptr<Response> Notification::createErrorResponse(const Error& error) const {
-        return make_shared<Response>(error);
+    std::shared_ptr<response> notification::create_error_response(const message_error& error) const {
+        return make_shared<response>(error);
     }
 
-    std::shared_ptr<Response> Notification::createErrorResponse(Error::ErrorCode code, const std::string& message) const {
-        return createErrorResponse(Error(message, code));
+    std::shared_ptr<response> notification::create_error_response(message_error::error_code code, const std::string& message) const {
+        return create_error_response(message_error(message, code));
     }
 
-    std::shared_ptr<Response> Notification::createResponse(const Json& result) const {
-        return make_shared<Response>(result);
+    std::shared_ptr<response> notification::create_response(const Json& result) const {
+        return make_shared<response>(result);
     }
 
-    void Notification::parse_json(const Json& json) {
+    void notification::parse_json(const Json& json) {
         try {
             if(json.count("jsonrpc") == 0)
-                throw ParseErrorException("jsonrpc is missing");
+                throw parse_error_exception("jsonrpc is missing");
             string jsonrpc = json["jsonrpc"].get<string>();
             if(jsonrpc != "2.0")
-                throw ParseErrorException("invalid jsonrpc value: " + jsonrpc);
+                throw parse_error_exception("invalid jsonrpc value: " + jsonrpc);
 
             if(json.count("method") == 0)
-                throw ParseErrorException("method is missing");
+                throw parse_error_exception("method is missing");
             if(!json["method"].is_string())
-                throw ParseErrorException("method must be a string value");
-            method = json["method"].get<std::string>();
-            if(method.empty())
-                throw ParseErrorException("method must not be empty");
+                throw parse_error_exception("method must be a string value");
+            method_name_ = json["method"].get<std::string>();
+            if(method_name_.empty())
+                throw parse_error_exception("method must not be empty");
 
-            extractServiceName(method, _serviceName, _serviceMethod);
+            extract_service_name(method_name_, service_name_, service_method_name_);
 
             if(json.count("params")) {
-                params = json["params"];
+                params_ = json["params"];
             } else {
-                params = nullptr;
+                params_ = nullptr;
             }
-        } catch(const RpcException& /*e*/) {
+        } catch(const rpc_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw ParseErrorException(e.what());
+            throw parse_error_exception(e.what());
         }
     }
 
-    Json Notification::to_json() const {
+    Json notification::to_json() const {
         Json json = {
             {"jsonrpc", "2.0"},
-            {"method", method},
+            {"method", method_name_ },
         };
 
-        if(params.is_null() == false)
-            json["params"] = params;
+        if(params_.is_null() == false)
+            json["params"] = params_;
 
         return json;
     }
 
-    //////////////////////// Batch implementation /////////////////////////////////
+    //////////////////////// batch implementation /////////////////////////////////
 
-    Batch::Batch(const Json& json) : message(entity_t::batch) {
+    batch::batch(const Json& json) : message(entity_t::batch) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    void Batch::parse_json(const Json& json) {
-        //	cout << "Batch::parse: " << json.dump() << "\n";
+    void batch::parse_json(const Json& json) {
+        //	cout << "batch::parse: " << json.dump() << "\n";
         entities.clear();
         for(auto it = json.begin(); it != json.end(); ++it) {
             //		cout << "x: " << it->dump() << "\n";
-            message_ptr ent(nullptr);
-            try {
-                ent = Parser::parse_json(*it);
-                if(!ent)
-                    ent = make_shared<Response>(Error("Invalid Request", -32600));
-            } catch(const RequestException& e) {
-                ent = make_shared<RequestException>(e);
-            } catch(const std::exception& e) {
-                ent = make_shared<Response>(Error(e.what(), -32600));
-            }
+            message_ptr ent = parser::parse_json(*it);
             entities.push_back(ent);
         }
         if(entities.empty())
-            throw InvalidRequestException();
+            throw invalid_request_exception();
     }
 
-    Json Batch::to_json() const {
+    Json batch::to_json() const {
         Json result;
         for(const auto& j : entities)
             result.push_back(j->to_json());

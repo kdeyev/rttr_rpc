@@ -14,66 +14,66 @@
 #pragma warning(disable : 4275)
 
 namespace jsonrpc {
-	class RTTR_RPC_JSONRPC_EXPORT Response;
-	class RTTR_RPC_JSONRPC_EXPORT RequestException;
+	class RTTR_RPC_JSONRPC_EXPORT response;
+	class RTTR_RPC_JSONRPC_EXPORT request_exception;
 
-    class RTTR_RPC_JSONRPC_EXPORT Notification : public message {
+    class RTTR_RPC_JSONRPC_EXPORT notification : public message {
     public:
-        std::string method;
-        std::string _serviceName;
-        std::string _serviceMethod;
+        std::string method_name_;
+        std::string service_name_;
+        std::string service_method_name_;
 
-        virtual std::shared_ptr<Response> createErrorResponse(const Error& error) const;
-        virtual std::shared_ptr<Response> createResponse(const Json& result) const;
+        virtual std::shared_ptr<response> create_error_response(const message_error& error) const;
+        virtual std::shared_ptr<response> create_response(const Json& result) const;
 
-        std::shared_ptr<Response> createErrorResponse(Error::ErrorCode code, const std::string& message = "") const;
+        std::shared_ptr<response> create_error_response(message_error::error_code code, const std::string& message = "") const;
 
-        Json params;
-        Notification(message::entity_t ent, const std::string& method, const Json& params = nullptr);
-        Notification(const char* method, const Json& params = nullptr);
-        Notification(const Json& json = nullptr);
-        Notification(const std::string& method, const Json& params);
+        Json params_;
+        notification(message::entity_t ent, const std::string& method, const Json& params = nullptr);
+        notification(const char* method, const Json& params = nullptr);
+        notification(const Json& json = nullptr);
+        notification(const std::string& method, const Json& params);
 
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT Request : public Notification {
+    class RTTR_RPC_JSONRPC_EXPORT request : public notification {
     public:
-        Request(const Json& json = nullptr);
-        Request(const Id& id, const std::string& method, const Json& params = nullptr);
+        request(const Json& json = nullptr);
+        request(const message_id& id, const std::string& method, const Json& params = nullptr);
 
-        std::shared_ptr<Response> createErrorResponse(const Error& error) const override;
-        std::shared_ptr<Response> createResponse(const Json& result) const override;
+        std::shared_ptr<response> create_error_response(const message_error& error) const override;
+        std::shared_ptr<response> create_response(const Json& result) const override;
 
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
 
-        Id id;
+        message_id id;
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT Response : public message {
+    class RTTR_RPC_JSONRPC_EXPORT response : public message {
     public:
-        Id    id;
+        message_id    id;
         Json  result;
-        Error error;
+        message_error error;
 
-        Response(const Json& json = nullptr);
-        Response(const Id& id, const Json& result);
-        Response(const Id& id, const Error& error);
-        Response(const Request& request, const Json& result);
-        Response(const Request& request, const Error& error);
-        Response(const RequestException& exception);
+        response(const Json& json = nullptr);
+        response(const message_id& id, const Json& result);
+        response(const message_id& id, const message_error& error);
+        response(const request& request, const Json& result);
+        response(const request& request, const message_error& error);
+        response(const request_exception& exception);
 
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT Batch : public message {
+    class RTTR_RPC_JSONRPC_EXPORT batch : public message {
     public:
         std::vector<message_ptr> entities;
 
-        Batch(const Json& json = nullptr);
+        batch(const Json& json = nullptr);
 
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
@@ -88,9 +88,9 @@ namespace jsonrpc {
         }
     };
 
-	typedef std::shared_ptr<Request>      request_ptr;
-	typedef std::shared_ptr<Notification> notification_ptr;
-	typedef std::shared_ptr<Response>     response_ptr;
-	typedef std::shared_ptr<Batch>        batch_ptr;
+	typedef std::shared_ptr<request>      request_ptr;
+	typedef std::shared_ptr<notification> notification_ptr;
+	typedef std::shared_ptr<response>     response_ptr;
+	typedef std::shared_ptr<batch>        batch_ptr;
 
 } // namespace jsonrpc

@@ -65,7 +65,7 @@ namespace rttr_rpc {
 			 * @param message JSON-RPC message
 			 * @return jsonrpc::MessagePtr JSON-RPC response message
 			 */
-            jsonrpc::MessagePtr process_message(const jsonrpc::MessagePtr& message) const;
+            jsonrpc::message_ptr process_message(const jsonrpc::message_ptr& message) const;
 
             const nlohmann::json& get_services_info() const {
                 return services_info_;

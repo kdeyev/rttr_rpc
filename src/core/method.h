@@ -11,7 +11,7 @@
 
 #include "rttr_rpc_core_export.h"
 
-#include "jsonrp.h" // jsonrpcpp::Error
+#include "jsonrpc/jsonrpc.h" // jsonrpc:error
 
 #include "parameter.h"
 

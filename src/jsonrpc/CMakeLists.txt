@@ -1,17 +1,17 @@
-project(rttr_rpc_core LANGUAGES CXX)
+project(rttr_rpc_jsonrpc LANGUAGES CXX)
 
 message(STATUS "Scanning "  ${PROJECT_NAME} " module.")
 message(STATUS "===========================")
 
 generateLibraryVersionVariables(${RTTR_RPC_VERSION_MAJOR} ${RTTR_RPC_VERSION_MINOR} ${RTTR_RPC_VERSION_PATCH}
-                                "RTTR-RPC-CORE" "" "MIT License")
+                                "RTTR-RPC-JSONRPC" "" "MIT License")
 
 #loadFolder("io" HPP_FILES SRC_FILES BUILD_INSTALLER)
 file(GLOB_RECURSE SRC_FILES *.cpp)
 file(GLOB_RECURSE HPP_FILES *.h)
 
 add_library(${PROJECT_NAME} SHARED ${UnityBuild} ${SRC_FILES} ${HPP_FILES})
-add_library(RTTR_RPC::Core ALIAS ${PROJECT_NAME})
+add_library(RTTR_RPC::JsonRpc ALIAS ${PROJECT_NAME})
 
 # generate export
 include(GenerateExportHeader)
@@ -20,7 +20,7 @@ file(COPY ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h DESTINATION ${PRO
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 					  VERSION ${RTTR_RPC_VERSION} SOVERSION ${RTTR_RPC_VERSION}
-					  EXPORT_NAME CORE
+					  EXPORT_NAME JSONRPC
 					  DEBUG_POSTFIX ${RTTR_RPC_DEBUG_POSTFIX}
 					  CXX_STANDARD ${MAX_CXX_STANDARD}
 					  CXX_VISIBILITY_PRESET hidden
@@ -29,7 +29,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 include_directories(${NLOHMANN_JSON_INCLUDE_DIR})
 					  
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS})
-target_link_libraries(${PROJECT_NAME} RTTR::Core RTTR_RPC::IO RTTR_RPC::JsonRpc)
+#target_link_libraries(${PROJECT_NAME} RTTR::Core RTTR_RPC::IO)
 					  
 					  
 if(${CMAKE_VERSION} VERSION_GREATER "3.8.0") 
@@ -59,7 +59,7 @@ if(BUILD_INSTALLER)
 	install(EXPORT rttr_rpc_targets
 		DESTINATION ${RTTR_RPC_CMAKE_CONFIG_INSTALL_DIR}
 		NAMESPACE RTTR_RPC::
-		FILE rttr-rpc-core-config.cmake)
+		FILE rttr-rpc-jsonrpc-config.cmake)
 endif()
 
 

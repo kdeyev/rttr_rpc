@@ -10,17 +10,7 @@
 
 #include "rttr_rpc_core_export.h"
 
-#include "jsonrp.h"
-namespace jsonrpcpp {
-    typedef Entity                        Message;
-    typedef std::shared_ptr<Message>      MessagePtr;
-    typedef std::shared_ptr<Request>      RequestPtr;
-    typedef std::shared_ptr<Notification> NotificationPtr;
-    typedef std::shared_ptr<Parameter>    ParameterPtr;
-    typedef std::shared_ptr<Response>     PesponsePtr;
-    typedef std::shared_ptr<Error>        ErrorPtr;
-    typedef std::shared_ptr<Batch>        EatchPtr;
-}; // namespace jsonrpcpp
+#include "jsonrpc/jsonrpc.h"
 
 #include "service.h"
 namespace rttr_rpc {

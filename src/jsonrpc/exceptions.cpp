@@ -11,47 +11,49 @@
 
 using namespace std;
 
-namespace jsonrpcpp {
-	
-    RpcException::RpcException(const char* text) : text_(text) {
-    }
+namespace jsonrpc {
 
-    RpcException::RpcException(const std::string& text) : RpcException(text.c_str()) {
-    }
+    //RpcException::RpcException(const char* text) : error(Error::internalError(text)), message(entity_t::exception) {
+    //}
 
-    RpcException::RpcException(const RpcException& e) : RpcException(e.what()) {
+    //RpcException::RpcException(const std::string& text) : error(Error::internalError(text.c_str())), message(entity_t::exception) {
+    //}
+
+    //RpcException::RpcException(const RpcException& e) : error(e.error), message(entity_t::exception) {
+    //}
+
+    RpcException::RpcException(const Error& e) : error(e), message(entity_t::exception) {
     }
 
     RpcException::~RpcException() throw() {
     }
 
     const char* RpcException::what() const noexcept {
-        return text_.c_str();
+        return error.message.c_str();
     }
 
-    ParseErrorException::ParseErrorException(const Error& error) : RpcException(error.message), Entity(entity_t::exception), error(error) {
-    }
-
-    ParseErrorException::ParseErrorException(const ParseErrorException& e) : RpcException(e.what()), Entity(entity_t::exception), error(e.error) {
-    }
-
-    ParseErrorException::ParseErrorException(const std::string& data) : ParseErrorException(Error("Parse error", Error::ErrorCode::ParseError, data)) {
-    }
-
-    Json ParseErrorException::to_json() const {
+    Json RpcException::to_json() const {
         Json response = {{"jsonrpc", "2.0"}, {"error", error.to_json()}, {"id", nullptr}};
 
         return response;
     }
 
-    void ParseErrorException::parse_json(const Json& /*json*/) {
+    void RpcException::parse_json(const Json& /*json*/) {
     }
 
-    RequestException::RequestException(const Error& error, const Id& requestId)
-        : RpcException(error.message), Entity(entity_t::exception), error(error), id(requestId) {
+    ParseErrorException::ParseErrorException(const Error& error) : RpcException(error) {
     }
 
-    RequestException::RequestException(const RequestException& e) : RpcException(e.what()), Entity(entity_t::exception), error(e.error), id(e.id) {
+    ParseErrorException::ParseErrorException(const ParseErrorException& e) : RpcException(e) {
+    }
+
+    ParseErrorException::ParseErrorException(const std::string& data) : ParseErrorException(Error("Parse error", Error::ErrorCode::ParseError, data)) {
+    }
+
+    RequestException::RequestException(const Error& error, const Id& requestId) : RpcException(error), id(requestId) {
+    }
+
+    RequestException::RequestException(const RequestException& e) : RpcException(e), id(e.id) {
     }
 
     Json RequestException::to_json() const {
@@ -111,4 +113,4 @@ namespace jsonrpcpp {
     InternalErrorException::InternalErrorException(const std::string& data, const Id& requestId) : InternalErrorException(data.c_str(), requestId) {
     }
 
-} // namespace jsonrpcpp
+} // namespace jsonrpc

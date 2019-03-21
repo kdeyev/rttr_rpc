@@ -37,14 +37,14 @@ namespace rttr_rpc {
             return true;
         }
 
-        bool method::parse_named_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpcpp::Error& err) const {
+        bool method::parse_named_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::Error& err) const {
             if(!json_params.is_object()) {
-                err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
+                err = jsonrpc::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
                 return false;
             }
 
             if(!_has_valid_names) {
-                err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - there is no parameter names for the method");
+                err = jsonrpc::Error::invalidParams("Method: " + name_ + " - there is no parameter names for the method");
                 return false;
             }
 
@@ -58,7 +58,7 @@ namespace rttr_rpc {
                         // has default value - no problem. just stop parsing here
                         return true;
                     } else {
-                        err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - cannot find argument: " + param.name_);
+                        err = jsonrpc::Error::invalidParams("Method: " + name_ + " - cannot find argument: " + param.name_);
                         return false;
                     }
                 }
@@ -66,7 +66,7 @@ namespace rttr_rpc {
                 // convert to variant
                 rttr::variant var = io::from_json(param_iter.value(), param._type);
                 if(var.is_valid() == false) {
-                    err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - cannot parse argument: " + param.name_ + " - " + param_iter.value().dump(4));
+                    err = jsonrpc::Error::invalidParams("Method: " + name_ + " - cannot parse argument: " + param.name_ + " - " + param_iter.value().dump(4));
                     return false;
                 }
                 vars.push_back(var);
@@ -74,14 +74,14 @@ namespace rttr_rpc {
             return true;
         }
 
-        bool method::parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpcpp::Error& err) const {
+        bool method::parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::Error& err) const {
             if(!json_params.is_array()) {
-                err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
+                err = jsonrpc::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
                 return false;
             }
 
             if(json_params.size() > params_.size()) {
-                err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - there are extra parameters");
+                err = jsonrpc::Error::invalidParams("Method: " + name_ + " - there are extra parameters");
                 return false;
             }
 
@@ -97,11 +97,11 @@ namespace rttr_rpc {
                             // all json params were parsed - no problem
                             return true;
                         } else {
-                            err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - there are extra parameters");
+                            err = jsonrpc::Error::invalidParams("Method: " + name_ + " - there are extra parameters");
                             return false;
                         }
                     } else {
-                        err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - there is no enought parameters");
+                        err = jsonrpc::Error::invalidParams("Method: " + name_ + " - there is no enought parameters");
                         return false;
                     }
                 }
@@ -109,7 +109,7 @@ namespace rttr_rpc {
                 // convert to variant
                 rttr::variant var = io::from_json(json_params[index], param._type);
                 if(var.is_valid() == false) {
-                    err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - cannot parse argument number: " + std::to_string(index) + " - " +
+                    err = jsonrpc::Error::invalidParams("Method: " + name_ + " - cannot parse argument number: " + std::to_string(index) + " - " +
                                                           json_params[index].dump(4));
                     return false;
                 }
@@ -124,7 +124,7 @@ namespace rttr_rpc {
             return method_.invoke_variadic(service_instance, args);
         }
 
-        bool method::invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpcpp::Error& err,
+        bool method::invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::Error& err,
                             std::mutex* m) const {
             ret_val.clear();
             std::vector<rttr::variant> vars;
@@ -137,7 +137,7 @@ namespace rttr_rpc {
                     return false;
                 }
             } else {
-                err = jsonrpcpp::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
+                err = jsonrpc::Error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
                 return false;
             }
 
@@ -158,7 +158,7 @@ namespace rttr_rpc {
             }
 
             if(result.is_valid() == false) {
-                err = jsonrpcpp::Error::internalError("Method: " + name_ + " - cannot invoke method");
+                err = jsonrpc::Error::internalError("Method: " + name_ + " - cannot invoke method");
                 return false;
             }
 

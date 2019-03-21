@@ -35,7 +35,6 @@ template<
 void
 handle_request(
 	repository* serviceRepository,
-	jsonrpcpp::Parser* parser,
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send)
 {
@@ -67,8 +66,8 @@ handle_request(
 	if (req.method() != http::verb::post)
 		return send(bad_request("Unknown HTTP-method"));
 
-	jsonrpcpp::MessagePtr request = parser->parse(req.body());
-	jsonrpcpp::MessagePtr response = serviceRepository->process_message(request);
+	jsonrpc::MessagePtr request = jsonrpc::Parser::parse(req.body());
+	jsonrpc::MessagePtr response = serviceRepository->process_message(request);
 
 	http::response<http::string_body> res{http::status::ok, req.version()};
 	res.body() = response->to_string();
@@ -104,17 +103,15 @@ class websocket_session : public std::enable_shared_from_this<websocket_session>
     boost::beast::multi_buffer buffer_;
     char ping_state_ = 0;
 	repository* _serviceRepository;
-	jsonrpcpp::Parser* _parser;
 public:
     // Take ownership of the socket
     explicit
-    websocket_session(tcp::socket socket, repository* serviceRepository, jsonrpcpp::Parser* parser)
+    websocket_session(tcp::socket socket, repository* serviceRepository)
         : ws_(std::move(socket))
         , strand_(ws_.get_executor())
         , timer_(ws_.get_executor().context(),
             (std::chrono::steady_clock::time_point::max)()),
-		_serviceRepository (serviceRepository), 
-		_parser(parser)
+		_serviceRepository (serviceRepository)
     {
     }
 
@@ -304,10 +301,10 @@ public:
         // Note that there is activity
         activity();
 
-		jsonrpcpp::MessagePtr request = _parser->parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
+		jsonrpc::MessagePtr request = jsonrpc::Parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
 		buffer_.consume(buffer_.size());
 
-		jsonrpcpp::MessagePtr response = _serviceRepository->process_message(request);
+		jsonrpc::MessagePtr response = _serviceRepository->process_message(request);
 		std::string response_body = response->to_string();
 
 		size_t n = buffer_copy(buffer_.prepare(response_body.size()), boost::asio::buffer(response_body.data(), response_body.size()));
@@ -453,7 +450,6 @@ class http_session : public std::enable_shared_from_this<http_session>
     boost::asio::steady_timer timer_;
     boost::beast::flat_buffer buffer_;
 	repository* serviceRepository_;
-	jsonrpcpp::Parser* parser_;
     http::request<http::string_body> req_;
     queue queue_;
 
@@ -462,13 +458,12 @@ public:
     explicit
     http_session(
         tcp::socket socket,
-		repository* serviceRepository_, jsonrpcpp::Parser* parser)
+		repository* serviceRepository_)
         : socket_(std::move(socket))
         , strand_(socket_.get_executor())
         , timer_(socket_.get_executor().context(),
             (std::chrono::steady_clock::time_point::max)())
-        , serviceRepository_(serviceRepository_),
-		parser_(parser)
+        , serviceRepository_(serviceRepository_)
         , queue_(*this)
     {
     }
@@ -567,12 +562,12 @@ public:
 
             // Create a WebSocket websocket_session by transferring the socket
             std::make_shared<websocket_session>(
-                std::move(socket_), serviceRepository_, parser_)->do_accept(std::move(req_));
+                std::move(socket_), serviceRepository_)->do_accept(std::move(req_));
             return;
         }
 
         // Send the response
-        handle_request(serviceRepository_, parser_, std::move(req_), queue_);
+        handle_request(serviceRepository_, std::move(req_), queue_);
 
         // If we aren't at the queue limit, try to pipeline another request
         if(! queue_.is_full())
@@ -623,18 +618,15 @@ class listener : public std::enable_shared_from_this<listener>
     tcp::acceptor acceptor_;
     tcp::socket socket_;
 	repository* serviceRepository_;
-	jsonrpcpp::Parser* _parser;
 
 public:
     listener(
         boost::asio::io_context& ioc,
         tcp::endpoint endpoint,
-		repository* serviceRepository,
-		jsonrpcpp::Parser* parser)
+		repository* serviceRepository)
         : acceptor_(ioc)
         , socket_(ioc)
         , serviceRepository_(serviceRepository)
-		, _parser(parser)
     {
         boost::system::error_code ec;
 
@@ -704,7 +696,7 @@ public:
             // Create the http_session and run it
             std::make_shared<http_session>(
                 std::move(socket_),
-				serviceRepository_, _parser)->run();
+				serviceRepository_)->run();
         }
 
         // Accept another connection
@@ -733,7 +725,7 @@ void RttRpcBeastServer::start(const tcp::endpoint& ep) {
     // Create and launch a listening port
     std::make_shared<listener>( 
         _impl->ioc,
-        ep, &_serviceRepository, &_parser)->run();
+        ep, &_serviceRepository)->run();
 
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;

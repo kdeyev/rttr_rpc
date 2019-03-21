@@ -11,20 +11,19 @@
 
 using namespace std;
 
-namespace jsonrpcpp {
+namespace jsonrpc {
 
-
-    entity_ptr Parser::parse(const std::string& json_str) {
+    message_ptr Parser::parse(const std::string& json_str) {
         try {
             return parse_json(Json::parse(json_str));
-        } catch(const RpcException& /*e*/) {
-            throw;
         } catch(const exception& e) {
-            throw ParseErrorException(e.what());
+            return std::make_shared<ParseErrorException>(e.what());
+        } catch(...) {
+            return std::make_shared<ParseErrorException>("unkown parsing error");
         }
     }
 
-    entity_ptr Parser::parse_json(const Json& json) {
+    message_ptr Parser::parse_json(const Json& json) {
         try {
             if(is_request(json))
                 return make_shared<Request>(json);
@@ -34,13 +33,14 @@ namespace jsonrpcpp {
                 return make_shared<Response>(json);
             else if(is_batch(json))
                 return make_shared<Batch>(json);
-        } catch(const RpcException& /*e*/) {
-            throw;
+        } catch(const RpcException& e) {
+            return std::make_shared<RpcException>(e);
         } catch(const exception& e) {
-            throw RpcException(e.what());
+            return std::make_shared<ParseErrorException>(e.what());
+        } catch(...) {
+            return std::make_shared<ParseErrorException>("unkown parsing error");
         }
-
-        return nullptr;
+        return std::make_shared<ParseErrorException>("unkown message type");
     }
 
     bool Parser::is_request(const std::string& json_str) {
@@ -91,4 +91,4 @@ namespace jsonrpcpp {
         return (json.is_array());
     }
 
-} // namespace jsonrpcpp
+} // namespace jsonrpc

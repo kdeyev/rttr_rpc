@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "jsonrpc/exceptions.h"
+
 namespace rttr_rpc {
     namespace core {
 
@@ -62,38 +64,38 @@ namespace rttr_rpc {
             return services_[service_name]->service_instance();
         }
 
-        jsonrpcpp::MessagePtr repository::process_message(const jsonrpcpp::MessagePtr& message) const {
+        jsonrpc::MessagePtr repository::process_message(const jsonrpc::MessagePtr& message) const {
             switch(message->type()) {
-            case jsonrpcpp::Message::entity_t::request:
-            case jsonrpcpp::Message::entity_t::notification: {
-                jsonrpcpp::NotificationPtr notification = std::dynamic_pointer_cast<jsonrpcpp::Notification>(message);
+            case jsonrpc::Message::entity_t::request:
+            case jsonrpc::Message::entity_t::notification: {
+                jsonrpc::NotificationPtr notification = std::dynamic_pointer_cast<jsonrpc::Notification>(message);
                 if(notification->method == "__init__") {
                     // special method name for service discovery
                     return notification->createResponse(get_services_info());
                 }
                 const std::string& service_name = notification->_serviceName;
                 if(service_name.empty()) {
-                    jsonrpcpp::MessagePtr error = notification->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "empty service name");
+                    jsonrpc::MessagePtr error = notification->createErrorResponse(jsonrpc::Error::ErrorCode::MethodNotFound, "empty service name");
                     return error;
                 }
                 if(services_.count(service_name) == 0) {
-                    jsonrpcpp::MessagePtr error =
-                        notification->createErrorResponse(jsonrpcpp::Error::ErrorCode::MethodNotFound, "service " + service_name + " not found");
+                    jsonrpc::MessagePtr error =
+                        notification->createErrorResponse(jsonrpc::Error::ErrorCode::MethodNotFound, "service " + service_name + " not found");
                     return error;
                 } else {
                     const service_ptr& service  = services_.at(service_name);
-                    jsonrpcpp::MessagePtr   response = service->dispatch(notification);
+                    jsonrpc::MessagePtr   response = service->dispatch(notification);
                     return response;
                 }
             } break;
 
-            case jsonrpcpp::Message::entity_t::response:
+            case jsonrpc::Message::entity_t::response:
                 // we don't handle responses in the provider
-                return jsonrpcpp::MessagePtr();
+                return jsonrpc::MessagePtr();
                 break;
 
             default: {
-                jsonrpcpp::MessagePtr error = std::make_shared<jsonrpcpp::InvalidRequestException>();
+                jsonrpc::MessagePtr error = std::make_shared<jsonrpc::InvalidRequestException>();
                 //QJsonChannelMessage error = message.createErrorResponse(QJsonChannel::InvalidRequest, QString("invalid request"));
                 return error;
                 break;

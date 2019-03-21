@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace jsonrpcpp {
+namespace jsonrpc {
     Error Error::invalidRequest(std::string message, const Json& data) {
         if(message.empty()) {
             message = "Invalid request";
@@ -54,10 +54,10 @@ namespace jsonrpcpp {
     void Error::parse_json(const Json& json) {
         try {
             if(json.count("code") == 0)
-                throw RpcException("code is missing");
+                throw ParseErrorException("code is missing");
             code = json["code"];
             if(json.count("message") == 0)
-                throw RpcException("message is missing");
+                throw ParseErrorException("message is missing");
             message = json["message"].get<std::string>();
             if(json.count("data"))
                 data = json["data"];
@@ -66,7 +66,7 @@ namespace jsonrpcpp {
         } catch(const RpcException& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw RpcException(e.what());
+            throw ParseErrorException(e.what());
         }
     }
 
@@ -81,4 +81,4 @@ namespace jsonrpcpp {
         return j;
     }
 
-} // namespace jsonrpcpp
+} // namespace jsonrpc

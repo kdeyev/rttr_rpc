@@ -13,38 +13,36 @@
 #pragma warning(disable : 4251)
 #pragma warning(disable : 4275)
 
-namespace jsonrpcpp {
-	class RTTR_RPC_JSONRPC_EXPORT Request;
+namespace jsonrpc {
+    class RTTR_RPC_JSONRPC_EXPORT Request;
 
-    class RTTR_RPC_JSONRPC_EXPORT RpcException : public std::exception {
-        std::string text_;
-
+    class RTTR_RPC_JSONRPC_EXPORT RpcException : public std::exception, public message {
     public:
-        RpcException(const char* text);
-        RpcException(const std::string& text);
-        RpcException(const RpcException& e);
+        //RpcException(const char* text);
+        //RpcException(const std::string& text);
+        //RpcException(const RpcException& e);
+        RpcException(const Error& e);
 
         virtual ~RpcException() throw();
         virtual const char* what() const noexcept;
+
+		virtual Json to_json() const;
+
+		Error error;
+	protected:
+		virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT ParseErrorException : public RpcException, public Entity {
+    class RTTR_RPC_JSONRPC_EXPORT ParseErrorException : public RpcException {
     public:
-        Error error;
-
         ParseErrorException(const Error& error);
         ParseErrorException(const ParseErrorException& e);
         ParseErrorException(const std::string& data);
-        virtual Json to_json() const;
-
-    protected:
-        virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT RequestException : public RpcException, public Entity {
+    class RTTR_RPC_JSONRPC_EXPORT RequestException : public RpcException {
     public:
-        Error error;
-        Id    id;
+        Id id;
 
         RequestException(const Error& error, const Id& requestId = Id());
         RequestException(const RequestException& e);
@@ -85,4 +83,4 @@ namespace jsonrpcpp {
         InternalErrorException(const char* data, const Id& requestId = Id());
         InternalErrorException(const std::string& data, const Id& requestId = Id());
     };
-} // namespace jsonrpcpp
+} // namespace jsonrpc

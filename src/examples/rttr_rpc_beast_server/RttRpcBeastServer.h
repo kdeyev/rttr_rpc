@@ -13,7 +13,6 @@ public:
 	void start (const boost::asio::ip::tcp::endpoint& ep);
 
 	rttr_rpc::core::repository _serviceRepository;
-	jsonrpcpp::Parser _parser;
 private:
 	RttRpcBeastImpl* _impl;
 };

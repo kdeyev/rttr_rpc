@@ -13,11 +13,11 @@
 #pragma warning(disable : 4251)
 #pragma warning(disable : 4275)
 
-namespace jsonrpcpp {
+namespace jsonrpc {
 	class RTTR_RPC_JSONRPC_EXPORT Response;
 	class RTTR_RPC_JSONRPC_EXPORT RequestException;
 
-    class RTTR_RPC_JSONRPC_EXPORT Notification : public Entity {
+    class RTTR_RPC_JSONRPC_EXPORT Notification : public message {
     public:
         std::string method;
         std::string _serviceName;
@@ -29,7 +29,7 @@ namespace jsonrpcpp {
         std::shared_ptr<Response> createErrorResponse(Error::ErrorCode code, const std::string& message = "") const;
 
         Json params;
-        Notification(Entity::entity_t ent, const std::string& method, const Json& params = nullptr);
+        Notification(message::entity_t ent, const std::string& method, const Json& params = nullptr);
         Notification(const char* method, const Json& params = nullptr);
         Notification(const Json& json = nullptr);
         Notification(const std::string& method, const Json& params);
@@ -52,7 +52,7 @@ namespace jsonrpcpp {
         Id id;
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT Response : public Entity {
+    class RTTR_RPC_JSONRPC_EXPORT Response : public message {
     public:
         Id    id;
         Json  result;
@@ -69,9 +69,9 @@ namespace jsonrpcpp {
         virtual void parse_json(const Json& json);
     };
 
-    class RTTR_RPC_JSONRPC_EXPORT Batch : public Entity {
+    class RTTR_RPC_JSONRPC_EXPORT Batch : public message {
     public:
-        std::vector<entity_ptr> entities;
+        std::vector<message_ptr> entities;
 
         Batch(const Json& json = nullptr);
 
@@ -83,9 +83,14 @@ namespace jsonrpcpp {
             entities.push_back(std::make_shared<T>(entity));
         }
 
-        void add_ptr(const entity_ptr& ent) {
+        void add_ptr(const message_ptr& ent) {
             entities.push_back(ent);
         }
     };
 
-} // namespace jsonrpcpp
+	typedef std::shared_ptr<Request>      request_ptr;
+	typedef std::shared_ptr<Notification> notification_ptr;
+	typedef std::shared_ptr<Response>     response_ptr;
+	typedef std::shared_ptr<Batch>        batch_ptr;
+
+} // namespace jsonrpc

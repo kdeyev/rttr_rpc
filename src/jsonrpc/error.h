@@ -6,14 +6,14 @@
 #include <exception>
 #include <nlohmann/json.hpp>
 
-#include "jsonrpc/entity.h"
+#include "jsonrpc/message.h"
 
 #include "rttr_rpc_jsonrpc_export.h"
 
 #pragma warning(disable : 4251)
 #pragma warning(disable : 4275)
 
-namespace jsonrpcpp {
+namespace jsonrpc {
 
     class RTTR_RPC_JSONRPC_EXPORT Error : public NullableEntity {
     public:
@@ -35,4 +35,5 @@ namespace jsonrpcpp {
         std::string message;
         Json        data;
     };
-} // namespace jsonrpcpp
+    typedef std::shared_ptr<Error> error_ptr;
+} // namespace jsonrpc

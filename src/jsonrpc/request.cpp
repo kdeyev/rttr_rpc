@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace jsonrpcpp {
+namespace jsonrpc {
 
     Request::Request(const Json& json) : Notification(entity_t::request, ""), id() {
         if(json != nullptr)
@@ -57,15 +57,15 @@ namespace jsonrpcpp {
 
     ///////////////////// Response implementation /////////////////////////////////
 
-    Response::Response(const Json& json) : Entity(entity_t::response) {
+    Response::Response(const Json& json) : message(entity_t::response) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    Response::Response(const Id& id, const Json& result) : Entity(entity_t::response), id(id), result(result), error(nullptr) {
+    Response::Response(const Id& id, const Json& result) : message(entity_t::response), id(id), result(result), error(nullptr) {
     }
 
-    Response::Response(const Id& id, const Error& error) : Entity(entity_t::response), id(id), result(), error(error) {
+    Response::Response(const Id& id, const Error& error) : message(entity_t::response), id(id), result(), error(error) {
     }
 
     Response::Response(const Request& request, const Json& result) : Response(request.id, result) {
@@ -82,23 +82,23 @@ namespace jsonrpcpp {
             error  = nullptr;
             result = nullptr;
             if(json.count("jsonrpc") == 0)
-                throw RpcException("jsonrpc is missing");
+                throw ParseErrorException("jsonrpc is missing");
             string jsonrpc = json["jsonrpc"].get<string>();
             if(jsonrpc != "2.0")
-                throw RpcException("invalid jsonrpc value: " + jsonrpc);
+                throw ParseErrorException("invalid jsonrpc value: " + jsonrpc);
             if(json.count("id") == 0)
-                throw RpcException("id is missing");
+                throw ParseErrorException("id is missing");
             id = Id(json["id"]);
             if(json.count("result"))
                 result = json["result"];
             else if(json.count("error"))
                 error.parse_json(json["error"]);
             else
-                throw RpcException("response must contain result or error");
-        } catch(const RpcException& /*e*/) {
+                throw ParseErrorException("response must contain result or error");
+        } catch(const ParseErrorException& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw RpcException(e.what());
+            throw ParseErrorException(e.what());
         }
     }
 
@@ -118,24 +118,23 @@ namespace jsonrpcpp {
 
     ///////////////// Notification implementation /////////////////////////////////
 
-    Notification::Notification(const Json& json) : Entity(entity_t::notification) {
+    Notification::Notification(const Json& json) : message(entity_t::notification) {
         if(json != nullptr)
             parse_json(json);
     }
 
+    static void extractServiceName(const std::string& method, std::string& service_name, std::string& serviceMethod) {
+        service_name.clear();
+        serviceMethod.clear();
+        size_t pos = method.find('.');
+        if(std::string::npos == pos) {
+            return;
+        }
+        service_name  = method.substr(0, pos);
+        serviceMethod = method.substr(pos + 1);
+    }
 
-	static void extractServiceName(const std::string& method, std::string& service_name, std::string& serviceMethod) {
-		service_name.clear();
-		serviceMethod.clear();
-		size_t pos = method.find('.');
-		if (std::string::npos == pos) {
-			return;
-		}
-		service_name = method.substr(0, pos);
-		serviceMethod = method.substr(pos + 1);
-	}
-
-    Notification::Notification(Entity::entity_t ent, const std::string& method, const Json& params) : Entity(ent), method(method), params(params) {
+    Notification::Notification(message::entity_t ent, const std::string& method, const Json& params) : message(ent), method(method), params(params) {
         extractServiceName(method, _serviceName, _serviceMethod);
     }
 
@@ -160,18 +159,18 @@ namespace jsonrpcpp {
     void Notification::parse_json(const Json& json) {
         try {
             if(json.count("jsonrpc") == 0)
-                throw RpcException("jsonrpc is missing");
+                throw ParseErrorException("jsonrpc is missing");
             string jsonrpc = json["jsonrpc"].get<string>();
             if(jsonrpc != "2.0")
-                throw RpcException("invalid jsonrpc value: " + jsonrpc);
+                throw ParseErrorException("invalid jsonrpc value: " + jsonrpc);
 
             if(json.count("method") == 0)
-                throw RpcException("method is missing");
+                throw ParseErrorException("method is missing");
             if(!json["method"].is_string())
-                throw RpcException("method must be a string value");
+                throw ParseErrorException("method must be a string value");
             method = json["method"].get<std::string>();
             if(method.empty())
-                throw RpcException("method must not be empty");
+                throw ParseErrorException("method must not be empty");
 
             extractServiceName(method, _serviceName, _serviceMethod);
 
@@ -183,7 +182,7 @@ namespace jsonrpcpp {
         } catch(const RpcException& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw RpcException(e.what());
+            throw ParseErrorException(e.what());
         }
     }
 
@@ -193,7 +192,7 @@ namespace jsonrpcpp {
             {"method", method},
         };
 
-        if(params)
+        if(params.is_null() == false)
             json["params"] = params;
 
         return json;
@@ -201,7 +200,7 @@ namespace jsonrpcpp {
 
     //////////////////////// Batch implementation /////////////////////////////////
 
-    Batch::Batch(const Json& json) : Entity(entity_t::batch) {
+    Batch::Batch(const Json& json) : message(entity_t::batch) {
         if(json != nullptr)
             parse_json(json);
     }
@@ -211,7 +210,7 @@ namespace jsonrpcpp {
         entities.clear();
         for(auto it = json.begin(); it != json.end(); ++it) {
             //		cout << "x: " << it->dump() << "\n";
-            entity_ptr ent(nullptr);
+            message_ptr ent(nullptr);
             try {
                 ent = Parser::parse_json(*it);
                 if(!ent)
@@ -234,4 +233,4 @@ namespace jsonrpcpp {
         return result;
     }
 
-} // namespace jsonrpcpp
+} // namespace jsonrpc

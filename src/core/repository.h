@@ -63,9 +63,9 @@ namespace rttr_rpc {
 			 * @brief Process a JSON-RPC message. In general it means the invocation of a requested function of a requested service
 			 *
 			 * @param message JSON-RPC message
-			 * @return jsonrpcpp::MessagePtr JSON-RPC response message
+			 * @return jsonrpc::MessagePtr JSON-RPC response message
 			 */
-            jsonrpcpp::MessagePtr process_message(const jsonrpcpp::MessagePtr& message) const;
+            jsonrpc::MessagePtr process_message(const jsonrpc::MessagePtr& message) const;
 
             const nlohmann::json& get_services_info() const {
                 return services_info_;

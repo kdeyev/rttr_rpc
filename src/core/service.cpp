@@ -584,7 +584,7 @@ namespace rttr_rpc {
                         return request->create_response(response_json);
                     } else {
                         // accumulate errors
-                        errors << "Service: " + name_ + " - method cannot be invoked: " << err.message << std::endl;
+                        errors << "Service: " + name_ + " - method cannot be invoked: " << err.message_ << std::endl;
                     }
                 }
 

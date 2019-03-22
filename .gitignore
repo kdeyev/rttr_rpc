@@ -34,3 +34,5 @@ build
 include
 lib
 bin
+src/core/rttr_rpc_core_export.h
+src/jsonrpc/rttr_rpc_jsonrpc_export.h

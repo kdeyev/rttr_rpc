@@ -1,6 +1,9 @@
-[submodule "rpcWebChannel"]
-	path = rpcWebChannel
-	url = https://github.com/kdeyev/rpcWebChannel.git
 [submodule "3rd_party/nlohmann/json"]
 	path = 3rd_party/nlohmann/json
 	url = https://github.com/nlohmann/json.git
+[submodule "3rd_party/rttr"]
+	path = 3rd_party/rttr
+	url = https://github.com/rttrorg/rttr.git
+[submodule "rpc-web-channel"]
+	path = rpc-web-channel
+	url = https://github.com/kdeyev/rpc-web-channel.git

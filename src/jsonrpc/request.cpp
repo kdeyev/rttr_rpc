@@ -1,11 +1,3 @@
-/***
-    This file is part of jsonrpc++
-    Copyright (C) 2017 Johannes Pohl
-    
-    This software may be modified and distributed under the terms
-    of the MIT license.  See the LICENSE file for details.
-***/
-
 #include "jsonrpc/request.h"
 #include "jsonrpc/exceptions.h"
 #include "jsonrpc/jsonrpc.h" // for batch
@@ -14,20 +6,20 @@ using namespace std;
 
 namespace jsonrpc {
 
-    request::request(const Json& json) : notification(entity_t::request, ""), id() {
+    request::request(const Json& json) : notification(entity_t::request, ""), id_() {
         if(json != nullptr)
             parse_json(json);
     }
 
-    request::request(const message_id& id, const std::string& method, const Json& params) : notification(entity_t::request, method.c_str(), params), id(id) {
+    request::request(const message_id& id, const std::string& method, const Json& params) : notification(entity_t::request, method.c_str(), params), id_(id) {
     }
 
     std::shared_ptr<response> request::create_error_response(const message_error& error) const {
-        return make_shared<response>(id, error);
+        return make_shared<response>(id_, error);
     }
 
     std::shared_ptr<response> request::create_response(const Json& result) const {
-        return make_shared<response>(id, result);
+        return make_shared<response>(id_, result);
     }
 
     void request::parse_json(const Json& json) {
@@ -36,7 +28,7 @@ namespace jsonrpc {
                 throw invalid_request_exception("id is missing");
 
             try {
-                id = message_id(json["id"]);
+                id_ = message_id(json["id"]);
             } catch(const std::exception& e) {
                 throw invalid_request_exception(e.what());
             }
@@ -45,13 +37,13 @@ namespace jsonrpc {
         } catch(const request_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
-            throw internal_error_exception(e.what(), id);
+            throw internal_error_exception(e.what(), id_);
         }
     }
 
     Json request::to_json() const {
         Json json  = notification::to_json();
-        json["id"] = id.to_json();
+        json["id"] = id_.to_json();
         return json;
     }
 
@@ -62,25 +54,25 @@ namespace jsonrpc {
             parse_json(json);
     }
 
-    response::response(const message_id& id, const Json& result) : message(entity_t::response), id(id), result(result), error(nullptr) {
+    response::response(const message_id& id, const Json& result) : message(entity_t::response), id_(id), result_(result), error_(nullptr) {
     }
 
-    response::response(const message_id& id, const message_error& error) : message(entity_t::response), id(id), result(), error(error) {
+    response::response(const message_id& id, const message_error& error) : message(entity_t::response), id_(id), result_(), error_(error) {
     }
 
-    response::response(const request& request, const Json& result) : response(request.id, result) {
+    response::response(const request& request, const Json& result) : response(request.id_, result) {
     }
 
-    response::response(const request& request, const message_error& error) : response(request.id, error) {
+    response::response(const request& request, const message_error& error) : response(request.id_, error) {
     }
 
-    response::response(const request_exception& exception) : response(exception.id, exception.error) {
+    response::response(const request_exception& exception) : response(exception.id_, exception.error_) {
     }
 
     void response::parse_json(const Json& json) {
         try {
-            error  = nullptr;
-            result = nullptr;
+            error_  = nullptr;
+            result_ = nullptr;
             if(json.count("jsonrpc") == 0)
                 throw parse_error_exception("jsonrpc is missing");
             string jsonrpc = json["jsonrpc"].get<string>();
@@ -88,11 +80,11 @@ namespace jsonrpc {
                 throw parse_error_exception("invalid jsonrpc value: " + jsonrpc);
             if(json.count("id") == 0)
                 throw parse_error_exception("id is missing");
-            id = message_id(json["id"]);
+            id_ = message_id(json["id"]);
             if(json.count("result"))
-                result = json["result"];
+                result_ = json["result"];
             else if(json.count("error"))
-                error.parse_json(json["error"]);
+                error_.parse_json(json["error"]);
             else
                 throw parse_error_exception("response must contain result or error");
         } catch(const parse_error_exception& /*e*/) {
@@ -106,13 +98,13 @@ namespace jsonrpc {
         Json j = Json::object();
 
         j["jsonrpc"] = "2.0";
-        if(id.type != message_id::value_t::null)
-            j["id"] = id.to_json();
+        if(id_.type_ != message_id::value_t::null)
+            j["id"] = id_.to_json();
 
-        if(error)
-            j["error"] = error.to_json();
+        if(error_)
+            j["error"] = error_.to_json();
         else
-            j["result"] = result;
+            j["result"] = result_;
 
         return j;
     }
@@ -190,7 +182,7 @@ namespace jsonrpc {
     Json notification::to_json() const {
         Json json = {
             {"jsonrpc", "2.0"},
-            {"method", method_name_ },
+            {"method", method_name_},
         };
 
         if(params_.is_null() == false)
@@ -208,19 +200,19 @@ namespace jsonrpc {
 
     void batch::parse_json(const Json& json) {
         //	cout << "batch::parse: " << json.dump() << "\n";
-        entities.clear();
+        entities_.clear();
         for(auto it = json.begin(); it != json.end(); ++it) {
             //		cout << "x: " << it->dump() << "\n";
             message_ptr ent = parser::parse_json(*it);
-            entities.push_back(ent);
+			entities_.push_back(ent);
         }
-        if(entities.empty())
+        if(entities_.empty())
             throw invalid_request_exception();
     }
 
     Json batch::to_json() const {
         Json result;
-        for(const auto& j : entities)
+        for(const auto& j : entities_)
             result.push_back(j->to_json());
         return result;
     }

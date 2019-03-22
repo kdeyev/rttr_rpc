@@ -25,12 +25,12 @@ namespace rttr_rpc {
             bool parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const;
 
             rttr::variant invoke(const rttr::instance& service_instance, const std::vector<rttr::argument>& args) const;
-            bool          invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::message_error& err,
-                                 std::mutex* m) const;
+            bool invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::message_error& err,
+                        std::mutex* m) const;
 
-            nlohmann::json createJsonSchema() const;
+            nlohmann::json create_json_schema() const;
 
-            bool _has_valid_names = false;
+            bool has_valid_names_ = false;
 
         private:
             void scan_metadata();

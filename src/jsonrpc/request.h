@@ -14,8 +14,8 @@
 #pragma warning(disable : 4275)
 
 namespace jsonrpc {
-	class RTTR_RPC_JSONRPC_EXPORT response;
-	class RTTR_RPC_JSONRPC_EXPORT request_exception;
+    class RTTR_RPC_JSONRPC_EXPORT response;
+    class RTTR_RPC_JSONRPC_EXPORT request_exception;
 
     class RTTR_RPC_JSONRPC_EXPORT notification : public message {
     public:
@@ -49,14 +49,14 @@ namespace jsonrpc {
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
 
-        message_id id;
+        message_id id_;
     };
 
     class RTTR_RPC_JSONRPC_EXPORT response : public message {
     public:
-        message_id    id;
-        Json  result;
-        message_error error;
+        message_id    id_;
+        Json          result_;
+        message_error error_;
 
         response(const Json& json = nullptr);
         response(const message_id& id, const Json& result);
@@ -71,7 +71,7 @@ namespace jsonrpc {
 
     class RTTR_RPC_JSONRPC_EXPORT batch : public message {
     public:
-        std::vector<message_ptr> entities;
+        std::vector<message_ptr> entities_;
 
         batch(const Json& json = nullptr);
 
@@ -80,17 +80,17 @@ namespace jsonrpc {
 
         template <typename T>
         void add(const T& entity) {
-            entities.push_back(std::make_shared<T>(entity));
+            entities_.push_back(std::make_shared<T>(entity));
         }
 
         void add_ptr(const message_ptr& ent) {
-            entities.push_back(ent);
+            entities_.push_back(ent);
         }
     };
 
-	typedef std::shared_ptr<request>      request_ptr;
-	typedef std::shared_ptr<notification> notification_ptr;
-	typedef std::shared_ptr<response>     response_ptr;
-	typedef std::shared_ptr<batch>        batch_ptr;
+    typedef std::shared_ptr<request>      request_ptr;
+    typedef std::shared_ptr<notification> notification_ptr;
+    typedef std::shared_ptr<response>     response_ptr;
+    typedef std::shared_ptr<batch>        batch_ptr;
 
 } // namespace jsonrpc

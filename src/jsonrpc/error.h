@@ -31,9 +31,9 @@ namespace jsonrpc {
         virtual Json to_json() const;
         virtual void parse_json(const Json& json);
 
-        int         code;
-        std::string message;
-        Json        data;
+        int         code_;
+        std::string message_;
+        Json        data_;
 
 #ifdef _MSC_VER
         virtual operator bool() const
@@ -41,11 +41,11 @@ namespace jsonrpc {
         virtual explicit operator bool() const
 #endif
         {
-            return !is_real_error;
+            return !error_occured_;
         }
 
     protected:
-        bool is_real_error = false;
+        bool error_occured_ = false;
     };
     typedef std::shared_ptr<message_error> error_ptr;
 } // namespace jsonrpc

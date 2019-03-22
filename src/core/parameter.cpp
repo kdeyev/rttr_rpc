@@ -12,7 +12,7 @@ namespace rttr_rpc {
         }
 
         parameter::parameter(const rttr::parameter_info& info)
-            : info_(info), name_(to_string(info.get_name())), _type(info.get_type()), _index(info.get_index()), _has_default_value(info.has_default_value()) {
+            : info_(info), name_(to_string(info.get_name())), type_(info.get_type()), index_(info.get_index()), has_default_value_(info.has_default_value()) {
         }
 
         std::string parameter::get_json_type_name(const rttr::type& type) {
@@ -61,8 +61,8 @@ namespace rttr_rpc {
         }
 
         nlohmann::json parameter::create_parameter_description(nlohmann::json& defs) const {
-            nlohmann::json param = create_parameter_description(name_, _type, defs);
-            if(_has_default_value) {
+            nlohmann::json param = create_parameter_description(name_, type_, defs);
+            if(has_default_value_) {
                 param["default"] = io::to_json_obj(info_.get_default_value());
             }
             return param;

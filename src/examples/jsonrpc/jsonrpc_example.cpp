@@ -14,7 +14,7 @@
 using namespace std;
 using namespace jsonrpc;
 
-jsonrpc::response getRespone(jsonrpc::request_ptr request) noexcept {
+jsonrpc::response get_respone(jsonrpc::request_ptr request) noexcept {
     //cout << " request: " << request->method << ", id: " << request->id << ", has params: " << !request->params.is_null() << "\n";
     if(request->method_name_ == "subtract") {
         if(request->params_.is_null() == false) {
@@ -51,33 +51,33 @@ void test(const std::string& json_str) {
             cout << "<-- " << message->to_json().dump() << "\n";
         }
         if(message->is_request()) {
-            jsonrpc::response response = getRespone(dynamic_pointer_cast<jsonrpc::request>(message));
+            jsonrpc::response response = get_respone(dynamic_pointer_cast<jsonrpc::request>(message));
             cout << "<-- " << response.to_json().dump() << "\n";
         } else if(message->is_notification()) {
             jsonrpc::notification_ptr notification = dynamic_pointer_cast<jsonrpc::notification>(message);
             cout << "notification: " << notification->method_name_ << ", has params: " << !notification->params_.is_null() << "\n";
         } else if(message->is_batch()) {
             jsonrpc::batch_ptr batch = dynamic_pointer_cast<jsonrpc::batch>(message);
-            jsonrpc::batch     responseBatch;
+            jsonrpc::batch     response_batch;
             //cout << " batch\n";
-            for(const auto& batch_message : batch->entities) {
+            for(const auto& batch_message : batch->entities_) {
                 //cout << batch_message->type_str() << ": \t" << batch_message->to_json() << "\n";
                 if(batch_message->is_request()) {
                     //try {
-                    jsonrpc::response response = getRespone(dynamic_pointer_cast<jsonrpc::request>(batch_message));
-                    responseBatch.add(response); //<jsonrpc::response>
+                    jsonrpc::response response = get_respone(dynamic_pointer_cast<jsonrpc::request>(batch_message));
+                    response_batch.add(response); //<jsonrpc::response>
                     //} catch(const jsonrpc::request_exception& e) {
-                    //    responseBatch.add(e); //<jsonrpc::request_exception>
+                    //    response_batch.add(e); //<jsonrpc::request_exception>
                     //}
                 } else if(batch_message->is_error()) {
-                    responseBatch.add_ptr(batch_message);
+                    response_batch.add_ptr(batch_message);
                 } else if(batch_message->is_notification()) {
                 } else {
-                    responseBatch.add_ptr(make_shared<invalid_request_exception>("Invalid request"));
+                    response_batch.add_ptr(make_shared<invalid_request_exception>("Invalid request"));
                 }
             }
-            //if(!responseBatch.entities.empty())
-            cout << "<-- " << responseBatch.to_json().dump() << "\n";
+            //if(!response_batch.entities.empty())
+            cout << "<-- " << response_batch.to_json().dump() << "\n";
         }
     }
 

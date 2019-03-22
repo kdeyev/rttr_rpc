@@ -26,9 +26,9 @@ namespace rttr_rpc {
 
             rttr::parameter_info info_;
             std::string          name_;
-            rttr::type           _type;
-            uint32_t             _index;
-            bool                 _has_default_value;
+            rttr::type           type_;
+            uint32_t             index_;
+            bool                 has_default_value_;
         };
     } // namespace core
 } // namespace rttr_rpc

@@ -13,7 +13,7 @@ namespace rttr_rpc {
             }
 
             scan_metadata();
-            _has_valid_names = check_valid_names();
+            has_valid_names_ = check_valid_names();
         }
 
         void method::scan_metadata() {
@@ -43,7 +43,7 @@ namespace rttr_rpc {
                 return false;
             }
 
-            if(!_has_valid_names) {
+            if(!has_valid_names_) {
                 err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - there is no parameter names for the method");
                 return false;
             }
@@ -54,7 +54,7 @@ namespace rttr_rpc {
                 auto param_iter = json_params.find(param.name_);
                 // cannot find a paramenter in json
                 if(param_iter == json_params.end()) {
-                    if(param._has_default_value) {
+                    if(param.has_default_value_) {
                         // has default value - no problem. just stop parsing here
                         return true;
                     } else {
@@ -64,9 +64,10 @@ namespace rttr_rpc {
                 }
 
                 // convert to variant
-                rttr::variant var = io::from_json(param_iter.value(), param._type);
+                rttr::variant var = io::from_json(param_iter.value(), param.type_);
                 if(var.is_valid() == false) {
-                    err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - cannot parse argument: " + param.name_ + " - " + param_iter.value().dump(4));
+                    err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - cannot parse argument: " + param.name_ + " - " +
+                                                                param_iter.value().dump(4));
                     return false;
                 }
                 vars.push_back(var);
@@ -88,10 +89,10 @@ namespace rttr_rpc {
             vars.clear();
             vars.reserve(json_params.size());
             for(auto& param : params_) {
-                size_t index = param._index;
+                size_t index = param.index_;
                 // the index is not presented in json
                 if(index >= json_params.size()) {
-                    if(param._has_default_value) {
+                    if(param.has_default_value_) {
                         // has default value.
                         if(vars.size() == json_params.size()) {
                             // all json params were parsed - no problem
@@ -107,10 +108,10 @@ namespace rttr_rpc {
                 }
 
                 // convert to variant
-                rttr::variant var = io::from_json(json_params[index], param._type);
+                rttr::variant var = io::from_json(json_params[index], param.type_);
                 if(var.is_valid() == false) {
                     err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - cannot parse argument number: " + std::to_string(index) + " - " +
-                                                          json_params[index].dump(4));
+                                                                json_params[index].dump(4));
                     return false;
                 }
 
@@ -167,8 +168,8 @@ namespace rttr_rpc {
             return true;
         }
 
-        nlohmann::json method::createJsonSchema() const {
-            if(!_has_valid_names) {
+        nlohmann::json method::create_json_schema() const {
+            if(!has_valid_names_) {
                 std::cout << "there is no parameter names for the method" << std::endl;
                 return "there is no parameter names for the method";
             }
@@ -183,7 +184,7 @@ namespace rttr_rpc {
             for(const auto& param : params_) {
                 properties[param.name_] = param.create_parameter_description(definitions);
 
-                if(param._has_default_value == false) {
+                if(param.has_default_value_ == false) {
                     // add to the list of required parameters
                     required.push_back(param.name_);
                 }

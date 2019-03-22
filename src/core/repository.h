@@ -75,7 +75,7 @@ namespace rttr_rpc {
             bool           add_service(const service_ptr& service);
             nlohmann::json create_services_info() const;
 
-            nlohmann::json                                    services_info_;
+            nlohmann::json                               services_info_;
             std::unordered_map<std::string, service_ptr> services_;
         };
     } // namespace core

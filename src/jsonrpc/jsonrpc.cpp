@@ -1,11 +1,3 @@
-/***
-    This file is part of jsonrpc++
-    Copyright (C) 2017 Johannes Pohl
-    
-    This software may be modified and distributed under the terms
-    of the MIT license.  See the LICENSE file for details.
-***/
-
 #include "jsonrpc/jsonrpc.h"
 #include "jsonrpc/exceptions.h"
 
@@ -40,7 +32,7 @@ namespace jsonrpc {
         } catch(...) {
             return std::make_shared<parse_error_exception>("unkown parsing error");
         }
-		return make_shared<invalid_request_exception>("Invalid request");
+        return make_shared<invalid_request_exception>("Invalid request");
     }
 
     bool parser::is_request(const std::string& json_str) noexcept {

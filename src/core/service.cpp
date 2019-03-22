@@ -38,7 +38,7 @@ namespace rttr_rpc {
         //    struct ParameterInfo {
         //        ParameterInfo (const QString& name = QString (), int type = 0, bool out = false);
         //
-        //        int     _type;
+        //        int     type_;
         //        int     _jsType;
         //        QString name_;
         //        bool    _out;
@@ -61,7 +61,7 @@ namespace rttr_rpc {
         //        QMetaProperty _prop;
         //
         //        QString name_;
-        //        int     _type;
+        //        int     type_;
         //        QString _typeName;
         //        QString _getterName;
         //        QString _setterName;
@@ -83,7 +83,7 @@ namespace rttr_rpc {
         //};
         //
         //service::ParameterInfo::ParameterInfo (const QString& n, int t, bool o)
-        //    : _type (t), _jsType (convertVariantTypeToJSType (t)), name_ (n), _out (o) {
+        //    : type_ (t), _jsType (convertVariantTypeToJSType (t)), name_ (n), _out (o) {
         //}
         //
         //service::MethodInfo::MethodInfo () : _returnType (QMetaType::Void), _valid (false), _hasOut (false) {
@@ -129,7 +129,7 @@ namespace rttr_rpc {
         //    name_     = _prop.name ();
         //    name_[0]  = name_[0].toUpper ();
         //    _typeName = _prop.typeName ();
-        //    _type     = QMetaType::type (_typeName.toStdString ().c_str ());
+        //    type_     = QMetaType::type (_typeName.toStdString ().c_str ());
         //
         //    if (_prop.isReadable ()) {
         //        _getterName = "get" + name_;
@@ -223,7 +223,7 @@ namespace rttr_rpc {
                         std::cout << "Service: " + name_ + " - the method name used twice: " << method_name << std::endl;
                         continue;
                     }
-                    methods_json[method_name] = method->createJsonSchema();
+                    methods_json[method_name] = method->create_json_schema();
                 }
             }
 
@@ -243,7 +243,7 @@ namespace rttr_rpc {
             //        params["properties"] = properties;
 
             //        method_desc["params"] = params;
-            //        method_desc["result"] = createParameterDescription ("return value", convertVariantTypeToJSType (info._type));
+            //        method_desc["result"] = createParameterDescription ("return value", convertVariantTypeToJSType (info.type_));
             //        qtMethods[name]       = method_desc;
             //    }
             //    {
@@ -255,7 +255,7 @@ namespace rttr_rpc {
             //        method_desc["description"] = name;
 
             //        nlohmann::json properties;
-            //        properties[info.name_] = createParameterDescription (info.name_, convertVariantTypeToJSType (info._type));
+            //        properties[info.name_] = createParameterDescription (info.name_, convertVariantTypeToJSType (info.type_));
 
             //        nlohmann::json params;
             //        params["type"]       = "object";
@@ -460,7 +460,7 @@ namespace rttr_rpc {
         //        const service::ParameterInfo& parameterInfo = info._parameters.at (i);
         //        QJsonValue incomingArgument = usingNamedParameters ? params.toObject ().value (parameterInfo.name_) : params.toArray ().at (i);
         //
-        //        QVariant argument = convertArgument (incomingArgument, parameterInfo._type);
+        //        QVariant argument = convertArgument (incomingArgument, parameterInfo.type_);
         //        if (!argument.isValid ()) {
         //            QString message = incomingArgument.isUndefined () ? QString ("failed to construct default object for '%1'").arg (parameterInfo.name_)
         //                                                              : QString ("failed to convert from JSON for '%1'").arg (parameterInfo.name_);
@@ -468,7 +468,7 @@ namespace rttr_rpc {
         //        }
         //
         //        arguments.push_back (argument);
-        //        if (parameterInfo._type == QMetaType::QVariant)
+        //        if (parameterInfo.type_ == QMetaType::QVariant)
         //            parameters.append (static_cast<void*> (&arguments.last ()));
         //        else
         //            parameters.append (const_cast<void*> (arguments.last ().constData ()));
@@ -538,7 +538,7 @@ namespace rttr_rpc {
         //
         //    const service::PropInfo& prop = _propertyInfoHash[propertyIndex];
         //
-        //    QVariant argument = convertArgument (arr[0], prop._type);
+        //    QVariant argument = convertArgument (arr[0], prop.type_);
         //
         //    if (is_thread_safe_) {
         //        prop._prop.write (service_instance_.data (), argument);

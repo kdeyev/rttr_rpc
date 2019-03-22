@@ -1,11 +1,3 @@
-/***
-    This file is part of jsonrpc++
-    Copyright (C) 2017 Johannes Pohl
-    
-    This software may be modified and distributed under the terms
-    of the MIT license.  See the LICENSE file for details.
-***/
-
 #include "jsonrpc/error.h"
 #include "jsonrpc/exceptions.h"
 
@@ -45,24 +37,24 @@ namespace jsonrpc {
             parse_json(json);
     }
 
-    message_error::message_error(std::nullptr_t) : is_real_error(true), code(0), message(""), data(nullptr) {
+    message_error::message_error(std::nullptr_t) : error_occured_(true), code_(0), message_(""), data_(nullptr) {
     }
 
-    message_error::message_error(const std::string& message, int code, const Json& data) : is_real_error(false), code(code), message(message), data(data) {
+    message_error::message_error(const std::string& message, int code, const Json& data) : error_occured_(false), code_(code), message_(message), data_(data) {
     }
 
     void message_error::parse_json(const Json& json) {
         try {
             if(json.count("code") == 0)
                 throw parse_error_exception("code is missing");
-            code = json["code"];
+            code_ = json["code"];
             if(json.count("message") == 0)
                 throw parse_error_exception("message is missing");
-            message = json["message"].get<std::string>();
+            message_ = json["message"].get<std::string>();
             if(json.count("data"))
-                data = json["data"];
+                data_ = json["data"];
             else
-                data = nullptr;
+                data_ = nullptr;
         } catch(const rpc_exception& /*e*/) {
             throw;
         } catch(const exception& e) {
@@ -72,12 +64,12 @@ namespace jsonrpc {
 
     Json message_error::to_json() const {
         Json j = {
-            {"code", code},
-            {"message", message},
+            {"code", code_},
+            {"message", message_},
         };
 
-        if(!data.is_null())
-            j["data"] = data;
+        if(!data_.is_null())
+            j["data"] = data_;
         return j;
     }
 

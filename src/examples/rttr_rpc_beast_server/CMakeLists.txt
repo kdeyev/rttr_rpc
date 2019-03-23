@@ -20,7 +20,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HPP_FILES})
 
 
-target_link_libraries(${PROJECT_NAME} RTTR::Core RTTR_RPC::IO RTTR_RPC::Core ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} RTTR::Core RTTR_RPC::IO RTTR_RPC::Core RTTR_RPC::Beast)
 
 include_directories(${NLOHMANN_JSON_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR})

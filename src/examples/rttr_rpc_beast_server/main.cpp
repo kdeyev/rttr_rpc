@@ -3,7 +3,7 @@
 #include <rttr/registration>
 using namespace rttr;
 
-#include "RttRpcBeastServer.h"
+#include "beast/server.h"
 #include "core/repository.h"
 using namespace rttr_rpc::core;
 using namespace rttr_rpc;
@@ -98,8 +98,8 @@ RTTR_REGISTRATION {
 int main(int argc, char** argv) {
     MyStruct obj;
 
-    RttRpcBeastServer server(1);
-    repository&       repo = server._serviceRepository;
+    server server(1);
+    repository&       repo = server.repo_;
 
     repo.add_service("test", obj);
 

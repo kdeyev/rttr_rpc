@@ -1,4 +1,4 @@
-#include "RttRpcBeastServer.h"
+#include "server.h"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -704,44 +704,50 @@ public:
     }
 };
 
-class RttRpcBeastImpl {
-public:
-	RttRpcBeastImpl(int threadCount) : ioc(threadCount), _threadCount(threadCount) {
+namespace rttr_rpc {
+	namespace beast {
+		class server_impl {
+		public:
+			server_impl(int thread_count) : ioc(thread_count), thread_count_(thread_count) {
+			}
+
+			// The io_context is required for all I/O
+			boost::asio::io_context ioc;
+			int thread_count_;
+		};
+
+
+
+		server::server(int thread_count) : impl_(new server_impl(thread_count)) {
+		}
+
+		server::~server() {
+			delete impl_;
+		}
+
+		void server::start(const tcp::endpoint& ep) {
+			// Create and launch a listening port
+			std::make_shared<listener>(
+				impl_->ioc,
+				ep, &repo_)->run();
+
+			// Run the I/O service on the requested number of threads
+			std::vector<std::thread> v;
+			if (impl_->thread_count_ > 0) {
+				v.reserve(impl_->thread_count_ - 1);
+				for (auto i = impl_->thread_count_ - 1; i > 0; --i)
+					v.emplace_back(
+						[this]
+				{
+					impl_->ioc.run();
+				});
+			}
+			impl_->ioc.run();
+
+			// Block until all the threads exit
+			for (auto& t : v)
+				t.join();
+
+		}
 	}
-
-    // The io_context is required for all I/O
-    boost::asio::io_context ioc;
-	int _threadCount;
-};
-
-RttRpcBeastServer::RttRpcBeastServer(int threadCount) : _impl (new RttRpcBeastImpl(threadCount)) {
-}
-
-RttRpcBeastServer::~RttRpcBeastServer() {
-	delete _impl;
-}
-
-void RttRpcBeastServer::start(const tcp::endpoint& ep) {
-    // Create and launch a listening port
-    std::make_shared<listener>( 
-        _impl->ioc,
-        ep, &_serviceRepository)->run();
-
-    // Run the I/O service on the requested number of threads
-    std::vector<std::thread> v;
-	if (_impl->_threadCount > 0) {
-		v.reserve(_impl->_threadCount - 1);
-		for(auto i = _impl->_threadCount - 1; i > 0; --i)
-			v.emplace_back(
-			[this]
-			{
-				_impl->ioc.run();
-			});
-	}
-    _impl->ioc.run();
-
-    // Block until all the threads exit
-    for(auto& t : v)
-        t.join();
-
 }

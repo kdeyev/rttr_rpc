@@ -47,6 +47,8 @@ auto request = std::make_shared <jsonrpc::request> (3, "my_obj.func", R"({"val1"
 // process the JSON-RPC request
 auto response = repo.process_message(request);
 ~~~~~~~~~~~
+## JSON Schema Service Descriptor
+TODO
 
 ## Examples
 More verbous example can be found [here](https://github.com/kdeyev/rttr_rpc/blob/master/src/examples/rttr_rpc/main.cpp).

@@ -7,4 +7,5 @@ set_target_properties(examples PROPERTIES
        
 add_subdirectory (jsonrpc)	   
 add_subdirectory (json_serialization_nlohmann)
+add_subdirectory (rttr_rpc)
 add_subdirectory (rttr_rpc_beast_server)

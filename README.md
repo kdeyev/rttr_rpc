@@ -1,5 +1,5 @@
 # RTTR-RPC
-JSON-RPC server buidt with C++ runtime reflection
+JSON-RPC server built with C++ runtime reflection
 
 - [RTTR-RPC](#rttr-rpc)
   - [Overview](#overview)
@@ -12,6 +12,7 @@ JSON-RPC server buidt with C++ runtime reflection
   - [Build](#build)
     - [Build RTTR](#build-rttr)
     - [Build RTTR-RPC](#build-rttr-rpc)
+  - [References](#references)
 
 
 ## Overview
@@ -21,7 +22,7 @@ RTTR-RPC is a JSON-RPC framework built on top of [RTTR](http://rttr.org) C++ ref
 
 ### C++ reflection
 You have a sctuct:
-~~~~~~~~~~~
+~~~~~~~~~~~c++
 struct MyStruct {
     MyStruct(){};
     void func(double val1, double val2) {
@@ -29,8 +30,8 @@ struct MyStruct {
     }
 };
 ~~~~~~~~~~~
-You add a reflection to your class using non-intrusive sintax;
-~~~~~~~~~~~
+You add a reflection to your class using non-intrusive sintax:
+~~~~~~~~~~~c++
 RTTR_REGISTRATION {
     registration::class_<MyStruct>("MyStruct")(
         // class meta data
@@ -45,8 +46,8 @@ RTTR_REGISTRATION {
 }
 ~~~~~~~~~~~
 ### C++ object binding to JSON-RPC service
-Bind an exisiong sctruct instance to RTTR-RPC service repository:
-~~~~~~~~~~~
+Bind an existing struct instance to RTTR-RPC service repository:
+~~~~~~~~~~~c++
 // service repository
 rttr_rpc::core::repository repo;
 
@@ -58,7 +59,7 @@ repo.add_service("my_obj", obj);
 ~~~~~~~~~~~
 
 invoke the object method using JSON-RPC request
-~~~~~~~~~~~
+~~~~~~~~~~~c++
 // example of JSON-RPC request
 auto request = std::make_shared <jsonrpc::request> (3, "my_obj.func", R"({"val1": 42.0, "val2": 24.0)");
 
@@ -67,7 +68,7 @@ auto response = repo.process_message(request);
 ~~~~~~~~~~~
 ### Javascript client using rpc-web-channel
 rpc-web-channel uses the JSON Schema Service Descriptor for building JS stubs on client side
-~~~~~~~~~~~
+~~~~~~~~~~~javascript
 new RpcWebChannel(jrpc, function(services) {
     let my_obj = services.my_obj;
 
@@ -81,7 +82,7 @@ TODO
 
 ## Components
 
-* [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) - JSON serialization/deserialization mechanism build on top of rttr reflection. This component actively used by [RTTR-RPC::core](https://github.com/kdeyev/rttr_rpc/tree/master/src/core)
+* [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) - JSON serialization/deserialization mechanism build on top of [RTTR](http://rttr.org) reflection. This component actively used by [RTTR-RPC::core](https://github.com/kdeyev/rttr_rpc/tree/master/src/core)
 * [RTTR-RPC::jsonrpc](https://github.com/kdeyev/rttr_rpc/tree/master/src/jsonrpc) - base infrastructure of JSON-RPC messages.
  * [RTTR-RPC::core](https://github.com/kdeyev/rttr_rpc/tree/master/src/core) - JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) serialization 
 * [rpc-web-channel.js](https://github.com/kdeyev/rpc-web-channel) - JavaScript layer over simple-jsonrpc-js which uses the JSON Schema Service Descriptor for building JS stubs on client side. 
@@ -98,3 +99,8 @@ TODO
 2. cmake -G "Visual Studio 15 2017 Win64" ..
 3. cmake --build . --target install
 
+## References
+* [RTTR](http://rttr.org)
+* [JSON for Modern C++](https://github.com/nlohmann/json)
+* [JSON Schema](https://json-schema.org)
+* [JSON Schema Service Descriptor](https://jsonrpc.org/historical/)

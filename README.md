@@ -6,7 +6,7 @@ JSON-RPC server built with C++ runtime reflection
   - [Motivation](#motivation)
     - [C++ reflection](#c-reflection)
     - [C++ object binding to JSON-RPC service](#c-object-binding-to-json-rpc-service)
-    - [Javascript client using rpc-web-channel](#javascript-client-using-rpc-web-channel)
+    - [JavaScript client using rpc-web-channel](#javascript-client-using-rpc-web-channel)
     - [Automatic UI forms generation](#automatic-ui-forms-generation)
   - [Components](#components)
   - [Build](#build)
@@ -85,6 +85,7 @@ TODO
 * [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) - JSON serialization/deserialization mechanism build on top of [RTTR](http://rttr.org) reflection. This component actively used by [RTTR-RPC::core](https://github.com/kdeyev/rttr_rpc/tree/master/src/core)
 * [RTTR-RPC::jsonrpc](https://github.com/kdeyev/rttr_rpc/tree/master/src/jsonrpc) - base infrastructure of JSON-RPC messages.
  * [RTTR-RPC::core](https://github.com/kdeyev/rttr_rpc/tree/master/src/core) - JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) serialization 
+ * [RTTR-RPC::beast](https://github.com/kdeyev/rttr_rpc/tree/master/src/beast) - JSON-RPC HTTP/WebSocket server implementation using [Boost.Beast](https://github.com/boostorg/beast)  
 * [rpc-web-channel.js](https://github.com/kdeyev/rpc-web-channel) - JavaScript layer over simple-jsonrpc-js which uses the JSON Schema Service Descriptor for building JS stubs on client side. 
 
 ## Build

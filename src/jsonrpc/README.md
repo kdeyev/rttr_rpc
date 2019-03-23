@@ -1,4 +1,4 @@
-# RTTR-RPC::JsonRpc
+# RTTR-RPC::jsonrpc
 
 Base infrastructure of JSON-RPC messages. This code was build with usage of [C++ JSON-RPC 2.0 library](https://github.com/badaix/jsonrpcpp)
 

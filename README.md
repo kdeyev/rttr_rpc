@@ -66,7 +66,7 @@ auto request = std::make_shared <jsonrpc::request> (3, "my_obj.func", R"({"val1"
 // process the JSON-RPC request
 auto response = repo.process_message(request);
 ~~~~~~~~~~~
-### Javascript client using rpc-web-channel
+### JavaScript client using rpc-web-channel
 rpc-web-channel uses the JSON Schema Service Descriptor for building JS stubs on client side
 ~~~~~~~~~~~javascript
 new RpcWebChannel(jrpc, function(services) {

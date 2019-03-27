@@ -1,10 +1,11 @@
 #include "listener.h"
 
 #include "http_session.h"
+#include "fail.h"
 
 namespace rttr_rpc {
 	namespace beast {
-		listener::listener(boost::asio::io_context& ioc, tcp::endpoint endpoint, repository* serviceRepository)
+		listener::listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, rttr_rpc::core::repository* serviceRepository)
 			: acceptor_(ioc), socket_(ioc), serviceRepository_(serviceRepository) {
 			boost::system::error_code ec;
 

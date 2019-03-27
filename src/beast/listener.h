@@ -4,12 +4,10 @@
 
 #include "core/repository.h"
 
-#include "rttr_rpc_beast_export.h"
-
 namespace rttr_rpc {
 	namespace beast {
 		// Accepts incoming connections and launches the sessions
-		class RTTR_RPC_BEAST_EXPORT listener : public std::enable_shared_from_this<listener> {
+		class listener : public std::enable_shared_from_this<listener> {
 			boost::asio::ip::tcp::acceptor acceptor_;
 			boost::asio::ip::tcp::socket   socket_;
 			rttr_rpc::core::repository*    serviceRepository_;

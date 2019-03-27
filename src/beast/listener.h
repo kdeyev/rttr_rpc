@@ -1,93 +1,28 @@
-#include "http_session.h"
+#pragma once
 
-// Accepts incoming connections and launches the sessions
-class listener : public std::enable_shared_from_this<listener>
-{
-    tcp::acceptor acceptor_;
-    tcp::socket socket_;
-	repository* serviceRepository_;
+#include <boost/asio/ip/tcp.hpp>
 
-public:
-    listener(
-        boost::asio::io_context& ioc,
-        tcp::endpoint endpoint,
-		repository* serviceRepository)
-        : acceptor_(ioc)
-        , socket_(ioc)
-        , serviceRepository_(serviceRepository)
-    {
-        boost::system::error_code ec;
+#include "core/repository.h"
 
-        // Open the acceptor
-        acceptor_.open(endpoint.protocol(), ec);
-        if(ec)
-        {
-            fail(ec, "open");
-            return;
-        }
+#include "rttr_rpc_beast_export.h"
 
-        // Allow address reuse
-        acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
-        if(ec)
-        {
-            fail(ec, "set_option");
-            return;
-        }
+namespace rttr_rpc {
+	namespace beast {
+		// Accepts incoming connections and launches the sessions
+		class RTTR_RPC_BEAST_EXPORT listener : public std::enable_shared_from_this<listener> {
+			boost::asio::ip::tcp::acceptor acceptor_;
+			boost::asio::ip::tcp::socket   socket_;
+			rttr_rpc::core::repository*    serviceRepository_;
 
-        // Bind to the server address
-        acceptor_.bind(endpoint, ec);
-        if(ec)
-        {
-            fail(ec, "bind");
-            return;
-        }
+		public:
+			listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, rttr_rpc::core::repository* serviceRepository);
 
-        // Start listening for connections
-        acceptor_.listen(
-            boost::asio::socket_base::max_listen_connections, ec);
-        if(ec)
-        {
-            fail(ec, "listen");
-            return;
-        }
-    }
+			// Start accepting incoming connections
+			void run();
 
-    // Start accepting incoming connections
-    void
-    run()
-    {
-        if(! acceptor_.is_open())
-            return;
-        do_accept();
-    }
+			void do_accept();
 
-    void
-    do_accept()
-    {
-        acceptor_.async_accept(
-            socket_,
-            std::bind(
-                &listener::on_accept,
-                shared_from_this(),
-                std::placeholders::_1));
-    }
-
-    void
-    on_accept(boost::system::error_code ec)
-    {
-        if(ec)
-        {
-            fail(ec, "accept");
-        }
-        else
-        {
-            // Create the http_session and run it
-            std::make_shared<http_session>(
-                std::move(socket_),
-				serviceRepository_)->run();
-        }
-
-        // Accept another connection
-        do_accept();
-    }
-};
+			void on_accept(boost::system::error_code ec);
+		};
+	}
+}

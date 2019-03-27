@@ -22,7 +22,7 @@ namespace rttr_rpc {
 			delete impl_;
 		}
 
-		void server::start(const tcp::endpoint& ep) {
+		void server::start(const boost::asio::ip::tcp::endpoint& ep) {
 			// Create and launch a listening port
 			std::make_shared<listener>(
 				impl_->ioc,

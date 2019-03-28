@@ -19,13 +19,13 @@ namespace rttr_rpc {
             boost::asio::strand<boost::asio::io_context::executor_type>  strand_;
             boost::asio::steady_timer                                    timer_;
             boost::beast::flat_buffer                                    buffer_;
-            rttr_rpc::core::repository*                                  serviceRepository_;
+            const rttr_rpc::core::repository&                            repo_;
             boost::beast::http::request<boost::beast::http::string_body> req_;
             queue*                                                       queue_;
 
         public:
             // Take ownership of the socket
-            explicit http_session(boost::asio::ip::tcp::socket socket, rttr_rpc::core::repository* serviceRepository_);
+            http_session(boost::asio::ip::tcp::socket socket, const rttr_rpc::core::repository& repo);
             ~http_session();
 
             // Start the asynchronous operation

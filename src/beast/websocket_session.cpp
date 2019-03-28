@@ -26,9 +26,9 @@ namespace websocket = boost::beast::websocket; // from <boost/beast/websocket.hp
 using namespace rttr_rpc::core;
 
 // Take ownership of the socket
-websocket_session::websocket_session(boost::asio::ip::tcp::socket socket, repository* serviceRepository)
+websocket_session::websocket_session(boost::asio::ip::tcp::socket socket, const repository& repo)
     : ws_(std::move(socket)), strand_(ws_.get_executor()), timer_(ws_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()),
-      _serviceRepository(serviceRepository) {
+      repo_(repo) {
 }
 
 void websocket_session::on_accept(boost::system::error_code ec) {
@@ -144,7 +144,7 @@ void websocket_session::on_read(boost::system::error_code ec, std::size_t bytes_
     jsonrpc::message_ptr request = jsonrpc::parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
     buffer_.consume(buffer_.size());
 
-    jsonrpc::message_ptr response      = _serviceRepository->process_message(request);
+    jsonrpc::message_ptr response      = repo_.process_message(request);
     std::string          response_body = response->to_string();
 
     size_t n = buffer_copy(buffer_.prepare(response_body.size()), boost::asio::buffer(response_body.data(), response_body.size()));

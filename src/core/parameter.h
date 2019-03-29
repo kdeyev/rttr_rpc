@@ -7,9 +7,6 @@
 #include "rttr_rpc_core_export.h"
 
 namespace rttr_rpc {
-    // TODO: move to global
-    enum class RTTR_RPC_CORE_EXPORT meta_data_type { thread_safe, description, version };
-
     namespace core {
 
         std::string to_string(const rttr::string_view& in);

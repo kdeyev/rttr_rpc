@@ -4,6 +4,7 @@
 
 #include "io/from_json.h"
 #include "io/to_json.h"
+#include "core/matadata.h"
 
 namespace rttr_rpc {
     namespace core {

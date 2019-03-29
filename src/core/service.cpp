@@ -2,6 +2,7 @@
 
 #include "io/from_json.h"
 #include "io/to_json.h"
+#include "core/matadata.h"
 
 #include <sstream>
 

@@ -4,6 +4,8 @@
 
 #include "io/from_json.h"
 #include "io/to_json.h"
+#include "core/matadata.h"
+
 
 namespace rttr_rpc {
     namespace core {
@@ -177,7 +179,7 @@ namespace rttr_rpc {
             method_desc["summary"]     = to_string(method_.get_signature());
             method_desc["description"] = description_;
 
-            nlohmann::json properties;
+            nlohmann::json properties = nlohmann::json::object();
 
             nlohmann::json required    = nlohmann::json::array();
             nlohmann::json definitions = nlohmann::json::object();

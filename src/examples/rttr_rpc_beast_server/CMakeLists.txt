@@ -7,8 +7,8 @@ generateLibraryVersionVariables(${RTTR_RPC_VERSION_MAJOR} ${RTTR_RPC_VERSION_MIN
                                 "RTTR-RPC Examples: Boost.Beast RPC server" "" "MIT License")
 
 #loadFolder("files" HPP_FILES SRC_FILES)
-file(GLOB_RECURSE SRC_FILES *.cpp)
-file(GLOB_RECURSE HPP_FILES *.h)
+file(GLOB_RECURSE SRC_FILES *.cpp ../services/*.cpp)
+file(GLOB_RECURSE HPP_FILES *.h ../services/*.h)
 
 add_definitions(-D_WIN32_WINNT=0x0601)
 

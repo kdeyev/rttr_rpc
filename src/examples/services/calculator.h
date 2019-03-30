@@ -16,22 +16,18 @@ struct vector2d {
 struct Calculator {
     Calculator(){};
     double add(double val1, double val2) {
-        //std::cout << val1 + val2 << std::endl;
         return val1 + val2;
     };
 
     double substruct(double val1, double val2) {
-        //std::cout << val1 - val2 << std::endl;
         return val1 - val2;
     };
 
     vector2d multiply(double val1, vector2d val2) {
-        //std::cout << val1 - val2 << std::endl;
         return vector2d(val1 * val2.x_, val1 * val2.y_);
     };
 
     vector2d multiply(vector2d val1, double val2) {
-        //std::cout << val1 - val2 << std::endl;
         return vector2d(val2 * val1.x_, val2 * val1.y_);
     };
 

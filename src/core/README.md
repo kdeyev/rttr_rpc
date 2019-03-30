@@ -2,28 +2,37 @@
 
 JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) serialization.
 
+- [RTTR-RPC::core](#rttr-rpccore)
+  - [Motivation](#motivation)
+  - [JSON Schema Service Descriptor](#json-schema-service-descriptor)
+    - [Method description is](#method-description-is)
+      - [JSON-Schema references](#json-schema-references)
+  - [Examples](#examples)
+  - [References](#references)
+
 ## Motivation
 You have a sctuct:
 ~~~~~~~~~~~c++
-struct MyStruct {
-    MyStruct(){};
-    void func(double val1, double val2) {
-        std::cout << val1 + val2 << std::endl;
-    }
+struct Calculator {
+    Calculator(){};
+    double add(double val1, double val2) {
+        return val1 + val2;
+    };
 };
 ~~~~~~~~~~~
 You add a reflection to your class using non-intrusive sintax:
 ~~~~~~~~~~~c++
 RTTR_REGISTRATION {
-    registration::class_<MyStruct>("MyStruct")(
+    rttr::registration::class_<Calculator>("Calculator")(
         // class meta data
-        metadata(meta_data_type::thread_safe, true), 
-        metadata(meta_data_type::description, "My cool service obj"), 
-        metadata(meta_data_type::version, "0.1a")
-    )
-    .method("func", &MyStruct::func)(
-        parameter_names("val1", "val2"), 
-        metadata(meta_data_type::description, "My cool method func")
+        rttr::metadata(rttr_rpc::meta_data_type::thread_safe, true), 
+		rttr::metadata(rttr_rpc::meta_data_type::description, "Calculator service obj"),
+        rttr::metadata(rttr_rpc::meta_data_type::version, "7.0")
+	)
+    
+    .method("add", rttr::select_overload<double(double, double)>(&Calculator::add))(
+    	rttr::parameter_names("val1", "val2"),
+    	rttr::metadata(rttr_rpc::meta_data_type::description, "Addition of scalars")
     );
 }
 ~~~~~~~~~~~
@@ -32,21 +41,30 @@ Bind an existing struct instance to RTTR-RPC service repository:
 // service repository
 rttr_rpc::core::repository repo;
 
-// an instance of your struct
-MyStruct obj;
+// an instance of your service
+Calculator calc;
 
 // bind the object to the service repository
-repo.add_service("my_obj", obj);
+ repo.add_service("calc", calc);
 ~~~~~~~~~~~
 
 invoke the object method using JSON-RPC request
 ~~~~~~~~~~~c++
 // example of JSON-RPC request
-auto request = std::make_shared <jsonrpc::request> (3, "my_obj.func", R"({"val1": 42.0, "val2": 24.0)");
+auto request = std::make_shared <jsonrpc::request> (3, "calc.add", R"([42.0,24.0])");
 
 // process the JSON-RPC request
 auto response = repo.process_message(request);
 ~~~~~~~~~~~
+It's also allowed to used named aruments:
+~~~~~~~~~~~c++
+// example of JSON-RPC request with named arguments
+auto request = std::make_shared <jsonrpc::request> (3, "calc.add", R"({"val1": 42.0, "val2": 24.0)");
+
+// process the JSON-RPC request
+auto response = repo.process_message(request);
+~~~~~~~~~~~
+
 ## JSON Schema Service Descriptor
 You can receive a description of avalable services in JSON Schema Service Descriptor format:
 ~~~~~~~~~~c++
@@ -55,16 +73,19 @@ std::cout << repo.get_services_info().dump(4) << std::endl;
 JSON Schema Service Descriptor:
 ~~~~~~~~~json
 {
-    "test": {
-        "info": {
-            "title": "My cool service obj",
-            "version": "0.1a"
-        },
+    "calc": {
         "jsonrpc": "2.0",
+        "info": {
+            "title": "Calculator service obj",
+            "version": "7.0"
+        },
         "methods": {
-            "func": {
-                "description": "My cool method func",
+            "add( double, double )": {
+                "name": "add",
+                "summary": "add( double, double )",
+                "description": "Addition of scalars",
                 "params": {
+                    "type": "object",
                     "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "val1": {
@@ -79,21 +100,37 @@ JSON Schema Service Descriptor:
                     "required": [
                         "val1",
                         "val2"
-                    ],
-                    "type": "object"
+                    ]
                 },
                 "result": {
                     "description": "return value",
-                    "type": "null"
-                },
-                "summary": "func( double, double )"
+                    "type": "number"
+                }
             },
-            "func2": {
-                "description": "My cool method func2",
+            "add( vector2d, vector2d )": {
+                "name": "add",
+                "summary": "add( vector2d, vector2d )",
+                "description": "Addition of vectors",
                 "params": {
+                    "type": "object",
                     "$schema": "http://json-schema.org/draft-07/schema#",
+                    "properties": {
+                        "val1": {
+                            "description": "val1",
+                            "$ref": "#/definitions/vector2d"
+                        },
+                        "val2": {
+                            "description": "val2",
+                            "$ref": "#/definitions/vector2d"
+                        }
+                    },
+                    "required": [
+                        "val1",
+                        "val2"
+                    ],
                     "definitions": {
-                        "point2d": {
+                        "vector2d": {
+                            "type": "object",
                             "properties": {
                                 "x": {
                                     "description": "x coordinate",
@@ -107,78 +144,225 @@ JSON Schema Service Descriptor:
                             "required": [
                                 "x",
                                 "y"
-                            ],
-                            "type": "object"
+                            ]
                         }
-                    },
+                    }
+                },
+                "result": {
+                    "description": "return value",
+                    "$ref": "#/definitions/vector2d"
+                }
+            },
+            "dot( vector2d, vector2d )": {
+                "name": "dot",
+                "summary": "dot( vector2d, vector2d )",
+                "description": "Dot product of two vectors",
+                "params": {
+                    "type": "object",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "val1": {
-                            "$ref": "#/definitions/point2d",
-                            "description": "val1"
+                            "description": "val1",
+                            "$ref": "#/definitions/vector2d"
                         },
                         "val2": {
-                            "$ref": "#/definitions/point2d",
-                            "description": "val2"
+                            "description": "val2",
+                            "$ref": "#/definitions/vector2d"
                         }
                     },
                     "required": [
                         "val1",
                         "val2"
                     ],
-                    "type": "object"
+                    "definitions": {
+                        "vector2d": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        }
+                    }
                 },
                 "result": {
                     "description": "return value",
                     "type": "number"
-                },
-                "summary": "func2( structpoint2d, structpoint2d )"
+                }
             },
-            "func3": {
-                "description": "My cool method func3",
+            "substruct( double, double )": {
+                "name": "substruct",
+                "summary": "substruct( double, double )",
+                "description": "Subtruction of scalars",
                 "params": {
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "al": {
-                            "description": "al",
-                            "enum": [
-                                "AlignLeft",
-                                "AlignRight",
-                                "AlignHCenter",
-                                "AlignJustify"
-                            ],
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "al"
-                    ],
-                    "type": "object"
-                },
-                "result": {
-                    "description": "return value",
-                    "type": "string"
-                },
-                "summary": "func3( enumE_Alignment )"
-            },
-            "func4": {
-                "description": "My cool method func4",
-                "params": {
+                    "type": "object",
                     "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "val1": {
-                            "default": 42.0,
                             "description": "val1",
+                            "type": "number"
+                        },
+                        "val2": {
+                            "description": "val2",
                             "type": "number"
                         }
                     },
-                    "required": [],
-                    "type": "object"
+                    "required": [
+                        "val1",
+                        "val2"
+                    ]
                 },
                 "result": {
                     "description": "return value",
                     "type": "number"
+                }
+            },
+            "substruct( vector2d, vector2d )": {
+                "name": "substruct",
+                "summary": "substruct( vector2d, vector2d )",
+                "description": "Subtruction of vectors",
+                "params": {
+                    "type": "object",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "properties": {
+                        "val1": {
+                            "description": "val1",
+                            "$ref": "#/definitions/vector2d"
+                        },
+                        "val2": {
+                            "description": "val2",
+                            "$ref": "#/definitions/vector2d"
+                        }
+                    },
+                    "required": [
+                        "val1",
+                        "val2"
+                    ],
+                    "definitions": {
+                        "vector2d": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        }
+                    }
                 },
-                "summary": "func4( double )"
+                "result": {
+                    "description": "return value",
+                    "$ref": "#/definitions/vector2d"
+                }
+            },
+            "multiply( vector2d, double )": {
+                "name": "multiply",
+                "summary": "multiply( vector2d, double )",
+                "description": "Multiplcation vector and scalar",
+                "params": {
+                    "type": "object",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "properties": {
+                        "val1": {
+                            "description": "val1",
+                            "$ref": "#/definitions/vector2d"
+                        },
+                        "val2": {
+                            "description": "val2",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "val1",
+                        "val2"
+                    ],
+                    "definitions": {
+                        "vector2d": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        }
+                    }
+                },
+                "result": {
+                    "description": "return value",
+                    "$ref": "#/definitions/vector2d"
+                }
+            },
+            "multiply( double, vector2d )": {
+                "name": "multiply",
+                "summary": "multiply( double, vector2d )",
+                "description": "Multiplcation vector and scalar",
+                "params": {
+                    "type": "object",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "properties": {
+                        "val1": {
+                            "description": "val1",
+                            "type": "number"
+                        },
+                        "val2": {
+                            "description": "val2",
+                            "$ref": "#/definitions/vector2d"
+                        }
+                    },
+                    "required": [
+                        "val1",
+                        "val2"
+                    ],
+                    "definitions": {
+                        "vector2d": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        }
+                    }
+                },
+                "result": {
+                    "description": "return value",
+                    "$ref": "#/definitions/vector2d"
+                }
             }
         }
     }
@@ -188,12 +372,29 @@ JSON Schema Service Descriptor:
 Each method description is a JSON Schema document:
 ~~~~~~~~~json
 {
-    "description": "My cool method func2",
-    "summary": "func2( structpoint2d, structpoint2d )",
+    "name": "dot",
+    "summary": "dot( vector2d, vector2d )",
+    "description": "Dot product of two vectors",
     "params": {
+        "type": "object",
         "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+            "val1": {
+                "description": "val1",
+                "$ref": "#/definitions/vector2d"
+            },
+            "val2": {
+                "description": "val2",
+                "$ref": "#/definitions/vector2d"
+            }
+        },
+        "required": [
+            "val1",
+            "val2"
+        ],
         "definitions": {
-            "point2d": {
+            "vector2d": {
+                "type": "object",
                 "properties": {
                     "x": {
                         "description": "x coordinate",
@@ -207,25 +408,9 @@ Each method description is a JSON Schema document:
                 "required": [
                     "x",
                     "y"
-                ],
-                "type": "object"
+                ]
             }
-        },
-        "properties": {
-            "val1": {
-                "$ref": "#/definitions/point2d",
-                "description": "val1"
-            },
-            "val2": {
-                "$ref": "#/definitions/point2d",
-                "description": "val2"
-            }
-        },
-        "required": [
-            "val1",
-            "val2"
-        ],
-        "type": "object"
+        }
     },
     "result": {
         "description": "return value",
@@ -237,7 +422,8 @@ Each method description is a JSON Schema document:
 RTTR-RPC use JSON-Schema references for  composite data types support:
 ~~~~~~~~~json
 "definitions": {
-    "point2d": {
+    "vector2d": {
+        "type": "object",
         "properties": {
             "x": {
                 "description": "x coordinate",
@@ -251,14 +437,13 @@ RTTR-RPC use JSON-Schema references for  composite data types support:
         "required": [
             "x",
             "y"
-        ],
-        "type": "object"
+        ]
     }
 }
 ~~~~~~~~~
 and
 ~~~~~~~~~json
-"$ref": "#/definitions/point2d",
+"$ref": "#/definitions/vector2d"
 ~~~~~~~~~
 
 ## Examples

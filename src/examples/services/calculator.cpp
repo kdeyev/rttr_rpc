@@ -45,6 +45,6 @@ RTTR_REGISTRATION {
 
 	.method("dot", &Calculator::dot)(
 		rttr::parameter_names("val1", "val2"),
-		rttr::metadata(rttr_rpc::meta_data_type::description, "Dot produuct of two vectors")
+		rttr::metadata(rttr_rpc::meta_data_type::description, "Dot product of two vectors")
 	);
 }

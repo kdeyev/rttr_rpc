@@ -6,7 +6,7 @@ JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github
   - [Motivation](#motivation)
   - [JSON Schema Service Descriptor](#json-schema-service-descriptor)
     - [Method description](#method-description)
-      - [Data types support](#data-types-support)
+      - [C++ types support](#c-types-support)
       - [JSON-Schema references](#json-schema-references)
   - [Examples](#examples)
   - [References](#references)
@@ -209,7 +209,7 @@ Each method description is a JSON Schema document:
 }
 ~~~~~~~~~~
 
-#### Data types support
+#### C++ types support
 Data types support utilies a JSON Schema "minimum" and "maximum" keywords. 
 So, int16_t is described as integer with "minimum" and "maximum" values:
 ~~~~~~~~~~~json

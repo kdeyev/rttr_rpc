@@ -5,7 +5,7 @@ JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github
 - [RTTR-RPC::core](#rttr-rpccore)
   - [Motivation](#motivation)
   - [JSON Schema Service Descriptor](#json-schema-service-descriptor)
-    - [Method description is](#method-description-is)
+    - [Method description](#method-description)
       - [Data types support](#data-types-support)
       - [JSON-Schema references](#json-schema-references)
   - [Examples](#examples)
@@ -158,7 +158,7 @@ JSON Schema Service Descriptor:
     }
 }
 ~~~~~~~~~
-### Method description is
+### Method description
 Each method description is a JSON Schema document:
 ~~~~~~~~~json
 {

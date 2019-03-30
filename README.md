@@ -56,7 +56,7 @@ rttr_rpc::core::repository repo;
 Calculator calc;
 
 // bind the object to the service repository
- repo.add_service("calc", calc);
+repo.add_service("calc", calc);
 ~~~~~~~~~~~
 
 invoke the object method using JSON-RPC request

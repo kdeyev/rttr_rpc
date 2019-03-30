@@ -16,6 +16,17 @@ namespace rttr_rpc {
             : info_(info), name_(to_string(info.get_name())), type_(info.get_type()), index_(info.get_index()), has_default_value_(info.has_default_value()) {
         }
 
+        template <typename T>
+        bool set_arithmetic_type_limits(const rttr::type& type, rttr_rpc::json& param, const char* json_type_name) {
+            if(type == rttr::type::get<T>()) {
+                param["minimum"] = std::numeric_limits<T>::lowest();
+                param["maximum"] = std::numeric_limits<T>::max();
+                param["type"]    = json_type_name;
+                return true;
+            }
+            return false;
+        }
+
         rttr_rpc::json parameter::create_parameter_description(const std::string& desc, const rttr::type& type, rttr_rpc::json& defs) {
             rttr_rpc::json param;
             param["description"] = desc;

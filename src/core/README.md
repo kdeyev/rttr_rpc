@@ -6,6 +6,7 @@ JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github
   - [Motivation](#motivation)
   - [JSON Schema Service Descriptor](#json-schema-service-descriptor)
     - [Method description is](#method-description-is)
+      - [Data types support](#data-types-support)
       - [JSON-Schema references](#json-schema-references)
   - [Examples](#examples)
   - [References](#references)
@@ -15,7 +16,7 @@ You have a sctuct:
 ~~~~~~~~~~~c++
 struct Calculator {
     Calculator(){};
-    double add(double val1, double val2) {
+    double sum(double val1, double val2) {
         return val1 + val2;
     };
 };
@@ -30,9 +31,9 @@ RTTR_REGISTRATION {
         rttr::metadata(rttr_rpc::meta_data_type::version, "7.0")
 	)
     
-    .method("add", rttr::select_overload<double(double, double)>(&Calculator::add))(
+    .method("sum", rttr::select_overload<double(double, double)>(&Calculator::sum))(
     	rttr::parameter_names("val1", "val2"),
-    	rttr::metadata(rttr_rpc::meta_data_type::description, "Addition of scalars")
+    	rttr::metadata(rttr_rpc::meta_data_type::description, "Summation of scalars")
     );
 }
 ~~~~~~~~~~~
@@ -51,7 +52,7 @@ Calculator calc;
 invoke the object method using JSON-RPC request
 ~~~~~~~~~~~c++
 // example of JSON-RPC request
-auto request = std::make_shared <jsonrpc::request> (3, "calc.add", R"([42.0,24.0])");
+auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"([42.0,24.0])");
 
 // process the JSON-RPC request
 auto response = repo.process_message(request);
@@ -59,7 +60,7 @@ auto response = repo.process_message(request);
 It's also allowed to used named aruments:
 ~~~~~~~~~~~c++
 // example of JSON-RPC request with named arguments
-auto request = std::make_shared <jsonrpc::request> (3, "calc.add", R"({"val1": 42.0, "val2": 24.0)");
+auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"({"val1": 42.0, "val2": 24.0)");
 
 // process the JSON-RPC request
 auto response = repo.process_message(request);
@@ -80,10 +81,10 @@ JSON Schema Service Descriptor:
             "version": "7.0"
         },
         "methods": {
-            "add( double, double )": {
-                "name": "add",
-                "summary": "add( double, double )",
-                "description": "Addition of scalars",
+            "sum( double, double )": {
+                "name": "sum",
+                "summary": "sum( double, double )",
+                "description": "Summation of scalars",
                 "params": {
                     "type": "object",
                     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -107,10 +108,10 @@ JSON Schema Service Descriptor:
                     "type": "number"
                 }
             },
-            "add( vector2d, vector2d )": {
-                "name": "add",
-                "summary": "add( vector2d, vector2d )",
-                "description": "Addition of vectors",
+            "sum( vector2d, vector2d )": {
+                "name": "sum",
+                "summary": "sum( vector2d, vector2d )",
+                "description": "Summation of vectors",
                 "params": {
                     "type": "object",
                     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -118,217 +119,6 @@ JSON Schema Service Descriptor:
                         "val1": {
                             "description": "val1",
                             "$ref": "#/definitions/vector2d"
-                        },
-                        "val2": {
-                            "description": "val2",
-                            "$ref": "#/definitions/vector2d"
-                        }
-                    },
-                    "required": [
-                        "val1",
-                        "val2"
-                    ],
-                    "definitions": {
-                        "vector2d": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "description": "x coordinate",
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "description": "y coordinate",
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ]
-                        }
-                    }
-                },
-                "result": {
-                    "description": "return value",
-                    "$ref": "#/definitions/vector2d"
-                }
-            },
-            "dot( vector2d, vector2d )": {
-                "name": "dot",
-                "summary": "dot( vector2d, vector2d )",
-                "description": "Dot product of two vectors",
-                "params": {
-                    "type": "object",
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "val1": {
-                            "description": "val1",
-                            "$ref": "#/definitions/vector2d"
-                        },
-                        "val2": {
-                            "description": "val2",
-                            "$ref": "#/definitions/vector2d"
-                        }
-                    },
-                    "required": [
-                        "val1",
-                        "val2"
-                    ],
-                    "definitions": {
-                        "vector2d": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "description": "x coordinate",
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "description": "y coordinate",
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ]
-                        }
-                    }
-                },
-                "result": {
-                    "description": "return value",
-                    "type": "number"
-                }
-            },
-            "substruct( double, double )": {
-                "name": "substruct",
-                "summary": "substruct( double, double )",
-                "description": "Subtruction of scalars",
-                "params": {
-                    "type": "object",
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "val1": {
-                            "description": "val1",
-                            "type": "number"
-                        },
-                        "val2": {
-                            "description": "val2",
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "val1",
-                        "val2"
-                    ]
-                },
-                "result": {
-                    "description": "return value",
-                    "type": "number"
-                }
-            },
-            "substruct( vector2d, vector2d )": {
-                "name": "substruct",
-                "summary": "substruct( vector2d, vector2d )",
-                "description": "Subtruction of vectors",
-                "params": {
-                    "type": "object",
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "val1": {
-                            "description": "val1",
-                            "$ref": "#/definitions/vector2d"
-                        },
-                        "val2": {
-                            "description": "val2",
-                            "$ref": "#/definitions/vector2d"
-                        }
-                    },
-                    "required": [
-                        "val1",
-                        "val2"
-                    ],
-                    "definitions": {
-                        "vector2d": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "description": "x coordinate",
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "description": "y coordinate",
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ]
-                        }
-                    }
-                },
-                "result": {
-                    "description": "return value",
-                    "$ref": "#/definitions/vector2d"
-                }
-            },
-            "multiply( vector2d, double )": {
-                "name": "multiply",
-                "summary": "multiply( vector2d, double )",
-                "description": "Multiplcation vector and scalar",
-                "params": {
-                    "type": "object",
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "val1": {
-                            "description": "val1",
-                            "$ref": "#/definitions/vector2d"
-                        },
-                        "val2": {
-                            "description": "val2",
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "val1",
-                        "val2"
-                    ],
-                    "definitions": {
-                        "vector2d": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "description": "x coordinate",
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "description": "y coordinate",
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ]
-                        }
-                    }
-                },
-                "result": {
-                    "description": "return value",
-                    "$ref": "#/definitions/vector2d"
-                }
-            },
-            "multiply( double, vector2d )": {
-                "name": "multiply",
-                "summary": "multiply( double, vector2d )",
-                "description": "Multiplcation vector and scalar",
-                "params": {
-                    "type": "object",
-                    "$schema": "http://json-schema.org/draft-07/schema#",
-                    "properties": {
-                        "val1": {
-                            "description": "val1",
-                            "type": "number"
                         },
                         "val2": {
                             "description": "val2",
@@ -418,6 +208,28 @@ Each method description is a JSON Schema document:
     }
 }
 ~~~~~~~~~~
+
+#### Data types support
+Data types support utilies a JSON Schema "minimum" and "maximum" keywords. 
+So, int16_t is described as integer with "minimum" and "maximum" values:
+~~~~~~~~~~~json
+"val1": {
+    "description": "val1",
+    "minimum": -32768,
+    "maximum": 32767,
+    "type": "integer"
+}
+~~~~~~~~~~~
+uint16_t looks:
+~~~~~~~~~~~json
+"val1": {
+    "description": "val1",
+    "minimum": 0,
+    "maximum": 4294967295,
+    "type": "integer"
+}
+~~~~~~~~~~~
+
 #### JSON-Schema references
 RTTR-RPC use JSON-Schema references for  composite data types support:
 ~~~~~~~~~json

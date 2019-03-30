@@ -17,7 +17,7 @@ struct Calculator {
     Calculator(){};
 
 	template <typename T>
-    T add(T val1, T val2) {
+    T sum(T val1, T val2) {
         return val1 + val2;
     };
 
@@ -29,7 +29,7 @@ struct Calculator {
         return vector2d(val2 * val1.x_, val2 * val1.y_);
     };
 
-    vector2d add(vector2d val1, vector2d val2) {
+    vector2d sum(vector2d val1, vector2d val2) {
         return vector2d(val1.x_ + val2.x_, val1.y_ + val2.y_);
     };
 

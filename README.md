@@ -23,25 +23,26 @@ RTTR-RPC is a JSON-RPC framework built on top of [RTTR](http://rttr.org) C++ ref
 ### C++ reflection
 You have a sctuct:
 ~~~~~~~~~~~c++
-struct MyStruct {
-    MyStruct(){};
-    void func(double val1, double val2) {
-        std::cout << val1 + val2 << std::endl;
-    }
+struct Calculator {
+    Calculator(){};
+    double sum(double val1, double val2) {
+        return val1 + val2;
+    };
 };
 ~~~~~~~~~~~
 You add a reflection to your class using non-intrusive sintax:
 ~~~~~~~~~~~c++
 RTTR_REGISTRATION {
-    registration::class_<MyStruct>("MyStruct")(
+    rttr::registration::class_<Calculator>("Calculator")(
         // class meta data
-        metadata(meta_data_type::thread_safe, true), 
-        metadata(meta_data_type::description, "My cool service obj"), 
-        metadata(meta_data_type::version, "0.1a")
-    )
-    .method("func", &MyStruct::func)(
-        parameter_names("val1", "val2"), 
-        metadata(meta_data_type::description, "My cool method func")
+        rttr::metadata(rttr_rpc::meta_data_type::thread_safe, true), 
+		rttr::metadata(rttr_rpc::meta_data_type::description, "Calculator service obj"),
+        rttr::metadata(rttr_rpc::meta_data_type::version, "7.0")
+	)
+    
+    .method("sum", rttr::select_overload<double(double, double)>(&Calculator::sum))(
+    	rttr::parameter_names("val1", "val2"),
+    	rttr::metadata(rttr_rpc::meta_data_type::description, "Summation of scalars")
     );
 }
 ~~~~~~~~~~~
@@ -51,17 +52,25 @@ Bind an existing struct instance to RTTR-RPC service repository:
 // service repository
 rttr_rpc::core::repository repo;
 
-// an instance of your struct
-MyStruct obj;
+// an instance of your service
+Calculator calc;
 
 // bind the object to the service repository
-repo.add_service("my_obj", obj);
+ repo.add_service("calc", calc);
 ~~~~~~~~~~~
 
 invoke the object method using JSON-RPC request
 ~~~~~~~~~~~c++
 // example of JSON-RPC request
-auto request = std::make_shared <jsonrpc::request> (3, "my_obj.func", R"({"val1": 42.0, "val2": 24.0)");
+auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"([42.0,24.0])");
+
+// process the JSON-RPC request
+auto response = repo.process_message(request);
+~~~~~~~~~~~
+It's also allowed to used named aruments:
+~~~~~~~~~~~c++
+// example of JSON-RPC request with named arguments
+auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"({"val1": 42.0, "val2": 24.0)");
 
 // process the JSON-RPC request
 auto response = repo.process_message(request);
@@ -70,15 +79,26 @@ auto response = repo.process_message(request);
 rpc-web-channel uses the JSON Schema Service Descriptor for building JS stubs on client side
 ~~~~~~~~~~~javascript
 new RpcWebChannel(jrpc, function(services) {
-    let my_obj = services.my_obj;
+    let calc = services.calc;
 
-    my_obj.func(42.0, 24.0).then(function (result) {
+    calc.sum(42.0, 24.0).then(function (result) {
         // do something with the result
     });
 };
 ~~~~~~~~~~~
 ### Automatic UI forms generation
-TODO
+This example shows how to generate UI forms for RPC functions exposed by the RpcWebChannel server.
+The example utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a specific RpcWebChannel server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using RpcWebChannel.
+
+An example of generated form:
+![calc_sum_double](img/calc_sum_double.png)
+![calc_sum_double](img/calc_sum_double_1.png)
+Parameter values validation
+![calc_sum_uchar](img/calc_sum_uchar_1.png)calc_dot
+Composite parameters:
+![calc_dot](img/calc_dot_1.png)
+Server invocation
+![calc_dot](img/calc_dot_2.png)
 
 ## Components
 

@@ -78,7 +78,7 @@ auto response = repo.process_message(request);
 ### JavaScript client using rpc-web-channel
 rpc-web-channel uses the JSON Schema Service Descriptor for building JS stubs on client side
 ~~~~~~~~~~~javascript
-new RpcWebChannel(jrpc, function(services) {
+new rpc-web-channel(jrpc, function(services) {
     let calc = services.calc;
 
     calc.sum(42.0, 24.0).then(function (result) {
@@ -87,7 +87,7 @@ new RpcWebChannel(jrpc, function(services) {
 };
 ~~~~~~~~~~~
 ### Automatic UI forms generation
-RpcWebChannel utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a specific RpcWebChannel server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using RpcWebChannel.
+rpc-web-channel utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a Service Descriptor compatible JSON-RPC server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using rpc-web-channel.
 
 An example of generated form:
 ![calc_sum_double](img/calc_sum_double.png)
@@ -101,6 +101,9 @@ Composite parameters:
 
 Server invocation:
 ![calc_dot](img/calc_dot_2.png)
+
+Look at [rpc-web-channel React From example](https://github.com/kdeyev/rpc-web-channel/tree/master/examples/react-froms-client) for details.
+
 
 ## Components
 

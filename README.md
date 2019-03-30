@@ -93,10 +93,13 @@ The example utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/hi
 An example of generated form:
 ![calc_sum_double](img/calc_sum_double.png)
 ![calc_sum_double](img/calc_sum_double_1.png)
+
 Parameter values validation
-![calc_sum_uchar](img/calc_sum_uchar_1.png)calc_dot
+![calc_sum_uchar](img/calc_sum_uchar_1.png)
+
 Composite parameters:
 ![calc_dot](img/calc_dot_1.png)
+
 Server invocation
 ![calc_dot](img/calc_dot_2.png)
 

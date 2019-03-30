@@ -90,16 +90,20 @@ new rpc-web-channel(jrpc, function(services) {
 rpc-web-channel utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a Service Descriptor compatible JSON-RPC server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using rpc-web-channel.
 
 An example of generated form:
+
 ![calc_sum_double](img/calc_sum_double.png)
 ![calc_sum_double](img/calc_sum_double_1.png)
 
 Parameter values validation:
+
 ![calc_sum_uchar](img/calc_sum_uchar_1.png)
 
 Composite parameters:
+
 ![calc_dot](img/calc_dot_1.png)
 
 Server invocation:
+
 ![calc_dot](img/calc_dot_2.png)
 
 Look at [rpc-web-channel React From example](https://github.com/kdeyev/rpc-web-channel/tree/master/examples/react-froms-client) for details.

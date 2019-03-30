@@ -22,7 +22,7 @@ struct Calculator {
 
     double substruct(double val1, double val2) {
         //std::cout << val1 - val2 << std::endl;
-        return val1 + val2;
+        return val1 - val2;
     };
 
     vector2d multiply(double val1, vector2d val2) {

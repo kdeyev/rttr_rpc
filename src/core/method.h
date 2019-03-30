@@ -31,6 +31,7 @@ namespace rttr_rpc {
 
             bool has_valid_names_ = false;
 
+			std::string          signature_;
         private:
             void scan_metadata();
             bool check_valid_names() const;

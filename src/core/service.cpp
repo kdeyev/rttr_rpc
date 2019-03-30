@@ -214,17 +214,16 @@ namespace rttr_rpc {
             data["info"] = info;
 
             rttr_rpc::json methods_json;
-            //QSet<QString> identifiers;
 
             for(auto iter = methods_.begin(); iter != methods_.end(); ++iter) {
-                const std::string&            method_name = iter->first;
+                //const std::string&            method_name = iter->first;
                 const std::list<method_ptr>& method_list = iter->second;
                 for(auto& method : method_list) {
-                    if(methods_json.count(method_name)) {
-                        std::cout << "Service: " + name_ + " - the method name used twice: " << method_name << std::endl;
+                    if(methods_json.count(method->signature_)) {
+                        std::cout << "Service: " + name_ + " - the method name used twice: " << method->signature_ << std::endl;
                         continue;
                     }
-                    methods_json[method_name] = method->create_json_schema();
+                    methods_json[method->signature_] = method->create_json_schema();
                 }
             }
 

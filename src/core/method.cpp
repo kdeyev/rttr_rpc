@@ -6,10 +6,9 @@
 #include "io/to_json.h"
 #include "core/matadata.h"
 
-
 namespace rttr_rpc {
     namespace core {
-        method::method(const rttr::method& method) : method_(method), name_(to_string(method.get_name())) {
+        method::method(const rttr::method& method) : method_(method), name_(to_string(method.get_name())), signature_(to_string(method.get_signature())) {
             for(auto param_info : method_.get_parameter_infos()) {
                 params_.push_back(parameter(param_info));
             }
@@ -170,19 +169,20 @@ namespace rttr_rpc {
             return true;
         }
 
-		rttr_rpc::json method::create_json_schema() const {
+        rttr_rpc::json method::create_json_schema() const {
             if(!has_valid_names_) {
                 std::cout << "there is no parameter names for the method" << std::endl;
                 return "there is no parameter names for the method";
             }
-			rttr_rpc::json method_desc;
+            rttr_rpc::json method_desc;
+            method_desc["name"]        = name_;
             method_desc["summary"]     = to_string(method_.get_signature());
             method_desc["description"] = description_;
 
-			rttr_rpc::json properties = rttr_rpc::json::object();
+            rttr_rpc::json properties = rttr_rpc::json::object();
 
-			rttr_rpc::json required    = rttr_rpc::json::array();
-			rttr_rpc::json definitions = rttr_rpc::json::object();
+            rttr_rpc::json required    = rttr_rpc::json::array();
+            rttr_rpc::json definitions = rttr_rpc::json::object();
             for(const auto& param : params_) {
                 properties[param.name_] = param.create_parameter_description(definitions);
 
@@ -191,7 +191,7 @@ namespace rttr_rpc {
                     required.push_back(param.name_);
                 }
             }
-			rttr_rpc::json result = parameter::create_parameter_description("return value", method_.get_return_type(), definitions);
+            rttr_rpc::json result = parameter::create_parameter_description("return value", method_.get_return_type(), definitions);
 
             rttr_rpc::json params;
             params["type"]       = "object";

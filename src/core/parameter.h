@@ -18,7 +18,6 @@ namespace rttr_rpc {
 
             static rttr_rpc::json create_class_definition(const rttr::type& type, rttr_rpc::json& defs);
             static rttr_rpc::json create_parameter_description(const std::string& desc, const rttr::type& type, rttr_rpc::json& defs);
-            static std::string    get_json_type_name(const rttr::type& type);
 
 			rttr_rpc::json create_parameter_description(rttr_rpc::json& defs) const;
 

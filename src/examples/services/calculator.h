@@ -15,12 +15,10 @@ struct vector2d {
 
 struct Calculator {
     Calculator(){};
-    double add(double val1, double val2) {
-        return val1 + val2;
-    };
 
-    double substruct(double val1, double val2) {
-        return val1 - val2;
+	template <typename T>
+    T add(T val1, T val2) {
+        return val1 + val2;
     };
 
     vector2d multiply(double val1, vector2d val2) {
@@ -33,10 +31,6 @@ struct Calculator {
 
     vector2d add(vector2d val1, vector2d val2) {
         return vector2d(val1.x_ + val2.x_, val1.y_ + val2.y_);
-    };
-
-    vector2d substruct(vector2d val1, vector2d val2) {
-        return vector2d(val1.x_ - val2.x_, val1.y_ - val2.y_);
     };
 
     double dot(vector2d val1, vector2d val2) {

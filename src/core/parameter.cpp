@@ -16,26 +16,6 @@ namespace rttr_rpc {
             : info_(info), name_(to_string(info.get_name())), type_(info.get_type()), index_(info.get_index()), has_default_value_(info.has_default_value()) {
         }
 
-        std::string parameter::get_json_type_name(const rttr::type& type) {
-            std::string type_nane = to_string(type.get_name());
-
-            if(type == rttr::type::get(nullptr) || type_nane == "void") {
-                return "null";
-            } else if(type == rttr::type::get<bool>()) {
-                return "boolean";
-            } else if(type == rttr::type::get<std::string>() || type.is_enumeration()) {
-                return "string";
-            } else if(type.is_arithmetic()) {
-                return "number";
-            } else if(type.is_array()) {
-                return "array";
-            } else if(type.is_associative_container() || type.is_class()) {
-                return "object";
-            }
-
-            return "undefined";
-        }
-
         rttr_rpc::json parameter::create_parameter_description(const std::string& desc, const rttr::type& type, rttr_rpc::json& defs) {
             rttr_rpc::json param;
             param["description"] = desc;
@@ -55,22 +35,49 @@ namespace rttr_rpc {
                     defs[class_name] = create_class_definition(type, defs);
                 }
             } else {
-                param["type"] = get_json_type_name(type);
-                //desc["default"] = info_.h;
+                std::string type_nane = to_string(type.get_name());
+
+                if(type == rttr::type::get(nullptr) || type_nane == "void") {
+                    param["type"] = "null";
+                } else if(type == rttr::type::get<bool>()) {
+                    param["type"] = "boolean";
+                } else if(type == rttr::type::get<std::string>() || type.is_enumeration()) {
+                    param["type"] = "string";
+                } else if(type.is_arithmetic()) {
+                    if(set_arithmetic_type_limits<double>(type, param, "number")) {
+                    } else if(set_arithmetic_type_limits<float>(type, param, "number")) {
+                    } else if(set_arithmetic_type_limits<int8_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<uint8_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<int16_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<uint16_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<int32_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<uint32_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<int64_t>(type, param, "integer")) {
+                    } else if(set_arithmetic_type_limits<uint64_t>(type, param, "integer")) {
+                    } else {
+                        param["type"] = "number";
+                    }
+                } else if(type.is_array()) {
+                    param["type"] = "array";
+                } else if(type.is_associative_container() || type.is_class()) {
+                    param["type"] = "object";
+                } else {
+                    param["type"] = "undefined";
+                }
             }
             return param;
         }
 
-		rttr_rpc::json parameter::create_parameter_description(rttr_rpc::json& defs) const {
-			rttr_rpc::json param = create_parameter_description(name_, type_, defs);
+        rttr_rpc::json parameter::create_parameter_description(rttr_rpc::json& defs) const {
+            rttr_rpc::json param = create_parameter_description(name_, type_, defs);
             if(has_default_value_) {
                 param["default"] = io::to_json_obj(info_.get_default_value());
             }
             return param;
         }
 
-		rttr_rpc::json parameter::create_class_definition(const rttr::type& type, rttr_rpc::json& defs) {
-			rttr_rpc::json def;
+        rttr_rpc::json parameter::create_class_definition(const rttr::type& type, rttr_rpc::json& defs) {
+            rttr_rpc::json def;
             // it's always object
             def["type"] = "object";
 

@@ -6,13 +6,12 @@
 #include <rttr/type.h>
 #include <rttr/instance.h>
 
-#include <nlohmann/json.hpp>
-
-#include "rttr_rpc_core_export.h"
-
+#include "json/json.h"
 #include "jsonrpc/jsonrpc.h"
 
 #include "method.h"
+
+#include "rttr_rpc_core_export.h"
 
 namespace rttr_rpc {
     namespace core {
@@ -50,9 +49,9 @@ namespace rttr_rpc {
 			 * @brief Returns JSON Document contains JSON Schema Service Descriptor
 			 * (https://jsonrpc.org/historical/json-schema-service-descriptor.html)
 			 *
-			 * @return const nlohmann::json&
+			 * @return const rttr_rpc::json&
 			 */
-            const nlohmann::json& service_info() const;
+            const rttr_rpc::json& service_info() const;
 
             /**
 			 * @brief Process a JSON-RPC message. In general it means the invocation of a requested function.
@@ -65,7 +64,7 @@ namespace rttr_rpc {
         private:
             void           scan_metadata();
             void           scan_methods();
-            nlohmann::json create_service_info() const;
+            rttr_rpc::json create_service_info() const;
 
             std::string name_;
             std::string version_;
@@ -75,7 +74,7 @@ namespace rttr_rpc {
             rttr::instance service_instance_;
             rttr::type     service_instance_type_;
 
-            nlohmann::json service_info_;
+            rttr_rpc::json service_info_;
 
             std::unordered_map<std::string, std::list<method_ptr>> methods_;
 

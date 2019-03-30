@@ -4,7 +4,8 @@
 #include <cstring>
 #include <vector>
 #include <exception>
-#include <nlohmann/json.hpp>
+
+#include "json/json.h"
 
 #include "rttr_rpc_jsonrpc_export.h"
 
@@ -12,7 +13,7 @@
 #pragma warning(disable : 4275)
 
 namespace jsonrpc {
-    using Json = nlohmann::json;
+    using Json = rttr_rpc::json;
 
     class RTTR_RPC_JSONRPC_EXPORT message {
     public:

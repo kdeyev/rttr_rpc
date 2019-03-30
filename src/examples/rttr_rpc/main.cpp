@@ -7,9 +7,9 @@ using namespace rttr_rpc;
 #include "../services/test.h"
 #include "../services/calculator.h"
 
-nlohmann::json generate_request(const std::string& method, const std::string& params) {
+rttr_rpc::json generate_request(const std::string& method, const std::string& params) {
     static size_t request_counter = 1;
-    return {{"jsonrpc", "2.0"}, {"method", method}, {"params", nlohmann::json::parse(params)}, {"id", request_counter++}};
+    return {{"jsonrpc", "2.0"}, {"method", method}, {"params", rttr_rpc::json::parse(params)}, {"id", request_counter++}};
 }
 
 int main(int argc, char** argv) {
@@ -98,32 +98,32 @@ int main(int argc, char** argv) {
     response = repo.process_message(m);
     std::cout << response->to_json().dump(4) << std::endl;
 
-	// multiply vector and scalar
-	m = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"([{"x":1.0,"y":2},10])"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
-	// named arguments
-	m = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"({"val1":{"x":1.0,"y":2},"val2":10})"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
+    // multiply vector and scalar
+    m        = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"([{"x":1.0,"y":2},10])"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
+    // named arguments
+    m        = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"({"val1":{"x":1.0,"y":2},"val2":10})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-	// multiply vector and scalar
-	m = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"([10,{"x":1.0,"y":2}])"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
-	// named arguments
-	m = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"({"val1":10, "val2":{"x":1.0,"y":2}})"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
+    // multiply vector and scalar
+    m        = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"([10,{"x":1.0,"y":2}])"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
+    // named arguments
+    m        = jsonrpc::parser::parse_json(generate_request("calc.multiply", R"({"val1":10, "val2":{"x":1.0,"y":2}})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
-	// dot
-	m = jsonrpc::parser::parse_json(generate_request("calc.dot", R"([{"x":1.0,"y":2},{"x":3.0,"y":4.0}])"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
-	// named arguments
-	m = jsonrpc::parser::parse_json(generate_request("calc.dot", R"({"val1":{"x":1.0,"y":2},"val2":{"x":3.0,"y":4.0}})"));
-	response = repo.process_message(m);
-	std::cout << response->to_json().dump(4) << std::endl;
+    // dot
+    m        = jsonrpc::parser::parse_json(generate_request("calc.dot", R"([{"x":1.0,"y":2},{"x":3.0,"y":4.0}])"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
+    // named arguments
+    m        = jsonrpc::parser::parse_json(generate_request("calc.dot", R"({"val1":{"x":1.0,"y":2},"val2":{"x":3.0,"y":4.0}})"));
+    response = repo.process_message(m);
+    std::cout << response->to_json().dump(4) << std::endl;
 
     return 0;
 }

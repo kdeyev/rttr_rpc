@@ -103,10 +103,10 @@ namespace rttr_rpc {
             };
         }
 
-        nlohmann::json repository::create_services_info() const {
-            nlohmann::json objectInfos = nlohmann::json::object();
+        rttr_rpc::json repository::create_services_info() const {
+            rttr_rpc::json objectInfos = rttr_rpc::json::object();
             for(auto iter : services_) {
-                const nlohmann::json& info = iter.second->service_info();
+                const rttr_rpc::json& info = iter.second->service_info();
                 objectInfos[iter.first]    = info;
             }
             return objectInfos;

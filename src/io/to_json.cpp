@@ -2,12 +2,11 @@
 #include <string>
 #include <vector>
 #include <array>
-
 #include <iostream>
 
 #include <rttr/type>
-#include <nlohmann/json.hpp>
 
+#include "json/json.h"
 #include "to_json.h"
 
 using namespace nlohmann;
@@ -16,14 +15,14 @@ using namespace rttr;
 namespace {
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    nlohmann::json to_json_recursively(const instance& obj);
+    rttr_rpc::json to_json_recursively(const instance& obj);
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    nlohmann::json write_variant(const variant& var, bool& flag);
-    nlohmann::json write_variant(const variant& var);
+    rttr_rpc::json write_variant(const variant& var, bool& flag);
+    rttr_rpc::json write_variant(const variant& var);
 
-    bool write_atomic_types_to_json(const type& t, const variant& var, nlohmann::json& json_obj) {
+    bool write_atomic_types_to_json(const type& t, const variant& var, rttr_rpc::json& json_obj) {
         if(t.is_arithmetic()) {
             if(t == type::get<bool>())
                 json_obj = var.to_bool();
@@ -62,7 +61,7 @@ namespace {
                 if(ok)
                     json_obj = value;
                 else
-                    json_obj = nlohmann::json(); // Null
+                    json_obj = rttr_rpc::json(); // Null
             }
 
             return true;
@@ -76,22 +75,22 @@ namespace {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    static nlohmann::json write_array(const variant_sequential_view& view) {
-        nlohmann::json json_array = nlohmann::json::array();
+    static rttr_rpc::json write_array(const variant_sequential_view& view) {
+        rttr_rpc::json json_array = rttr_rpc::json::array();
         for(const auto& item : view) {
             if(item.is_sequential_container()) {
-                nlohmann::json child = write_array(item.create_sequential_view());
+                rttr_rpc::json child = write_array(item.create_sequential_view());
                 json_array.push_back(child);
             } else {
                 variant wrapped_var = item.extract_wrapped_value();
                 type    value_type  = wrapped_var.get_type();
                 if(value_type.is_arithmetic() || value_type == type::get<std::string>() || value_type.is_enumeration()) {
-                    nlohmann::json child;
+                    rttr_rpc::json child;
                     write_atomic_types_to_json(value_type, wrapped_var, child);
                     json_array.push_back(child);
                 } else // object
                 {
-                    nlohmann::json child = to_json_recursively(wrapped_var);
+                    rttr_rpc::json child = to_json_recursively(wrapped_var);
                     json_array.push_back(child);
                 }
             }
@@ -101,20 +100,20 @@ namespace {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    static nlohmann::json write_associative_container(const variant_associative_view& view) {
+    static rttr_rpc::json write_associative_container(const variant_associative_view& view) {
         static const std::string key_name("key");
         static const std::string value_name("value");
 
-        nlohmann::json json_array = nlohmann::json::array();
+        rttr_rpc::json json_array = rttr_rpc::json::array();
 
         if(view.is_key_only_type()) {
             for(auto& item : view) {
-                nlohmann::json child = write_variant(item.first);
+                rttr_rpc::json child = write_variant(item.first);
                 json_array.push_back(child);
             }
         } else {
             for(auto& item : view) {
-                nlohmann::json child = nlohmann::json::object();
+                rttr_rpc::json child = rttr_rpc::json::object();
                 child[key_name]      = write_variant(item.first);
                 child[value_name]    = write_variant(item.second);
 
@@ -126,10 +125,10 @@ namespace {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    nlohmann::json write_variant(const variant& var, bool& flag) {
+    rttr_rpc::json write_variant(const variant& var, bool& flag) {
         flag = true;
 
-        nlohmann::json json_obj;
+        rttr_rpc::json json_obj;
         auto           value_type   = var.get_type();
         auto           wrapped_type = value_type.is_wrapper() ? value_type.get_wrapped_type() : value_type;
         bool           is_wrapper   = wrapped_type != value_type;
@@ -155,15 +154,15 @@ namespace {
         return json_obj;
     }
 
-    nlohmann::json write_variant(const variant& var) {
+    rttr_rpc::json write_variant(const variant& var) {
         bool flag;
         return write_variant(var, flag);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-    nlohmann::json to_json_recursively(const instance& obj2) {
-        nlohmann::json json_obj = nlohmann::json::object();
+    rttr_rpc::json to_json_recursively(const instance& obj2) {
+        rttr_rpc::json json_obj = rttr_rpc::json::object();
 
         instance obj = obj2.get_type().get_raw_type().is_wrapper() ? obj2.get_wrapped_instance() : obj2;
 
@@ -178,7 +177,7 @@ namespace {
 
             const auto     name = prop.get_name();
             bool           flag;
-            nlohmann::json child = write_variant(prop_value, flag);
+            rttr_rpc::json child = write_variant(prop_value, flag);
             if(!flag) {
                 std::cerr << "cannot serialize property: " << name << std::endl;
             }
@@ -199,11 +198,11 @@ namespace rttr_rpc {
 
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        nlohmann::json to_json_obj(const rttr::instance& obj) {
+        rttr_rpc::json to_json_obj(const rttr::instance& obj) {
             if(!obj.is_valid())
-                return nlohmann::json();
+                return rttr_rpc::json();
 
-            nlohmann::json json_obj = to_json_recursively(obj);
+            rttr_rpc::json json_obj = to_json_recursively(obj);
 
             return json_obj;
         }
@@ -214,15 +213,15 @@ namespace rttr_rpc {
             if(!obj.is_valid())
                 return std::string();
 
-            nlohmann::json json_obj = to_json_obj(obj);
+            rttr_rpc::json json_obj = to_json_obj(obj);
 
             return json_obj.dump(4);
         }
 
-        nlohmann::json to_json_obj(const rttr::variant& var) {
+        rttr_rpc::json to_json_obj(const rttr::variant& var) {
             // optimisation for void data
             if(var.is_type<void>()) {
-                return nlohmann::json(nullptr);
+                return rttr_rpc::json(nullptr);
             }
 
             return write_variant(var);

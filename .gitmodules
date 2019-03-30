@@ -7,3 +7,6 @@
 [submodule "rpc-web-channel"]
 	path = rpc-web-channel
 	url = https://github.com/kdeyev/rpc-web-channel.git
+[submodule "3rd_party/nlohmann/fifo_map"]
+	path = 3rd_party/nlohmann/fifo_map
+	url = https://github.com/nlohmann/fifo_map.git

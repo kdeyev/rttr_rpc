@@ -5,7 +5,7 @@ project ("rttr-rpc" LANGUAGES CXX)
 set(RTTR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/rttr/install/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake ${RTTR_DIR})
 
-set(NLOHMANN_JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/nlohmann/json/include)
+set(NLOHMANN_JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/nlohmann/json/include ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/nlohmann/fifo_map/src)
 
 find_package(RTTR CONFIG REQUIRED Core)
 

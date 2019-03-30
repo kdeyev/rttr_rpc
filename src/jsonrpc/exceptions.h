@@ -4,8 +4,8 @@
 #include <cstring>
 #include <vector>
 #include <exception>
-#include <nlohmann/json.hpp>
 
+#include "json/json.h"
 #include "jsonrpc/error.h"
 
 #include "rttr_rpc_jsonrpc_export.h"

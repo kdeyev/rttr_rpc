@@ -36,11 +36,11 @@ namespace rttr_rpc {
             return "undefined";
         }
 
-        nlohmann::json parameter::create_parameter_description(const std::string& desc, const rttr::type& type, nlohmann::json& defs) {
-            nlohmann::json param;
+        rttr_rpc::json parameter::create_parameter_description(const std::string& desc, const rttr::type& type, rttr_rpc::json& defs) {
+            rttr_rpc::json param;
             param["description"] = desc;
             if(type.is_enumeration()) {
-                nlohmann::json values = nlohmann::json::array();
+                rttr_rpc::json values = rttr_rpc::json::array();
 
                 for(const rttr::string_view& name : type.get_enumeration().get_names()) {
                     values.push_back(to_string(name));
@@ -61,21 +61,21 @@ namespace rttr_rpc {
             return param;
         }
 
-        nlohmann::json parameter::create_parameter_description(nlohmann::json& defs) const {
-            nlohmann::json param = create_parameter_description(name_, type_, defs);
+		rttr_rpc::json parameter::create_parameter_description(rttr_rpc::json& defs) const {
+			rttr_rpc::json param = create_parameter_description(name_, type_, defs);
             if(has_default_value_) {
                 param["default"] = io::to_json_obj(info_.get_default_value());
             }
             return param;
         }
 
-        nlohmann::json parameter::create_class_definition(const rttr::type& type, nlohmann::json& defs) {
-            nlohmann::json def;
+		rttr_rpc::json parameter::create_class_definition(const rttr::type& type, rttr_rpc::json& defs) {
+			rttr_rpc::json def;
             // it's always object
             def["type"] = "object";
 
-            nlohmann::json properties = nlohmann::json::object();
-            nlohmann::json required   = nlohmann::json::array();
+            rttr_rpc::json properties = rttr_rpc::json::object();
+            rttr_rpc::json required   = rttr_rpc::json::array();
 
             // iterate over class properties
             for(auto prop : type.get_properties()) {

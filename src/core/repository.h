@@ -3,16 +3,15 @@
 #include <string>
 #include <unordered_map>
 
-#include <nlohmann/json.hpp>
-
 #include <rttr/type.h>
 #include <rttr/instance.h>
 
+#include "json/json.h"
+#include "jsonrpc/jsonrpc.h"
+#include "service.h"
+
 #include "rttr_rpc_core_export.h"
 
-#include "jsonrpc/jsonrpc.h"
-
-#include "service.h"
 namespace rttr_rpc {
     namespace core {
         /**
@@ -67,15 +66,15 @@ namespace rttr_rpc {
 			 */
             jsonrpc::message_ptr process_message(const jsonrpc::message_ptr& message) const;
 
-            const nlohmann::json& get_services_info() const {
+            const rttr_rpc::json& get_services_info() const {
                 return services_info_;
             }
 
         private:
             bool           add_service(const service_ptr& service);
-            nlohmann::json create_services_info() const;
+            rttr_rpc::json create_services_info() const;
 
-            nlohmann::json                               services_info_;
+            rttr_rpc::json                               services_info_;
             std::unordered_map<std::string, service_ptr> services_;
         };
     } // namespace core

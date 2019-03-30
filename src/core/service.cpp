@@ -25,7 +25,7 @@ namespace rttr_rpc {
         //        cacheInvokableInfo ();
         //    }
         //
-        //    nlohmann::json create_service_info () const;
+        //    rttr_rpc::json create_service_info () const;
         //
         //    void              cacheInvokableInfo ();
         //    static int        jsonrpc::MessagePtrType;
@@ -72,7 +72,7 @@ namespace rttr_rpc {
         //    QHash<int, PropInfo>                      _propertyInfoHash;
         //    QHash<std::string, QList<QPair<int, int>>> _invokableMethodHash;
         //
-        //    nlohmann::json service_info_;
+        //    rttr_rpc::json service_info_;
         //
         //    QSharedPointer<QObject> service_instance_;
         //    std::string              name_;
@@ -199,21 +199,21 @@ namespace rttr_rpc {
             return name_;
         }
 
-        const nlohmann::json& service::service_info() const {
+        const rttr_rpc::json& service::service_info() const {
             return service_info_;
         }
 
-        nlohmann::json service::create_service_info() const {
-            nlohmann::json data;
+        rttr_rpc::json service::create_service_info() const {
+            rttr_rpc::json data;
             data["jsonrpc"] = "2.0";
 
-            nlohmann::json info;
+            rttr_rpc::json info;
             info["title"]   = description_;
             info["version"] = version_;
 
             data["info"] = info;
 
-            nlohmann::json methods_json;
+            rttr_rpc::json methods_json;
             //QSet<QString> identifiers;
 
             for(auto iter = methods_.begin(); iter != methods_.end(); ++iter) {
@@ -234,12 +234,12 @@ namespace rttr_rpc {
             //        QString name = info._getterName;
             //        identifiers << name;
 
-            //        nlohmann::json method_desc;
+            //        rttr_rpc::json method_desc;
             //        method_desc["summary"]     = name;
             //        method_desc["description"] = name;
 
-            //        nlohmann::json properties;
-            //        nlohmann::json params;
+            //        rttr_rpc::json properties;
+            //        rttr_rpc::json params;
             //        params["type"]       = "object";
             //        params["properties"] = properties;
 
@@ -251,14 +251,14 @@ namespace rttr_rpc {
             //        QString name = info._setterName;
             //        identifiers << name;
 
-            //        nlohmann::json method_desc;
+            //        rttr_rpc::json method_desc;
             //        method_desc["summary"]     = name;
             //        method_desc["description"] = name;
 
-            //        nlohmann::json properties;
+            //        rttr_rpc::json properties;
             //        properties[info.name_] = createParameterDescription (info.name_, convertVariantTypeToJSType (info.type_));
 
-            //        nlohmann::json params;
+            //        rttr_rpc::json params;
             //        params["type"]       = "object";
             //        params["properties"] = properties;
 
@@ -361,7 +361,7 @@ namespace rttr_rpc {
         //    return (j == parameters.size ());
         //}
         //
-        //static bool jsParameterCompare (const nlohmann::json& parameters, const service::MethodInfo& info) {
+        //static bool jsParameterCompare (const rttr_rpc::json& parameters, const service::MethodInfo& info) {
         //    for (int i = 0; i < info._parameters.size (); ++i) {
         //        int        jsType = info._parameters.at (i)._jsType;
         //        QJsonValue value  = parameters.value (info._parameters.at (i).name_);
@@ -411,7 +411,7 @@ namespace rttr_rpc {
         //}
         //
         //QJsonValue service::convertReturnValue (QVariant& returnValue) {
-        //    if (static_cast<int> (returnValue.type ()) == qMetaTypeId<nlohmann::json> ())
+        //    if (static_cast<int> (returnValue.type ()) == qMetaTypeId<rttr_rpc::json> ())
         //        return QJsonValue (returnValue.toJsonObject ());
         //    else if (static_cast<int> (returnValue.type ()) == qMetaTypeId<QJsonArray> ())
         //        return QJsonValue (returnValue.toJsonArray ());
@@ -562,7 +562,7 @@ namespace rttr_rpc {
                 return request->create_error_response(jsonrpc::message_error::error_code::MethodNotFound, "Service: " + name_ + " - cannot find requested method");
             }
 
-            nlohmann::json response_json;
+            rttr_rpc::json response_json;
 
 			std::mutex* m = is_thread_safe_ ? nullptr : &mutex_;
 

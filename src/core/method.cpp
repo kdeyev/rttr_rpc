@@ -39,7 +39,7 @@ namespace rttr_rpc {
             return true;
         }
 
-        bool method::parse_named_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const {
+        bool method::parse_named_arguments(const rttr_rpc::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const {
             if(!json_params.is_object()) {
                 err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
                 return false;
@@ -77,7 +77,7 @@ namespace rttr_rpc {
             return true;
         }
 
-        bool method::parse_array_arguments(const nlohmann::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const {
+        bool method::parse_array_arguments(const rttr_rpc::json& json_params, std::vector<rttr::variant>& vars, jsonrpc::message_error& err) const {
             if(!json_params.is_array()) {
                 err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - wrong json format: " + json_params.dump(4));
                 return false;
@@ -127,7 +127,7 @@ namespace rttr_rpc {
             return method_.invoke_variadic(service_instance, args);
         }
 
-        bool method::invoke(const rttr::instance& service_instance, const nlohmann::json& json_params, nlohmann::json& ret_val, jsonrpc::message_error& err,
+        bool method::invoke(const rttr::instance& service_instance, const rttr_rpc::json& json_params, rttr_rpc::json& ret_val, jsonrpc::message_error& err,
                             std::mutex* m) const {
             ret_val.clear();
             std::vector<rttr::variant> vars;
@@ -170,19 +170,19 @@ namespace rttr_rpc {
             return true;
         }
 
-        nlohmann::json method::create_json_schema() const {
+		rttr_rpc::json method::create_json_schema() const {
             if(!has_valid_names_) {
                 std::cout << "there is no parameter names for the method" << std::endl;
                 return "there is no parameter names for the method";
             }
-            nlohmann::json method_desc;
+			rttr_rpc::json method_desc;
             method_desc["summary"]     = to_string(method_.get_signature());
             method_desc["description"] = description_;
 
-            nlohmann::json properties = nlohmann::json::object();
+			rttr_rpc::json properties = rttr_rpc::json::object();
 
-            nlohmann::json required    = nlohmann::json::array();
-            nlohmann::json definitions = nlohmann::json::object();
+			rttr_rpc::json required    = rttr_rpc::json::array();
+			rttr_rpc::json definitions = rttr_rpc::json::object();
             for(const auto& param : params_) {
                 properties[param.name_] = param.create_parameter_description(definitions);
 
@@ -191,9 +191,9 @@ namespace rttr_rpc {
                     required.push_back(param.name_);
                 }
             }
-            nlohmann::json result = parameter::create_parameter_description("return value", method_.get_return_type(), definitions);
+			rttr_rpc::json result = parameter::create_parameter_description("return value", method_.get_return_type(), definitions);
 
-            nlohmann::json params;
+            rttr_rpc::json params;
             params["type"]       = "object";
             params["$schema"]    = "http://json-schema.org/draft-07/schema#";
             params["properties"] = properties;

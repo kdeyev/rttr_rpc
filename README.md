@@ -1,5 +1,5 @@
 # RTTR-RPC
-JSON-RPC server built with C++ runtime reflection
+JSON-RPC 2.0 server built with C++ runtime reflection
 
 - [RTTR-RPC](#rttr-rpc)
   - [Overview](#overview)
@@ -16,7 +16,7 @@ JSON-RPC server built with C++ runtime reflection
 
 
 ## Overview
-RTTR-RPC is a JSON-RPC framework built on top of [RTTR](http://rttr.org) C++ reflection library, which allows binding of existing C++ object to a JSON-RPC service. RTTR-RPC uses [JSON Schema Service Descriptor](https://jsonrpc.org/historical/) for providing a service discovery functionality. [rpc-web-channel.js](https://github.com/kdeyev/rpc-web-channel) uses the JSON Schema Service Descriptor for  JavaScript stubs generating in run-time and uses [JSON Schema](https://json-schema.org) for UI form generation.
+RTTR-RPC is a [JSON-RPC 2.0](https://www.jsonrpc.org/specification) framework built on top of [RTTR](http://rttr.org) C++ reflection library, which allows binding of existing C++ object to a JSON-RPC service. RTTR-RPC uses [JSON Schema Service Descriptor](https://jsonrpc.org/historical/) for providing a service discovery functionality. [rpc-web-channel.js](https://github.com/kdeyev/rpc-web-channel) uses the JSON Schema Service Descriptor for  JavaScript stubs generating in run-time and uses [JSON Schema](https://json-schema.org) for UI form generation.
 
 ## Motivation
 
@@ -87,7 +87,7 @@ new rpc-web-channel(jrpc, function(services) {
 };
 ~~~~~~~~~~~
 ### Automatic UI forms generation
-rpc-web-channel utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a Service Descriptor compatible JSON-RPC server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using rpc-web-channel.
+rpc-web-channel utilizes the [JSON Schema Service Descriptor](https://jsonrpc.org/historical/json-schema-service-descriptor.html) format for discovering service list on a Service Descriptor compatible JSON-RPC 2.0 server and uses the [React Jon Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for the UI forms generation. A generated UI Form allows specifying parameter values and invokes a server-side method using rpc-web-channel.
 
 An example of generated form:
 
@@ -131,6 +131,7 @@ Look at [rpc-web-channel React From example](https://github.com/kdeyev/rpc-web-c
 
 ## References
 * [RTTR](http://rttr.org)
+* [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
 * [JSON for Modern C++](https://github.com/nlohmann/json)
 * [JSON Schema](https://json-schema.org)
 * [JSON Schema Service Descriptor](https://jsonrpc.org/historical/)

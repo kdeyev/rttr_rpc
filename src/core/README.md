@@ -1,6 +1,6 @@
 # RTTR-RPC::core
 
-JSON-RPC layer based on top of rttr reflection and [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) serialization.
+[JSON-RPC 2.0](https://www.jsonrpc.org/specification) layer based on top of rttr reflection and [RTTR-RPC::io](https://github.com/kdeyev/rttr_rpc/tree/master/src/io) serialization.
 
 - [RTTR-RPC::core](#rttr-rpccore)
   - [Motivation](#motivation)
@@ -263,6 +263,6 @@ More verbous example can be found [here](https://github.com/kdeyev/rttr_rpc/blob
 
 ## References
 * [RTTR](http://rttr.org)
-* [JSON-RPC](https://www.jsonrpc.org/specification)
+* [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
 * [JSON Schema](https://json-schema.org)
 * [JSON Schema Service Descriptor](https://jsonrpc.org/historical/)

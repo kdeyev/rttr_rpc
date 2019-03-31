@@ -1,9 +1,9 @@
 # RTTR-RPC::jsonrpc
 
-Base infrastructure of JSON-RPC messages. This code was build with usage of [C++ JSON-RPC 2.0 library](https://github.com/badaix/jsonrpcpp)
+Base infrastructure of [JSON-RPC 2.0](https://www.jsonrpc.org/specification) messages. This code was build with usage of [C++ JSON-RPC 2.0 library](https://github.com/badaix/jsonrpcpp)
 
 ## Motivation
-JSON-RPC message representation:
+[JSON-RPC 2.0](https://www.jsonrpc.org/specification) message representation:
 ~~~~~~~~~~~c++
 jsonrpc::message_ptr message = jsonrpc::parser::parse(R"({"jsonrpc": "2.0", "method": "subtract", "params": {"subtrahend": 23, "minuend": 42}, "id": 3})");
 if(message->is_request()) {
@@ -29,4 +29,4 @@ if(message->is_request()) {
 More verbous example can be found [here](https://github.com/kdeyev/rttr_rpc/blob/master/src/examples/jsonrpc/main.cpp).
 
 ## References
-* [JSON-RPC](https://www.jsonrpc.org/specification)
+* [JSON-RPC 2.0](https://www.jsonrpc.org/specification)

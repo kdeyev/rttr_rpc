@@ -27,8 +27,7 @@ using namespace rttr_rpc::core;
 
 // Take ownership of the socket
 websocket_session::websocket_session(boost::asio::ip::tcp::socket socket, const repository& repo)
-    : ws_(std::move(socket)), strand_(ws_.get_executor()), timer_(ws_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()),
-      repo_(repo) {
+    : ws_(std::move(socket)), strand_(ws_.get_executor()), timer_(ws_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo) {
 }
 
 void websocket_session::on_accept(boost::system::error_code ec) {

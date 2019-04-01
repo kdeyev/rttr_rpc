@@ -18,7 +18,7 @@ struct MyStruct {
         std::cout << "first " << first << std::endl;
         std::cout << "second " << second << std::endl;
         std::cout << "third " << third << std::endl;
-		std::cout << "last " << last << std::endl;
+        std::cout << "last " << last << std::endl;
     }
     std::string methodWithParamsAndReturnValue(const std::string& name) {
         std::cout << "methodWithParamsAndReturnValue called" << std::endl;

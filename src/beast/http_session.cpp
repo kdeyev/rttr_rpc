@@ -129,8 +129,7 @@ namespace rttr_rpc {
 
         http_session::http_session(tcp::socket socket, const repository& repo)
             : socket_(std::move(socket)), strand_(socket_.get_executor()),
-              timer_(socket_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo),
-              queue_(new queue(*this)) {
+              timer_(socket_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo), queue_(new queue(*this)) {
         }
 
         http_session::~http_session() {

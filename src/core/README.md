@@ -27,13 +27,13 @@ RTTR_REGISTRATION {
     rttr::registration::class_<Calculator>("Calculator")(
         // class meta data
         rttr::metadata(rttr_rpc::meta_data_type::thread_safe, true), 
-		rttr::metadata(rttr_rpc::meta_data_type::description, "Calculator service obj"),
+        rttr::metadata(rttr_rpc::meta_data_type::description, "Calculator service obj"),
         rttr::metadata(rttr_rpc::meta_data_type::version, "7.0")
-	)
+    )
     
     .method("sum", rttr::select_overload<double(double, double)>(&Calculator::sum))(
-    	rttr::parameter_names("val1", "val2"),
-    	rttr::metadata(rttr_rpc::meta_data_type::description, "Summation of scalars")
+        rttr::parameter_names("val1", "val2"),
+        rttr::metadata(rttr_rpc::meta_data_type::description, "Summation of scalars")
     );
 }
 ~~~~~~~~~~~

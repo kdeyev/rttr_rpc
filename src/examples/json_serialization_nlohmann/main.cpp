@@ -13,60 +13,59 @@
 using namespace rttr;
 using namespace rttr_rpc;
 
-enum class color
-{
-    red,
-    green,
-    blue
-};
+enum class color { red, green, blue };
 
-struct point2d
-{
-    point2d() {}
+struct point2d {
+    point2d() {
+    }
     point2d(int x_, int y_) : x(x_), y(y_), lx(x_), ly(y_), ulx(x_), uly(y_), fx(float(x_)), fy(float(y_)), dx(x_), dy(y_) {
-	}
+    }
 
-	void set_x(int x_) {
-		x = x_;
-		lx = x;
-		ulx = x;
-		fx = float(x);
-		dx = x;
-	}
+    void set_x(int x_) {
+        x   = x_;
+        lx  = x;
+        ulx = x;
+        fx  = float(x);
+        dx  = x;
+    }
 
-	void set_y(int y_) {
-		y = y_;
-		ly = y;
-		uly = y;
-		fy = float(y);
-		dy = y;
-	}
+    void set_y(int y_) {
+        y   = y_;
+        ly  = y;
+        uly = y;
+        fy  = float(y);
+        dy  = y;
+    }
     int x = 0;
     int y = 0;
 
-	int64_t lx = 0;
-	int64_t ly = 0;
+    int64_t lx = 0;
+    int64_t ly = 0;
 
-	uint64_t ulx = 0;
-	uint64_t uly = 0;
+    uint64_t ulx = 0;
+    uint64_t uly = 0;
 
-	float fx = 0;
-	float fy = 0;
+    float fx = 0;
+    float fy = 0;
 
-	double dx = 0;
-	double dy = 0;
+    double dx = 0;
+    double dy = 0;
 };
 
-struct shape
-{
-    shape(std::string n) : name(n) {}
+struct shape {
+    shape(std::string n) : name(n) {
+    }
 
-    void set_visible(bool v) { visible = v; }
-    bool get_visible() const { return visible; }
+    void set_visible(bool v) {
+        visible = v;
+    }
+    bool get_visible() const {
+        return visible;
+    }
 
-    color color_ = color::blue;
-    std::string name = "";
-    point2d position;
+    color                    color_ = color::blue;
+    std::string              name   = "";
+    point2d                  position;
     std::map<color, point2d> dictionary;
 
     RTTR_ENABLE()
@@ -74,11 +73,11 @@ private:
     bool visible = false;
 };
 
-struct circle : shape
-{
-    circle(std::string n) : shape(n) {}
+struct circle : shape {
+    circle(std::string n) : shape(n) {
+    }
 
-    double radius = 5.2;
+    double               radius = 5.2;
     std::vector<point2d> points;
 
     int no_serialize = 100;
@@ -86,50 +85,36 @@ struct circle : shape
     RTTR_ENABLE(shape)
 };
 
-RTTR_REGISTRATION
-{
+RTTR_REGISTRATION {
     rttr::registration::class_<shape>("shape")
         .property("visible", &shape::get_visible, &shape::set_visible)
         .property("color", &shape::color_)
         .property("name", &shape::name)
         .property("position", &shape::position)
-        .property("dictionary", &shape::dictionary)
-    ;
+        .property("dictionary", &shape::dictionary);
 
     rttr::registration::class_<circle>("circle")
         .property("radius", &circle::radius)
         .property("points", &circle::points)
-        .property("no_serialize", &circle::no_serialize)
-        (
-            metadata("NO_SERIALIZE", true)
-        )
-        ;
+        .property("no_serialize", &circle::no_serialize)(metadata("NO_SERIALIZE", true));
 
     rttr::registration::class_<point2d>("point2d")
         .constructor()(rttr::policy::ctor::as_object)
         .property("x", &point2d::x)
         .property("y", &point2d::y)
-		.property("lx", &point2d::lx)
-		.property("ly", &point2d::ly)
-		.property("ulx", &point2d::ulx)
-		.property("uly", &point2d::uly)
-		.property("fx", &point2d::fx)
-		.property("fy", &point2d::fy)
-		.property("dx", &point2d::dx)
-		.property("dy", &point2d::dy)
-        ;
+        .property("lx", &point2d::lx)
+        .property("ly", &point2d::ly)
+        .property("ulx", &point2d::ulx)
+        .property("uly", &point2d::uly)
+        .property("fx", &point2d::fx)
+        .property("fy", &point2d::fy)
+        .property("dx", &point2d::dx)
+        .property("dy", &point2d::dy);
 
-
-    rttr::registration::enumeration<color>("color")
-        (
-            value("red", color::red),
-            value("blue", color::blue),
-            value("green", color::green)
-        );
+    rttr::registration::enumeration<color>("color")(value("red", color::red), value("blue", color::blue), value("green", color::green));
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     std::string json_string;
 
     {
@@ -148,7 +133,7 @@ int main(int argc, char** argv)
         c_1.color_ = color::red;
 
         // additional braces are needed for a VS 2013 bug
-        c_1.dictionary = { { {color::green, {1, 2} }, {color::blue, {3, 4} }, {color::red, {5, 6} } } };
+        c_1.dictionary = {{{color::green, {1, 2}}, {color::blue, {3, 4}}, {color::red, {5, 6}}}};
 
         c_1.no_serialize = 12345;
 
@@ -166,4 +151,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-

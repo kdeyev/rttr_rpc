@@ -16,7 +16,7 @@ struct vector2d {
 struct Calculator {
     Calculator(){};
 
-	template <typename T>
+    template <typename T>
     T sum(T val1, T val2) {
         return val1 + val2;
     };

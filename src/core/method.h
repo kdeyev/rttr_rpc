@@ -27,11 +27,12 @@ namespace rttr_rpc {
             bool invoke(const rttr::instance& service_instance, const rttr_rpc::json& json_params, rttr_rpc::json& ret_val, jsonrpc::message_error& err,
                         std::mutex* m) const;
 
-			rttr_rpc::json create_json_schema() const;
+            rttr_rpc::json create_json_schema() const;
 
             bool has_valid_names_ = false;
 
-			std::string          signature_;
+            std::string signature_;
+
         private:
             void scan_metadata();
             bool check_valid_names() const;

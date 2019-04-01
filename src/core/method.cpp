@@ -130,7 +130,12 @@ namespace rttr_rpc {
                             std::mutex* m) const {
             ret_val.clear();
             std::vector<rttr::variant> vars;
-            if(json_params.is_array()) {
+            if(json_params.is_null()) {
+				if (vars.size() > 0) {
+					err = jsonrpc::message_error::invalidParams("Method: " + name_ + " - requires parameters.");
+					return false;
+				}
+            } else if(json_params.is_array()) {
                 if(!parse_array_arguments(json_params, vars, err)) {
                     return false;
                 }

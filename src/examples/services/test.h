@@ -13,26 +13,30 @@ struct MyStruct {
     void method() {
         std::cout << "method called" << std::endl;
     }
-    void methodWithParams(const std::string& first, bool second, double third, int last) {
+	std::string methodWithParams(const std::string& first, bool second, double third, int last) {
         std::cout << "methodWithParams called" << std::endl;
         std::cout << "first " << first << std::endl;
         std::cout << "second " << second << std::endl;
         std::cout << "third " << third << std::endl;
         std::cout << "last " << last << std::endl;
+
+		return "first: " + first + ", second: " + std::to_string(second) + ", third: " + std::to_string(third) + ", last: " + std::to_string(last);
     }
     std::string methodWithParamsAndReturnValue(const std::string& name) {
         std::cout << "methodWithParamsAndReturnValue called" << std::endl;
         std::cout << "name " << name << std::endl;
         return "Hello " + name;
     }
-    void methodWithDefaultParameter(const std::string& first, const std::string& second = "string") {
+	std::string methodWithDefaultParameter(const std::string& first, const std::string& second = "string") {
         std::cout << "methodWithDefaultParameter called" << std::endl;
         std::cout << "first " << first << std::endl;
         std::cout << "second " << second << std::endl;
+
+		return "first: " + first + ", second: " + second;
     }
 
-    std::string methodWithEnumParame(E_Alignment al) {
-        std::cout << "methodWithEnumParame called" << std::endl;
+    std::string methodWithEnumParam(E_Alignment al) {
+        std::cout << "methodWithEnumParam called" << std::endl;
         std::cout << "al " << int(al) << std::endl;
 
         std::string res;

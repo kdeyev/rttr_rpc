@@ -21,7 +21,7 @@ RTTR-RPC is a [JSON-RPC 2.0](https://www.jsonrpc.org/specification) framework bu
 ## Motivation
 
 ### C++ reflection
-You have a sctuct:
+You have a sctuct/class:
 ~~~~~~~~~~~c++
 struct Calculator {
     Calculator(){};
@@ -30,7 +30,7 @@ struct Calculator {
     };
 };
 ~~~~~~~~~~~
-You add a reflection to your class using non-intrusive sintax:
+You add a reflection to your C++ class using non-intrusive syntax:
 ~~~~~~~~~~~c++
 RTTR_REGISTRATION {
     rttr::registration::class_<Calculator>("Calculator")(
@@ -47,7 +47,7 @@ RTTR_REGISTRATION {
 }
 ~~~~~~~~~~~
 ### C++ object binding to JSON-RPC service
-Bind an existing struct instance to RTTR-RPC service repository:
+Bind a class instance to RTTR-RPC service repository:
 ~~~~~~~~~~~c++
 // service repository
 rttr_rpc::core::repository repo;
@@ -59,7 +59,7 @@ Calculator calc;
 repo.add_service("calc", calc);
 ~~~~~~~~~~~
 
-invoke the object method using JSON-RPC request
+invoke the instance method using JSON-RPC request:
 ~~~~~~~~~~~c++
 // example of JSON-RPC request
 auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"([42.0,24.0])");
@@ -67,7 +67,7 @@ auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"([42.0,24.0
 // process the JSON-RPC request
 auto response = repo.process_message(request);
 ~~~~~~~~~~~
-It's also allowed to used named aruments:
+It's also allowed to use named arguments:
 ~~~~~~~~~~~c++
 // example of JSON-RPC request with named arguments
 auto request = std::make_shared <jsonrpc::request> (3, "calc.sum", R"({"val1": 42.0, "val2": 24.0)");

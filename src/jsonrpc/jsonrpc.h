@@ -16,6 +16,7 @@
 
 namespace jsonrpc {
     namespace parser {
+        message_ptr RTTR_RPC_JSONRPC_EXPORT parse(const char* json_str, size_t size) noexcept;
         message_ptr RTTR_RPC_JSONRPC_EXPORT parse(const std::string& json_str) noexcept;
         message_ptr RTTR_RPC_JSONRPC_EXPORT parse_json(const Json& json) noexcept;
         bool RTTR_RPC_JSONRPC_EXPORT is_request(const std::string& json_str) noexcept;

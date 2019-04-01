@@ -140,7 +140,7 @@ void websocket_session::on_read(boost::system::error_code ec, std::size_t bytes_
     // Note that there is activity
     activity();
 
-    jsonrpc::message_ptr request = jsonrpc::parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())));
+    jsonrpc::message_ptr request = jsonrpc::parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())), buffer_.size());
     buffer_.consume(buffer_.size());
 
     jsonrpc::message_ptr response      = repo_.process_message(request);

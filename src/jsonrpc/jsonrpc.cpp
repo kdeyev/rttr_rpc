@@ -5,6 +5,16 @@ using namespace std;
 
 namespace jsonrpc {
 
+    message_ptr parser::parse(const char* json_str, size_t size) noexcept {
+        try {
+            return parse_json(Json::parse(json_str, json_str + size));
+        } catch(const exception& e) {
+            return std::make_shared<parse_error_exception>(e.what());
+        } catch(...) {
+            return std::make_shared<parse_error_exception>("unkown parsing error");
+        }
+    }
+
     message_ptr parser::parse(const std::string& json_str) noexcept {
         try {
             return parse_json(Json::parse(json_str));

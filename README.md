@@ -1,5 +1,5 @@
 # RTTR-RPC
-JSON-RPC 2.0 server built with C++ runtime reflection
+JSON-RPC 2.0 server based on C++ runtime reflection
 
 - [RTTR-RPC](#rttr-rpc)
   - [Overview](#overview)

@@ -16,6 +16,7 @@ namespace rttr_rpc {
             void start(const boost::asio::ip::tcp::endpoint& ep);
 
             rttr_rpc::core::repository repo;
+            jsonrpc::parser            parser;
 
         private:
             server_impl* impl_;

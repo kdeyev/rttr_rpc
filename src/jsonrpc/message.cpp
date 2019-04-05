@@ -31,27 +31,27 @@ namespace jsonrpc {
         return (entity == entity_t::batch);
     }
 
-    void message::parse(const char* json_str) {
-        // http://www.jsonrpc.org/specification
-        //	code	message	meaning
-        //	-32700	Parse error	Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.
-        //	-32600	Invalid request	The JSON sent is not a valid request object.
-        //	-32601	Method not found	The method does not exist / is not available.
-        //	-32602	Invalid params	Invalid method parameter(s).
-        //	-32603	Internal error	Internal JSON-RPC error.
-        //	-32000 to -32099	Server error	Reserved for implementation-defined server-errors.
-        try {
-            parse_json(Json::parse(json_str));
-        } catch(const rpc_exception& /*e*/) {
-            throw;
-        } catch(const exception& e) {
-            throw parse_error_exception(e.what());
-        }
-    }
+    //void message::parse(const char* json_str) {
+    //    // http://www.jsonrpc.org/specification
+    //    //	code	message	meaning
+    //    //	-32700	Parse error	Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.
+    //    //	-32600	Invalid request	The JSON sent is not a valid request object.
+    //    //	-32601	Method not found	The method does not exist / is not available.
+    //    //	-32602	Invalid params	Invalid method parameter(s).
+    //    //	-32603	Internal error	Internal JSON-RPC error.
+    //    //	-32000 to -32099	Server error	Reserved for implementation-defined server-errors.
+    //    try {
+    //        parse_json(json::parse(json_str));
+    //    } catch(const rpc_exception& /*e*/) {
+    //        throw;
+    //    } catch(const exception& e) {
+    //        throw parse_error_exception(e.what());
+    //    }
+    //}
 
-    void message::parse(const std::string& json_str) {
-        parse(json_str.c_str());
-    }
+    //void message::parse(const std::string& json_str) {
+    //    parse(json_str.c_str());
+    //}
 
     std::string message::type_str() const {
         switch(entity) {
@@ -72,9 +72,9 @@ namespace jsonrpc {
         }
     }
 
-    std::string message::to_string() const {
-        return to_json().dump();
-    }
+    //std::string message::to_string() const {
+    //    return to_json().dump();
+    //}
 
     message_id::message_id() : type_(value_t::null), int_id_(0), string_id_("") {
     }
@@ -88,11 +88,11 @@ namespace jsonrpc {
     message_id::message_id(const std::string& id) : message_id(id.c_str()) {
     }
 
-    message_id::message_id(const Json& json_id) : type_(value_t::null) {
+    message_id::message_id(const json& json_id) : type_(value_t::null) {
         parse_json(json_id);
     }
 
-    void message_id::parse_json(const Json& json) {
+    void message_id::parse_json(const json& json) {
         if(json.is_null()) {
             type_ = value_t::null;
         } else if(json.is_number_integer()) {
@@ -105,7 +105,7 @@ namespace jsonrpc {
             throw std::invalid_argument("id must be integer, string or null");
     }
 
-    Json message_id::to_json() const {
+    json message_id::to_json() const {
         if(type_ == value_t::null)
             return nullptr;
         else if(type_ == value_t::string)

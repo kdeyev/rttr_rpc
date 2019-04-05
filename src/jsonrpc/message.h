@@ -13,7 +13,7 @@
 #pragma warning(disable : 4275)
 
 namespace jsonrpc {
-    using Json = rttr_rpc::json;
+    using json = rttr_rpc::json;
 
     class RTTR_RPC_JSONRPC_EXPORT message {
     public:
@@ -33,12 +33,12 @@ namespace jsonrpc {
         }
         virtual std::string type_str() const;
 
-        std::string  to_string() const;
-        virtual Json to_json() const              = 0;
-        virtual void parse_json(const Json& json) = 0;
+        //std::string  to_string() const;
+        virtual json to_json() const              = 0;
+        virtual void parse_json(const json& json) = 0;
 
-        virtual void parse(const std::string& json_str);
-        virtual void parse(const char* json_str);
+        //virtual void parse(const std::string& json_str);
+        //virtual void parse(const char* json_str);
 
     protected:
         entity_t entity;
@@ -52,10 +52,10 @@ namespace jsonrpc {
         message_id(int id);
         message_id(const char* id);
         message_id(const std::string& id);
-        message_id(const Json& json_id);
+        message_id(const json& json_id);
 
-        Json to_json() const;
-        void parse_json(const Json& json);
+        json to_json() const;
+        void parse_json(const json& json);
 
         friend std::ostream& operator<<(std::ostream& out, const message_id& id) {
             out << id.to_json();

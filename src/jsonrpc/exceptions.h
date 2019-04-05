@@ -23,12 +23,12 @@ namespace jsonrpc {
         virtual ~rpc_exception() throw();
         virtual const char* what() const noexcept;
 
-        virtual Json to_json() const;
+        virtual json to_json() const;
 
         message_error error_;
 
     protected:
-        virtual void parse_json(const Json& json);
+        virtual void parse_json(const json& json);
     };
 
     class RTTR_RPC_JSONRPC_EXPORT parse_error_exception : public rpc_exception {
@@ -44,10 +44,10 @@ namespace jsonrpc {
 
         request_exception(const message_error& error, const message_id& requestId = message_id());
         request_exception(const request_exception& e);
-        virtual Json to_json() const;
+        virtual json to_json() const;
 
     protected:
-        virtual void parse_json(const Json& json);
+        virtual void parse_json(const json& json);
     };
 
     class RTTR_RPC_JSONRPC_EXPORT invalid_request_exception : public request_exception {

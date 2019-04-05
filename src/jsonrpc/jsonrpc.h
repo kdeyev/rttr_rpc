@@ -11,22 +11,29 @@
 
 #include "rttr_rpc_jsonrpc_export.h"
 
-#pragma warning(disable : 4251)
-#pragma warning(disable : 4275)
-
 namespace jsonrpc {
-    namespace parser {
-        message_ptr RTTR_RPC_JSONRPC_EXPORT parse(const char* json_str, size_t size) noexcept;
-        message_ptr RTTR_RPC_JSONRPC_EXPORT parse(const std::string& json_str) noexcept;
-        message_ptr RTTR_RPC_JSONRPC_EXPORT parse_json(const Json& json) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_request(const std::string& json_str) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_request(const Json& json) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_notification(const std::string& json_str) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_notification(const Json& json) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_response(const std::string& json_str) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_response(const Json& json) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_batch(const std::string& json_str) noexcept;
-        bool RTTR_RPC_JSONRPC_EXPORT is_batch(const Json& json) noexcept;
-    } // namespace parser
+    class RTTR_RPC_JSONRPC_EXPORT parser {
+    public:
+        enum class encoding : uint8_t { json, bson, cbor };
 
+        encoding encoding_ = encoding::json;
+        parser(encoding encoding = encoding::json) : encoding_(encoding) {
+        }
+
+        message_ptr parse(const char* str, size_t size) const noexcept;
+        message_ptr parse(const std::string& str) const noexcept;
+
+		std::string to_string(const json& json) const noexcept;
+        std::string to_string(const message& msg) const noexcept;
+
+        static message_ptr parse_json(const json& json) noexcept;
+        static bool        is_request(const std::string& json_str) noexcept;
+        static bool        is_request(const json& json) noexcept;
+        static bool        is_notification(const std::string& json_str) noexcept;
+        static bool        is_notification(const json& json) noexcept;
+        static bool        is_response(const std::string& json_str) noexcept;
+        static bool        is_response(const json& json) noexcept;
+        static bool        is_batch(const std::string& json_str) noexcept;
+        static bool        is_batch(const json& json) noexcept;
+    };
 } // namespace jsonrpc

@@ -6,23 +6,23 @@ using namespace std;
 
 namespace jsonrpc {
 
-    request::request(const Json& json) : notification(entity_t::request, ""), id_() {
+    request::request(const json& json) : notification(entity_t::request, ""), id_() {
         if(json != nullptr)
             parse_json(json);
     }
 
-    request::request(const message_id& id, const std::string& method, const Json& params) : notification(entity_t::request, method.c_str(), params), id_(id) {
+    request::request(const message_id& id, const std::string& method, const json& params) : notification(entity_t::request, method.c_str(), params), id_(id) {
     }
 
     std::shared_ptr<response> request::create_error_response(const message_error& error) const {
         return make_shared<response>(id_, error);
     }
 
-    std::shared_ptr<response> request::create_response(const Json& result) const {
+    std::shared_ptr<response> request::create_response(const json& result) const {
         return make_shared<response>(id_, result);
     }
 
-    void request::parse_json(const Json& json) {
+    void request::parse_json(const json& json) {
         try {
             if(json.count("id") == 0)
                 throw invalid_request_exception("id is missing");
@@ -41,26 +41,26 @@ namespace jsonrpc {
         }
     }
 
-    Json request::to_json() const {
-        Json json  = notification::to_json();
+    json request::to_json() const {
+        json json  = notification::to_json();
         json["id"] = id_.to_json();
         return json;
     }
 
     ///////////////////// response implementation /////////////////////////////////
 
-    response::response(const Json& json) : message(entity_t::response) {
+    response::response(const json& json) : message(entity_t::response) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    response::response(const message_id& id, const Json& result) : message(entity_t::response), id_(id), result_(result), error_(nullptr) {
+    response::response(const message_id& id, const json& result) : message(entity_t::response), id_(id), result_(result), error_(nullptr) {
     }
 
     response::response(const message_id& id, const message_error& error) : message(entity_t::response), id_(id), result_(), error_(error) {
     }
 
-    response::response(const request& request, const Json& result) : response(request.id_, result) {
+    response::response(const request& request, const json& result) : response(request.id_, result) {
     }
 
     response::response(const request& request, const message_error& error) : response(request.id_, error) {
@@ -69,7 +69,7 @@ namespace jsonrpc {
     response::response(const request_exception& exception) : response(exception.id_, exception.error_) {
     }
 
-    void response::parse_json(const Json& json) {
+    void response::parse_json(const json& json) {
         try {
             error_  = nullptr;
             result_ = nullptr;
@@ -94,8 +94,8 @@ namespace jsonrpc {
         }
     }
 
-    Json response::to_json() const {
-        Json j = Json::object();
+    json response::to_json() const {
+        json j = json::object();
 
         j["jsonrpc"] = "2.0";
         if(id_.type_ != message_id::value_t::null)
@@ -111,7 +111,7 @@ namespace jsonrpc {
 
     ///////////////// notification implementation /////////////////////////////////
 
-    notification::notification(const Json& json) : message(entity_t::notification) {
+    notification::notification(const json& json) : message(entity_t::notification) {
         if(json != nullptr)
             parse_json(json);
     }
@@ -127,14 +127,14 @@ namespace jsonrpc {
         serviceMethod = method.substr(pos + 1);
     }
 
-    notification::notification(message::entity_t ent, const std::string& method, const Json& params) : message(ent), method_name_(method), params_(params) {
+    notification::notification(message::entity_t ent, const std::string& method, const json& params) : message(ent), method_name_(method), params_(params) {
         extract_service_name(method, service_name_, service_method_name_);
     }
 
-    notification::notification(const char* method, const Json& params) : notification(entity_t::notification, method, params) {
+    notification::notification(const char* method, const json& params) : notification(entity_t::notification, method, params) {
     }
 
-    notification::notification(const std::string& method, const Json& params) : notification(method.c_str(), params) {
+    notification::notification(const std::string& method, const json& params) : notification(method.c_str(), params) {
     }
 
     std::shared_ptr<response> notification::create_error_response(const message_error& error) const {
@@ -145,11 +145,11 @@ namespace jsonrpc {
         return create_error_response(message_error(message, code));
     }
 
-    std::shared_ptr<response> notification::create_response(const Json& result) const {
+    std::shared_ptr<response> notification::create_response(const json& result) const {
         return make_shared<response>(result);
     }
 
-    void notification::parse_json(const Json& json) {
+    void notification::parse_json(const json& json) {
         try {
             if(json.count("jsonrpc") == 0)
                 throw parse_error_exception("jsonrpc is missing");
@@ -179,8 +179,8 @@ namespace jsonrpc {
         }
     }
 
-    Json notification::to_json() const {
-        Json json = {
+    json notification::to_json() const {
+        json json = {
             {"jsonrpc", "2.0"},
             {"method", method_name_},
         };
@@ -193,12 +193,12 @@ namespace jsonrpc {
 
     //////////////////////// batch implementation /////////////////////////////////
 
-    batch::batch(const Json& json) : message(entity_t::batch) {
+    batch::batch(const json& json) : message(entity_t::batch) {
         if(json != nullptr)
             parse_json(json);
     }
 
-    void batch::parse_json(const Json& json) {
+    void batch::parse_json(const json& json) {
         //	cout << "batch::parse: " << json.dump() << "\n";
         entities_.clear();
         for(auto it = json.begin(); it != json.end(); ++it) {
@@ -210,8 +210,8 @@ namespace jsonrpc {
             throw invalid_request_exception();
     }
 
-    Json batch::to_json() const {
-        Json result;
+    json batch::to_json() const {
+        json result;
         for(const auto& j : entities_)
             result.push_back(j->to_json());
         return result;

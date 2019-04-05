@@ -20,12 +20,13 @@ namespace rttr_rpc {
             boost::asio::steady_timer                                    timer_;
             boost::beast::flat_buffer                                    buffer_;
             const rttr_rpc::core::repository&                            repo_;
+            const jsonrpc::parser&                                       parser_;
             boost::beast::http::request<boost::beast::http::string_body> req_;
             queue*                                                       queue_;
 
         public:
             // Take ownership of the socket
-            http_session(boost::asio::ip::tcp::socket socket, const rttr_rpc::core::repository& repo);
+            http_session(boost::asio::ip::tcp::socket socket, const rttr_rpc::core::repository& repo, const jsonrpc::parser& parser);
             ~http_session();
 
             // Start the asynchronous operation

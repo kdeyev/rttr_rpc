@@ -22,7 +22,7 @@ namespace rttr_rpc {
 
         void server::start(const boost::asio::ip::tcp::endpoint& ep) {
             // Create and launch a listening port
-            std::make_shared<listener>(impl_->ioc_, ep, repo)->run();
+            std::make_shared<listener>(impl_->ioc_, ep, repo, parser)->run();
 
             // Run the I/O service on the requested number of threads
             std::vector<std::thread> v;

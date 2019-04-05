@@ -24,30 +24,30 @@ namespace jsonrpc {
         std::string service_method_name_;
 
         virtual std::shared_ptr<response> create_error_response(const message_error& error) const;
-        virtual std::shared_ptr<response> create_response(const Json& result) const;
+        virtual std::shared_ptr<response> create_response(const json& result) const;
 
         std::shared_ptr<response> create_error_response(message_error::error_code code, const std::string& message = "") const;
 
-        Json params_;
-        notification(message::entity_t ent, const std::string& method, const Json& params = nullptr);
-        notification(const char* method, const Json& params = nullptr);
-        notification(const Json& json = nullptr);
-        notification(const std::string& method, const Json& params);
+        json params_;
+        notification(message::entity_t ent, const std::string& method, const json& params = nullptr);
+        notification(const char* method, const json& params = nullptr);
+        notification(const json& json = nullptr);
+        notification(const std::string& method, const json& params);
 
-        virtual Json to_json() const;
-        virtual void parse_json(const Json& json);
+        virtual json to_json() const;
+        virtual void parse_json(const json& json);
     };
 
     class RTTR_RPC_JSONRPC_EXPORT request : public notification {
     public:
-        request(const Json& json = nullptr);
-        request(const message_id& id, const std::string& method, const Json& params = nullptr);
+        request(const json& json = nullptr);
+        request(const message_id& id, const std::string& method, const json& params = nullptr);
 
         std::shared_ptr<response> create_error_response(const message_error& error) const override;
-        std::shared_ptr<response> create_response(const Json& result) const override;
+        std::shared_ptr<response> create_response(const json& result) const override;
 
-        virtual Json to_json() const;
-        virtual void parse_json(const Json& json);
+        virtual json to_json() const;
+        virtual void parse_json(const json& json);
 
         message_id id_;
     };
@@ -55,28 +55,28 @@ namespace jsonrpc {
     class RTTR_RPC_JSONRPC_EXPORT response : public message {
     public:
         message_id    id_;
-        Json          result_;
+        json          result_;
         message_error error_;
 
-        response(const Json& json = nullptr);
-        response(const message_id& id, const Json& result);
+        response(const json& json = nullptr);
+        response(const message_id& id, const json& result);
         response(const message_id& id, const message_error& error);
-        response(const request& request, const Json& result);
+        response(const request& request, const json& result);
         response(const request& request, const message_error& error);
         response(const request_exception& exception);
 
-        virtual Json to_json() const;
-        virtual void parse_json(const Json& json);
+        virtual json to_json() const;
+        virtual void parse_json(const json& json);
     };
 
     class RTTR_RPC_JSONRPC_EXPORT batch : public message {
     public:
         std::vector<message_ptr> entities_;
 
-        batch(const Json& json = nullptr);
+        batch(const json& json = nullptr);
 
-        virtual Json to_json() const;
-        virtual void parse_json(const Json& json);
+        virtual json to_json() const;
+        virtual void parse_json(const json& json);
 
         template <typename T>
         void add(const T& entity) {

@@ -11,9 +11,11 @@ namespace rttr_rpc {
             boost::asio::ip::tcp::acceptor    acceptor_;
             boost::asio::ip::tcp::socket      socket_;
             const rttr_rpc::core::repository& repo_;
+            const jsonrpc::parser&            parser_;
 
         public:
-            listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, const rttr_rpc::core::repository& repo);
+            listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, const rttr_rpc::core::repository& repo,
+                     const jsonrpc::parser& parser);
 
             // Start accepting incoming connections
             void run();

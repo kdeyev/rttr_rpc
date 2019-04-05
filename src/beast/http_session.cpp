@@ -18,7 +18,7 @@ namespace rttr_rpc {
         // contents of the request, so the interface requires the
         // caller to pass a generic lambda for receiving the response.
         template <class Body, class Allocator, class Send>
-        void handle_request(const repository& repo, http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
+        void handle_request(const repository& repo, const jsonrpc::parser& parser, http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
             // Returns a bad request response
             auto const bad_request = [&req](boost::beast::string_view why) {
                 http::response<http::string_body> res{http::status::bad_request, req.version()};
@@ -45,11 +45,11 @@ namespace rttr_rpc {
             if(req.method() != http::verb::post)
                 return send(bad_request("Unknown HTTP-method"));
 
-            jsonrpc::message_ptr request  = jsonrpc::parser::parse(req.body());
+            jsonrpc::message_ptr request  = parser.parse(req.body());
             jsonrpc::message_ptr response = repo.process_message(request);
 
             http::response<http::string_body> res{http::status::ok, req.version()};
-            res.body() = response->to_string();
+            res.body() = parser.to_string(*response);
 
             res.set(http::field::access_control_allow_origin, "*");
             res.set(http::field::access_control_allow_methods, "POST");
@@ -127,9 +127,9 @@ namespace rttr_rpc {
             }
         };
 
-        http_session::http_session(tcp::socket socket, const repository& repo)
+        http_session::http_session(tcp::socket socket, const repository& repo, const jsonrpc::parser& parser)
             : socket_(std::move(socket)), strand_(socket_.get_executor()),
-              timer_(socket_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo), queue_(new queue(*this)) {
+              timer_(socket_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo), parser_(parser), queue_(new queue(*this)) {
         }
 
         http_session::~http_session() {
@@ -203,12 +203,12 @@ namespace rttr_rpc {
                 timer_.expires_at((std::chrono::steady_clock::time_point::min)());
 
                 // Create a WebSocket websocket_session by transferring the socket
-                std::make_shared<websocket_session>(std::move(socket_), repo_)->do_accept(std::move(req_));
+                std::make_shared<websocket_session>(std::move(socket_), repo_, parser_)->do_accept(std::move(req_));
                 return;
             }
 
             // Send the response
-            handle_request(repo_, std::move(req_), *queue_);
+            handle_request(repo_, parser_, std::move(req_), *queue_);
 
             // If we aren't at the queue limit, try to pipeline another request
             if(!queue_->is_full())

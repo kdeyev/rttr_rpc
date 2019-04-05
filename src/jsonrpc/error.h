@@ -19,21 +19,21 @@ namespace jsonrpc {
     public:
         enum error_code : int { ParseError = -32700, InvalidRequest = -32600, MethodNotFound = -32601, InvalidParams = -32602, InternalError = -32603 };
 
-        static message_error invalidRequest(std::string message = "", const Json& data = nullptr);
-        static message_error methodNotFound(std::string message = "", const Json& data = nullptr);
-        static message_error invalidParams(std::string message = "", const Json& data = nullptr);
-        static message_error internalError(std::string message = "", const Json& data = nullptr);
+        static message_error invalidRequest(std::string message = "", const json& data = nullptr);
+        static message_error methodNotFound(std::string message = "", const json& data = nullptr);
+        static message_error invalidParams(std::string message = "", const json& data = nullptr);
+        static message_error internalError(std::string message = "", const json& data = nullptr);
 
-        message_error(const Json& json = nullptr);
+        message_error(const json& json = nullptr);
         message_error(std::nullptr_t);
-        message_error(const std::string& message, int code, const Json& data = nullptr);
+        message_error(const std::string& message, int code, const json& data = nullptr);
 
-        virtual Json to_json() const;
-        virtual void parse_json(const Json& json);
+        virtual json to_json() const;
+        virtual void parse_json(const json& json);
 
         int         code_;
         std::string message_;
-        Json        data_;
+        json        data_;
 
 #ifdef _MSC_VER
         virtual operator bool() const

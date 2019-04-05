@@ -24,13 +24,13 @@ namespace jsonrpc {
         return error_.message_.c_str();
     }
 
-    Json rpc_exception::to_json() const {
-        Json response = {{"jsonrpc", "2.0"}, {"error", error_.to_json()}, {"id", nullptr}};
+    json rpc_exception::to_json() const {
+        json response = {{"jsonrpc", "2.0"}, {"error", error_.to_json()}, {"id", nullptr}};
 
         return response;
     }
 
-    void rpc_exception::parse_json(const Json& /*json*/) {
+    void rpc_exception::parse_json(const json& /*json*/) {
     }
 
     parse_error_exception::parse_error_exception(const message_error& error) : rpc_exception(error) {
@@ -49,13 +49,13 @@ namespace jsonrpc {
     request_exception::request_exception(const request_exception& e) : rpc_exception(e), id_(e.id_) {
     }
 
-    Json request_exception::to_json() const {
-        Json response = {{"jsonrpc", "2.0"}, {"error", error_.to_json()}, {"id", id_.to_json()}};
+    json request_exception::to_json() const {
+        json response = {{"jsonrpc", "2.0"}, {"error", error_.to_json()}, {"id", id_.to_json()}};
 
         return response;
     }
 
-    void request_exception::parse_json(const Json& /*json*/) {
+    void request_exception::parse_json(const json& /*json*/) {
     }
 
     invalid_request_exception::invalid_request_exception(const message_id& requestId) : request_exception(message_error::invalidRequest(), requestId) {

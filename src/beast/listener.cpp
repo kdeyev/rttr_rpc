@@ -5,8 +5,9 @@
 
 namespace rttr_rpc {
     namespace beast {
-        listener::listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, const rttr_rpc::core::repository& repo)
-            : acceptor_(ioc), socket_(ioc), repo_(repo) {
+        listener::listener(boost::asio::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, const rttr_rpc::core::repository& repo,
+                           const jsonrpc::parser& parser)
+            : acceptor_(ioc), socket_(ioc), repo_(repo), parser_(parser) {
             boost::system::error_code ec;
 
             // Open the acceptor
@@ -54,7 +55,7 @@ namespace rttr_rpc {
                 fail(ec, "accept");
             } else {
                 // Create the http_session and run it
-                std::make_shared<http_session>(std::move(socket_), repo_)->run();
+                std::make_shared<http_session>(std::move(socket_), repo_, parser_)->run();
             }
 
             // Accept another connection

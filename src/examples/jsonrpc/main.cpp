@@ -33,29 +33,36 @@ jsonrpc::response get_respone(jsonrpc::request_ptr request) noexcept {
             result += summand.get<int>();
         return jsonrpc::response(*request, result);
     } else if(request->method_name_ == "get_data") {
-        return jsonrpc::response(*request, Json({"hello", 5}));
+        return jsonrpc::response(*request, json({"hello", 5}));
     } else {
         return jsonrpc::method_not_found_exception(*request);
     }
 }
 
-void test(const std::string& json_str) {
-    cout << "--> " << json_str << "\n";
-    jsonrpc::message_ptr message = jsonrpc::parser::parse(json_str);
+void process_encoded_message(const jsonrpc::parser& parser, const std::string& str) {
+    cout << "ENCODED --> " << str << "\n";
+    message_ptr message = parser.parse(str);
     if(message) {
-        //cout << " Json: " << message->to_json().dump() << "\n";
+        //cout << " json: " << message->to_json().dump() << "\n";
         if(message->is_error()) {
-            cout << "<-- " << message->to_json().dump() << "\n";
+            cout << "ERROR \n";
+            cout << "JSON <-- " << message->to_json().dump() << "\n";
+            cout << "ENCODED <-- " << parser.to_string(*message) << "\n";
         }
         if(message->is_response()) {
-            cout << "<-- " << message->to_json().dump() << "\n";
+            cout << "RESPONSE \n";
+            cout << "JSON <-- " << message->to_json().dump() << "\n";
+            cout << "ENCODED <-- " << parser.to_string(*message) << "\n";
         }
         if(message->is_request()) {
             jsonrpc::response response = get_respone(dynamic_pointer_cast<jsonrpc::request>(message));
-            cout << "<-- " << response.to_json().dump() << "\n";
+            cout << "REQUEST \n";
+            cout << "JSON <-- " << response.to_json().dump() << "\n";
+            cout << "ENCODED <-- " << parser.to_string(response) << "\n";
         } else if(message->is_notification()) {
             jsonrpc::notification_ptr notification = dynamic_pointer_cast<jsonrpc::notification>(message);
-            cout << "notification: " << notification->method_name_ << ", has params: " << !notification->params_.is_null() << "\n";
+            cout << "NOTIFICATION \n";
+            cout << notification->method_name_ << ", has params: " << !notification->params_.is_null() << "\n";
         } else if(message->is_batch()) {
             jsonrpc::batch_ptr batch = dynamic_pointer_cast<jsonrpc::batch>(message);
             jsonrpc::batch     response_batch;
@@ -79,65 +86,83 @@ void test(const std::string& json_str) {
             //if(!response_batch.entities.empty())
             cout << "<-- " << response_batch.to_json().dump() << "\n";
         }
+    } else {
+        cout << "cannot parse the message";
     }
 
     cout << "\n";
 }
 
-void test(const jsonrpc::message& message) {
-    test(message.to_json().dump());
+void process_message(const jsonrpc::parser& parser, const message& message) {
+    cout << "MESSAGE \n";
+    cout << "JSON --> " << message.to_json().dump() << "\n";
+    process_encoded_message(parser, parser.to_string(message));
 }
 
-//examples taken from: http://www.jsonrpc.org/specification#examples
-int main(int /*argc*/, char* /*argv*/[]) {
+void test(jsonrpc::parser::encoding encoding) {
+    jsonrpc::parser parser(encoding);
     cout << "rpc call with positional parameters:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": "sum", "params": [1, 2, 3, 4, 5], "id": 1})");
-    test(jsonrpc::request(1, "sum", Json({1, 2, 3, 4, 5})));
 
-    test(R"({"jsonrpc": "2.0", "method": "subtract", "params": [42, 23], "id": 1})");
-    test(jsonrpc::request(1, "subtract", Json({42, 23})));
-    test(R"({"jsonrpc": "2.0", "method": "subtract", "params": [23, 42], "id": 2})");
-    test(jsonrpc::request(2, "subtract", Json({23, 42})));
+    process_message(parser, jsonrpc::request(1, "sum", json({1, 2, 3, 4, 5})));
+
+    process_message(parser, jsonrpc::request(1, "subtract", json({42, 23})));
+    process_message(parser, jsonrpc::request(2, "subtract", json({23, 42})));
 
     cout << "\n\nrpc call with named parameters:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": "subtract", "params": {"subtrahend": 23, "minuend": 42}, "id": 3})");
-    test(jsonrpc::request(3, "subtract", Json({{"subtrahend", 23}, {"minuend", 42}})));
-    test(R"({"jsonrpc": "2.0", "method": "subtract", "params": {"minuend": 42, "subtrahend": 23}, "id": 4})");
-    test(jsonrpc::request(4, "subtract", Json({{"minuend", 42}, {"subtrahend", 23}})));
+    process_message(parser, jsonrpc::request(3, "subtract", json({{"subtrahend", 23}, {"minuend", 42}})));
+    process_message(parser, jsonrpc::request(4, "subtract", json({{"minuend", 42}, {"subtrahend", 23}})));
 
     cout << "\n\na notification:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": "update", "params": [1,2,3,4,5]})");
-    test(jsonrpc::notification("update", Json({1, 2, 3, 4, 5})));
-    test(R"({"jsonrpc": "2.0", "method": "foobar"})");
-    test(jsonrpc::notification("foobar"));
+    process_message(parser, jsonrpc::notification("update", json({1, 2, 3, 4, 5})));
+    process_message(parser, jsonrpc::notification("foobar"));
 
     cout << "\n\nrpc call of non-existent method:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": "foobar", "id": "1"})");
-    test(jsonrpc::request("1", "foobar"));
+    process_message(parser, jsonrpc::request("1", "foobar"));
+}
+
+void test_json() {
+    jsonrpc::parser parser(jsonrpc::parser::encoding::json);
+    cout << "rpc call with positional parameters:\n\n";
+
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "sum", "params": [1, 2, 3, 4, 5], "id": 1})");
+
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "subtract", "params": [42, 23], "id": 1})");
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "subtract", "params": [23, 42], "id": 2})");
+
+    cout << "\n\nrpc call with named parameters:\n\n";
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "subtract", "params": {"subtrahend": 23, "minuend": 42}, "id": 3})");
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "subtract", "params": {"minuend": 42, "subtrahend": 23}, "id": 4})");
+
+    cout << "\n\na notification:\n\n";
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "update", "params": [1,2,3,4,5]})");
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "foobar"})");
+
+    cout << "\n\nrpc call of non-existent method:\n\n";
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "foobar", "id": "1"})");
 
     cout << "\n\nrpc call with invalid JSON:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": "foobar, "params": "bar", "baz])");
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": "foobar, "params": "bar", "baz])");
 
     cout << "\n\nrpc call with invalid request object:\n\n";
-    test(R"({"jsonrpc": "2.0", "method": 1, "params": "bar"})");
+    process_encoded_message(parser, R"({"jsonrpc": "2.0", "method": 1, "params": "bar"})");
 
     cout << "\n\nrpc call batch, invalid JSON:\n\n";
-    test(R"(	[
+    process_encoded_message(parser, R"(	[
 		{"jsonrpc": "2.0", "method": "sum", "params": [1,2,4], "id": "1"},
 		{"jsonrpc": "2.0", "method"
 	])");
 
     cout << "\n\nrpc call with an empty Array:\n\n";
-    test(R"([])");
+    process_encoded_message(parser, R"([])");
 
     cout << "\n\nrpc call with an invalid batch (but not empty):\n\n";
-    test(R"([1])");
+    process_encoded_message(parser, R"([1])");
 
     cout << "\n\nrpc call with invalid batch:\n\n";
-    test(R"([1,2,3])");
+    process_encoded_message(parser, R"([1,2,3])");
 
     cout << "\n\nrpc call batch:\n\n";
-    test(R"(	[
+    process_encoded_message(parser, R"(	[
 		{"jsonrpc": "2.0", "method": "sum", "params": [1,2,4], "id": "1"},
 		{"jsonrpc": "2.0", "method": "notify_hello", "params": [7]},
 		{"jsonrpc": "2.0", "method": "subtract", "params": [42,23], "id": "2"},
@@ -149,8 +174,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
 	])");
 
     cout << "\n\nrpc call batch (all notifications):\n\n";
-    test(R"(	[
+    process_encoded_message(parser, R"(	[
 		{"jsonrpc": "2.0", "method": "notify_sum", "params": [1,2,4]},
 		{"jsonrpc": "2.0", "method": "notify_hello", "params": [7]}
 	])");
+}
+
+//examples taken from: http://www.jsonrpc.org/specification#examples
+int main(int /*argc*/, char* /*argv*/[]) {
+    test(jsonrpc::parser::encoding::json);
+    test(jsonrpc::parser::encoding::bson);
+    test(jsonrpc::parser::encoding::cbor);
+    test_json();
 }

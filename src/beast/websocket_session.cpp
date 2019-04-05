@@ -26,8 +26,9 @@ namespace websocket = boost::beast::websocket; // from <boost/beast/websocket.hp
 using namespace rttr_rpc::core;
 
 // Take ownership of the socket
-websocket_session::websocket_session(boost::asio::ip::tcp::socket socket, const repository& repo)
-    : ws_(std::move(socket)), strand_(ws_.get_executor()), timer_(ws_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo) {
+websocket_session::websocket_session(boost::asio::ip::tcp::socket socket, const repository& repo, const jsonrpc::parser& parser)
+    : ws_(std::move(socket)), strand_(ws_.get_executor()), timer_(ws_.get_executor().context(), (std::chrono::steady_clock::time_point::max)()), repo_(repo),
+      parser_(parser) {
 }
 
 void websocket_session::on_accept(boost::system::error_code ec) {
@@ -140,11 +141,11 @@ void websocket_session::on_read(boost::system::error_code ec, std::size_t bytes_
     // Note that there is activity
     activity();
 
-    jsonrpc::message_ptr request = jsonrpc::parser::parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())), buffer_.size());
+    jsonrpc::message_ptr request = parser_.parse(boost::asio::buffer_cast<char const*>(boost::beast::buffers_front(buffer_.data())), buffer_.size());
     buffer_.consume(buffer_.size());
 
     jsonrpc::message_ptr response      = repo_.process_message(request);
-    std::string          response_body = response->to_string();
+    std::string          response_body = parser_.to_string(*response);
 
     size_t n = buffer_copy(buffer_.prepare(response_body.size()), boost::asio::buffer(response_body.data(), response_body.size()));
     if(n != response_body.size()) {

@@ -12,10 +12,11 @@ class websocket_session : public std::enable_shared_from_this<websocket_session>
     boost::beast::multi_buffer                                    buffer_;
     char                                                          ping_state_ = 0;
     const rttr_rpc::core::repository&                             repo_;
+    const jsonrpc::parser&                                        parser_;
 
 public:
     // Take ownership of the socket
-    websocket_session(boost::asio::ip::tcp::socket socket, const rttr_rpc::core::repository& repo);
+    websocket_session(boost::asio::ip::tcp::socket socket, const rttr_rpc::core::repository& repo, const jsonrpc::parser& parser);
 
     // Start the asynchronous operation
     template <class Body, class Allocator>

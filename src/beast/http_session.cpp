@@ -121,7 +121,7 @@ namespace rttr_rpc {
                 // Allocate and store the work
                 items_.push_back(boost::make_unique<work_impl>(self_, std::move(msg)));
 
-                // If there was no previous work, start this one
+                // If there was no previous work, bind this one
                 if(items_.size() == 1)
                     (*items_.front())();
             }

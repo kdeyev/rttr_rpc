@@ -3,39 +3,33 @@
 
 namespace rttr_rpc {
     namespace beast {
-        class server_impl {
-        public:
-            server_impl(int thread_count) : ioc_(thread_count), thread_count_(thread_count) {
-            }
 
-            // The io_context is required for all I/O
-            boost::asio::io_context ioc_;
-            int                     thread_count_;
-        };
-
-        server::server(int thread_count) : impl_(new server_impl(thread_count)) {
-        }
-
-        server::~server() {
-            delete impl_;
-        }
-
-        void server::start(const boost::asio::ip::tcp::endpoint& ep) {
-            // Create and launch a listening port
-            std::make_shared<listener>(impl_->ioc_, ep, repo, parser)->run();
-
+        void server::start_threads(boost::asio::io_context& ioc, size_t thread_count) {
             // Run the I/O service on the requested number of threads
             std::vector<std::thread> v;
-            if(impl_->thread_count_ > 0) {
-                v.reserve(impl_->thread_count_ - 1);
-                for(auto i = impl_->thread_count_ - 1; i > 0; --i)
-                    v.emplace_back([this] { impl_->ioc_.run(); });
+            if(thread_count > 0) {
+                v.reserve(thread_count - 1);
+                for(auto i = thread_count - 1; i > 0; --i)
+                    v.emplace_back([&] { ioc.run(); });
             }
-            impl_->ioc_.run();
+            ioc.run();
 
             // Block until all the threads exit
             for(auto& t : v)
                 t.join();
+        }
+
+        server::server(jsonrpc::parser::encoding encoding, core::repository_ptr repo) : parser_(encoding), repo_(repo) {
+        }
+
+        bool server::bind(boost::asio::io_context& ioc, const boost::asio::ip::tcp::endpoint& ep) {
+            if(!repo_) {
+                return false;
+            }
+            // Create and launch a listening port
+            std::make_shared<listener>(ioc, ep, *repo_, parser_)->run();
+
+            return true;
         }
     } // namespace beast
 } // namespace rttr_rpc

@@ -77,5 +77,7 @@ namespace rttr_rpc {
             rttr_rpc::json                               services_info_;
             std::unordered_map<std::string, service_ptr> services_;
         };
+
+        typedef std::shared_ptr<repository> repository_ptr;
     } // namespace core
 } // namespace rttr_rpc

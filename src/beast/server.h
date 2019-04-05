@@ -7,19 +7,17 @@
 
 namespace rttr_rpc {
     namespace beast {
-        class server_impl;
         class RTTR_RPC_BEAST_EXPORT server {
         public:
-            server(int thread_count);
-            ~server();
+            static void start_threads(boost::asio::io_context& ioc, size_t thread_count);
 
-            void start(const boost::asio::ip::tcp::endpoint& ep);
+            server(jsonrpc::parser::encoding encoding, core::repository_ptr repo = core::repository_ptr());
 
-            rttr_rpc::core::repository repo;
-            jsonrpc::parser            parser;
+            bool bind(boost::asio::io_context& ioc, const boost::asio::ip::tcp::endpoint& ep);
 
         private:
-            server_impl* impl_;
+            rttr_rpc::core::repository_ptr repo_;
+            jsonrpc::parser                parser_;
         };
     } // namespace beast
 } // namespace rttr_rpc
